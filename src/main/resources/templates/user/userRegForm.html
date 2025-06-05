@@ -1,0 +1,485 @@
+    <!DOCTYPE html>
+    <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>회원가입 - 전남 영화/드라마 여행</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            body {
+                padding-top: 50px;
+                background-color: #f8f9fa;
+            }
+            .register-container {
+                max-width: 700px;
+                margin: 0 auto;
+                padding: 30px;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+            /* 유효성 검사 피드백 스타일 */
+            .is-invalid { border-color: #dc3545 !important; }
+            .is-valid { border-color: #28a745 !important; }
+            .invalid-feedback { display: block; color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
+            .valid-feedback { display: block; color: #28a745; font-size: 0.875em; margin-top: 0.25rem; }
+
+            /* 비밀번호 유효성 검사 팁 스타일 추가 */
+            .password-validation-tip {
+                font-size: 0.85em;
+                color: #6c757d; /* 회색 텍스트 */
+                margin-top: 5px;
+            }
+            .validation-fail {
+                color: red;
+            }
+            .validation-success {
+                color: green;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="container register-container">
+        <h2 class="text-center mb-4">회원가입</h2>
+        <form id="userRegForm" action="/account/insertUserInfo" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">이메일 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="이메일 주소 입력" required>
+                    <button class="btn btn-outline-secondary" type="button" id="checkEmailBtn">중복 확인</button>
+                    <button class="btn btn-outline-primary ms-2" type="button" id="sendVerificationEmailBtn">인증 메일 전송</button>
+                </div>
+                <div id="emailFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="verificationCode" class="form-label">인증 코드 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="verificationCode" name="verificationCode" placeholder="인증 코드 입력" required disabled>
+                    <button class="btn btn-outline-success" type="button" id="verifyEmailCodeBtn" disabled>코드 확인</button>
+                </div>
+                <div id="verificationCodeFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호 <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="8~20자, 영문, 숫자, 특수문자 포함" required>
+                <div id="passwordFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">비밀번호 확인 <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 재입력" required>
+                <div id="confirmPasswordFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">이름 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="이름 입력" required>
+                <div id="nameFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="birthDate" class="form-label">생년월일 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="birthDate" name="birthDate"
+                       placeholder="YYYYMMDD (예: 19900115)" maxlength="8" required>
+                <div id="birthDateFeedback" class="invalid-feedback"></div>
+                <div class="form-text mt-2">생년월일 8자리를 숫자만 입력해주세요 (예: 19900115).</div>
+            </div>
+            <div class="mb-3">
+                <label for="phoneNum" class="form-label">휴대폰 번호 <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="phoneNum" name="phoneNum"
+                       placeholder="하이픈 없이 숫자만 입력 (예: 01012345678)" required>
+                <div id="phoneNumFeedback" class="invalid-feedback"></div>
+                <div class="form-text mt-2">하이픈(-) 없이 숫자만 입력해주세요 (010으로 시작).</div>
+            </div>
+            <div class="mb-3">
+                <label for="sex" class="form-label">성별 <span class="text-danger">*</span></label>
+                <select class="form-select" id="sex" name="sex" required>
+                    <option value="">선택</option>
+                    <option value="M">남</option>
+                    <option value="F">여</option>
+                </select>
+                <div id="sexFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="country" class="form-label">국가 <span class="text-danger">*</span></label>
+                <select class="form-select" id="country" name="country" required>
+                    <option value="">선택</option>
+                    <option value="KR">대한민국</option>
+                    <option value="US">미국</option>
+                    <option value="JP">일본</option>
+                    <option value="CN">중국</option>
+                    <option value="ETC">기타</option>
+                </select>
+                <div id="countryFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">회원가입</button>
+        </form>
+        <div class="mt-3 text-center">
+            이미 계정이 있으신가요? <a href="/user/login">로그인</a>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 전역 변수 초기화 (기존과 동일)
+        let isEmailValid = false;
+        let isEmailVerified = false;
+        let isPasswordValid = false;
+        let isConfirmPasswordValid = false;
+        let isNameValid = false;
+        let isBirthDateValid = false; // 생년월일 유효성 변수
+        let isPhoneNumValid = false;   // 휴대폰 번호 유효성 변수
+        let isSexValid = false;
+        let isCountryValid = false;
+
+        // 피드백 메시지 표시 함수 (기존과 동일)
+        function showFeedback(fieldId, message, isValid) {
+            const feedbackElement = $(`#${fieldId}Feedback`);
+            const inputElement = $(`#${fieldId}`);
+
+            if (isValid) {
+                inputElement.removeClass('is-invalid').addClass('is-valid');
+                feedbackElement.text('');
+            } else {
+                inputElement.removeClass('is-valid').addClass('is-invalid');
+                feedbackElement.text(message);
+            }
+        }
+
+        // 모든 필드 유효성 검사 및 버튼 활성화 함수 (기존과 동일)
+        function checkFormValidity() {
+            const isFormValid = isEmailValid && isEmailVerified && isPasswordValid && isConfirmPasswordValid &&
+                isNameValid && isBirthDateValid && isPhoneNumValid && isSexValid && isCountryValid;
+            $('#submitBtn').prop('disabled', !isFormValid);
+            return isFormValid;
+        }
+
+        // 이메일 입력 필드 유효성 검사 (기존과 동일)
+        $('#email').on('keyup change', function() {
+            const email = $(this).val().trim();
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (email.length === 0) {
+                showFeedback('email', '이메일 주소를 입력해주세요.', false);
+                isEmailValid = false;
+            } else if (!emailRegex.test(email)) {
+                showFeedback('email', '올바른 이메일 형식이 아닙니다.', false);
+                isEmailValid = false;
+            } else {
+                showFeedback('email', '', true);
+                isEmailValid = true;
+            }
+            isEmailVerified = false; // 이메일 변경 시 인증 상태 초기화
+            $('#verificationCode').prop('disabled', true).val(''); // 인증 코드 초기화 및 비활성화
+            $('#verifyEmailCodeBtn').prop('disabled', true).text('코드 확인');
+            checkFormValidity();
+        });
+
+        // 이메일 중복 확인 버튼 클릭 이벤트 (기존과 동일)
+        $('#checkEmailBtn').on('click', function() {
+            const email = $('#email').val().trim();
+            if (!isEmailValid) {
+                alert('유효한 이메일 주소를 입력해주세요.');
+                return;
+            }
+
+            $.ajax({
+                url: '/account/getEmailExists',
+                type: 'POST',
+                data: { email: email },
+                success: function(response) {
+                    if (response.exist_yn === 'Y') {
+                        showFeedback('email', '이미 가입된 이메일 주소입니다. 다른 이메일을 사용해주세요.', false);
+                        isEmailValid = false; // 중복이면 유효하지 않음
+                        isEmailVerified = false;
+                    } else {
+                        showFeedback('email', '사용 가능한 이메일 주소입니다.', true);
+                        isEmailValid = true; // 사용 가능하면 유효함
+                        // 이메일 중복 확인 후 인증 관련 필드 활성화
+                        $('#email').prop('disabled', true); // 중복 확인 후 이메일 필드 비활성화
+                        $('#checkEmailBtn').prop('disabled', true); // 중복 확인 버튼 비활성화
+                        $('#sendVerificationEmailBtn').prop('disabled', false); // 인증 메일 전송 버튼 활성화
+                        $('#verificationCode').prop('disabled', false); // 인증 코드 필드 활성화
+                    }
+                    checkFormValidity();
+                },
+                error: function() {
+                    showFeedback('email', '이메일 중복 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', false);
+                    isEmailValid = false;
+                    checkFormValidity();
+                }
+            });
+        });
+
+        // 인증 메일 전송 버튼 클릭 이벤트 (기존과 동일)
+        $('#sendVerificationEmailBtn').on('click', function() {
+            const email = $('#email').val().trim();
+            if (!email) {
+                alert('이메일 주소를 입력해주세요.');
+                return;
+            }
+
+            $('#sendVerificationEmailBtn').prop('disabled', true).text('전송 중...'); // 버튼 비활성화 및 텍스트 변경
+
+            $.ajax({
+                url: '/account/sendVerificationEmail',
+                type: 'POST',
+                data: { email: email },
+                success: function(response) {
+                    if (response.result === 1) {
+                        alert(response.msg);
+                        $('#verifyEmailCodeBtn').prop('disabled', false); // 코드 확인 버튼 활성화
+                        $('#sendVerificationEmailBtn').text('재전송'); // 텍스트 변경
+                    } else {
+                        alert(response.msg);
+                        $('#sendVerificationEmailBtn').prop('disabled', false).text('재전송'); // 전송 실패 시 다시 활성화
+                    }
+                },
+                error: function() {
+                    alert('인증 메일 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                    $('#sendVerificationEmailBtn').prop('disabled', false).text('재전송');
+                }
+            });
+        });
+
+        // 인증 코드 확인 버튼 클릭 이벤트 (기존과 동일)
+        $('#verifyEmailCodeBtn').on('click', function() {
+            const email = $('#email').val().trim();
+            const code = $('#verificationCode').val().trim();
+
+            if (!email || !code) {
+                alert('이메일과 인증 코드를 모두 입력해주세요.');
+                return;
+            }
+
+            $('#verifyEmailCodeBtn').prop('disabled', true).text('확인 중...'); // 버튼 비활성화 및 텍스트 변경
+
+            $.ajax({
+                url: '/account/verifyEmailCode',
+                type: 'POST',
+                data: { email: email, code: code },
+                success: function(response) {
+                    if (response.result === 1) {
+                        alert(response.msg);
+                        showFeedback('verificationCode', '인증 성공!', true);
+                        isEmailVerified = true;
+                        // 인증 성공 후 관련 필드 모두 비활성화
+                        $('#email').prop('disabled', true);
+                        $('#checkEmailBtn').prop('disabled', true);
+                        $('#sendVerificationEmailBtn').prop('disabled', true).text('인증 완료');
+                        $('#verificationCode').prop('disabled', true);
+                        $('#verifyEmailCodeBtn').prop('disabled', true).text('인증 완료');
+                    } else {
+                        alert(response.msg);
+                        showFeedback('verificationCode', response.msg, false);
+                        isEmailVerified = false;
+                        $('#verifyEmailCodeBtn').prop('disabled', false).text('코드 확인'); // 실패 시 재활성화
+                    }
+                    checkFormValidity();
+                },
+                error: function() {
+                    alert('인증 코드 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                    isEmailVerified = false;
+                    $('#verifyEmailCodeBtn').prop('disabled', false).text('코드 확인');
+                    checkFormValidity();
+                }
+            });
+        });
+
+        // 비밀번호 입력 필드 유효성 검사 (기존과 동일)
+        $('#password').on('keyup change', function() {
+            const password = $(this).val();
+            const passwordRegex = /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
+            if (password.length < 8 || password.length > 20) {
+                showFeedback('password', '비밀번호는 8자 이상 20자 이하로 입력해주세요.', false);
+                isPasswordValid = false;
+            } else if (!passwordRegex.test(password)) {
+                showFeedback('password', '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.', false);
+                isPasswordValid = false;
+            } else {
+                showFeedback('password', '', true);
+                isPasswordValid = true;
+            }
+            // 비밀번호 변경 시 확인 비밀번호도 다시 검사
+            $('#confirmPassword').trigger('keyup');
+            checkFormValidity();
+        });
+
+        // 비밀번호 확인 필드 유효성 검사 (기존과 동일)
+        $('#confirmPassword').on('keyup change', function() {
+            const password = $('#password').val();
+            const confirmPassword = $(this).val();
+            if (confirmPassword.length === 0) {
+                showFeedback('confirmPassword', '비밀번호를 다시 입력해주세요.', false);
+                isConfirmPasswordValid = false;
+            } else if (password !== confirmPassword) {
+                showFeedback('confirmPassword', '비밀번호가 일치하지 않습니다.', false);
+                isConfirmPasswordValid = false;
+            } else {
+                showFeedback('confirmPassword', '', true);
+                isConfirmPasswordValid = true;
+            }
+            checkFormValidity();
+        });
+
+        // 이름 입력 필드 유효성 검사 (기존과 동일)
+        $('#name').on('keyup change', function() {
+            const name = $(this).val().trim();
+            if (name.length === 0) {
+                showFeedback('name', '이름을 입력해주세요.', false);
+                isNameValid = false;
+            } else {
+                showFeedback('name', '', true);
+                isNameValid = true;
+            }
+            checkFormValidity();
+        });
+
+        // 🌟🌟🌟 생년월일 필드 유효성 검사 리팩토링 시작 🌟🌟🌟
+        $('#birthDate').on('keyup', function() { // on 'change' 대신 'keyup' 사용
+            const birthDate = $(this).val().trim();
+            const birthDateRegex = /^\d{8}$/; // 8자리 숫자만 허용하는 정규식
+
+            if (birthDate.length === 0) {
+                showFeedback('birthDate', '생년월일 8자리를 입력해주세요.', false);
+                isBirthDateValid = false;
+            } else if (!birthDateRegex.test(birthDate)) {
+                showFeedback('birthDate', '생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다.', false);
+                isBirthDateValid = false;
+            } else {
+                // 추가적으로 유효한 날짜인지 (예: 2월 30일 같은 오류) 검사할 수 있지만,
+                // 현재 서버 유효성 검사가 숫자 8자리에 초점 맞춰져 있으므로 여기서는 생략
+                showFeedback('birthDate', '', true);
+                isBirthDateValid = true;
+            }
+            checkFormValidity();
+        }).trigger('keyup'); // 페이지 로드 시 초기 유효성 검사 실행
+        // 🌟🌟🌟 생년월일 필드 유효성 검사 리팩토링 끝 🌟🌟🌟
+
+        // 🌟🌟🌟 휴대폰 번호 필드 유효성 검사 리팩토링 시작 🌟🌟🌟
+        $('#phoneNum').on('keyup', function() { // on 'change' 대신 'keyup' 사용
+            const phoneNum = $(this).val().trim();
+            // 서버 DTO의 정규식과 동일하게 하이픈 없는 숫자만 검사
+            const phoneRegex = /^(010|011|016|017|018|019)\d{7,8}$/; // 01X + 7~8자리 숫자
+
+            if (phoneNum.length === 0) {
+                showFeedback('phoneNum', '휴대폰 번호를 입력해주세요.', false);
+                isPhoneNumValid = false;
+            } else if (!phoneRegex.test(phoneNum)) {
+                showFeedback('phoneNum', '올바른 휴대폰 번호 형식이 아닙니다. (하이픈 없이 숫자만)', false);
+                isPhoneNumValid = false;
+            } else {
+                showFeedback('phoneNum', '', true);
+                isPhoneNumValid = true;
+            }
+            checkFormValidity();
+        }).trigger('keyup'); // 페이지 로드 시 초기 유효성 검사 실행
+        // 🌟🌟🌟 휴대폰 번호 필드 유효성 검사 리팩토링 끝 🌟🌟🌟
+
+        // 성별 필드 유효성 검사 (기존과 동일)
+        $('#sex').on('change', function() {
+            if ($(this).val() === '') {
+                showFeedback('sex', '성별을 선택해주세요.', false);
+                isSexValid = false;
+            } else {
+                showFeedback('sex', '', true);
+                isSexValid = true;
+            }
+            checkFormValidity();
+        }).trigger('change'); // 페이지 로드 시 초기 유효성 검사 실행
+
+        // 국가 필드 유효성 검사 (기존과 동일)
+        $('#country').on('change', function() {
+            if ($(this).val() === '') {
+                showFeedback('country', '국가를 선택해주세요.', false);
+                isCountryValid = false;
+            } else {
+                showFeedback('country', '', true);
+                isCountryValid = true;
+            }
+            checkFormValidity();
+        }).trigger('change'); // 페이지 로드 시 초기 유효성 검사 실행
+
+        // 폼 제출 이벤트 (기존과 동일, 생년월일/휴대폰 번호 가공 로직 제거)
+        $('#userRegForm').on('submit', function(event) {
+            event.preventDefault(); // 기본 폼 제출 방지
+
+            // 최종 유효성 검사 (모든 필드 유효성 및 이메일 인증 완료)
+            if (!checkFormValidity()) {
+                alert('모든 필수 정보를 올바르게 입력하고 이메일 인증을 완료해야 합니다.');
+                return;
+            }
+
+            // 🌟🌟🌟 생년월일/휴대폰 번호 데이터 가공 로직 제거! 🌟🌟🌟
+            // 이제 입력 필드에서 값을 가져올 때 그대로 사용!
+            // (사용자가 이미 하이픈 없이 숫자만 입력했다고 가정)
+
+            const jsonData = {
+                email: $('#email').val(),
+                password: $('#password').val(),
+                name: $('#name').val(),
+                birthDate: $('#birthDate').val(), // ⭐ 그대로 사용 ⭐
+                phoneNum: $('#phoneNum').val(),   // ⭐ 그대로 사용 ⭐
+                sex: $('#sex').val(),
+                country: $('#country').val(),
+                verificationCode: $('#verificationCode').val()
+            };
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                contentType: 'application/json',
+                data: JSON.stringify(jsonData),
+                success: function(response) {
+                    if (response.result === 1) {
+                        alert(response.msg);
+                        location.href = '/user/login';
+                    } else {
+                        alert(response.msg);
+                        // 실패 시 관련 필드 및 버튼 재활성화
+                        $('#email').prop('disabled', false);
+                        $('#checkEmailBtn').prop('disabled', false);
+                        $('#sendVerificationEmailBtn').prop('disabled', false).text('인증 메일 전송');
+                        $('#verificationCode').prop('disabled', false);
+                        $('#verifyEmailCodeBtn').prop('disabled', false).text('코드 확인');
+                        isEmailVerified = false; // 인증 실패했으니 상태 초기화
+                        checkFormValidity(); // 폼 유효성 다시 검사하여 버튼 상태 업데이트
+                    }
+                },
+                error: function(xhr) {
+                    alert("회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                    // 오류 발생 시에도 필드 및 버튼 재활성화
+                    $('#email').prop('disabled', false);
+                    $('#checkEmailBtn').prop('disabled', false);
+                    $('#sendVerificationEmailBtn').prop('disabled', false).text('인증 메일 전송');
+                    $('#verificationCode').prop('disabled', false);
+                    $('#verifyEmailCodeBtn').prop('disabled', false).text('코드 확인');
+                    isEmailVerified = false; // 인증 실패했으니 상태 초기화
+                    checkFormValidity();
+                }
+            });
+        });
+
+        // 페이지 로드 시 초기 유효성 검사 실행 (모든 필드)
+        $(document).ready(function() {
+            $('#email').trigger('keyup');
+            $('#password').trigger('keyup');
+            $('#confirmPassword').trigger('keyup');
+            $('#name').trigger('keyup');
+            // 생년월일과 휴대폰 번호도 초기 유효성 검사 실행
+            $('#birthDate').trigger('keyup');
+            $('#phoneNum').trigger('keyup');
+            $('#sex').trigger('change');
+            $('#country').trigger('change');
+        });
+
+    </script>
+
+    </body>
+    </html>

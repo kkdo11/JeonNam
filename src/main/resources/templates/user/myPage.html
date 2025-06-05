@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - 전남 영화/드라마 여행</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #f8f9fa;
+        }
+        .mypage-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .info-row {
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        /* 유효성 검사 메시지 스타일 */
+        .password-validation-tip {
+            font-size: 0.85em;
+            color: #6c757d; /* 회색 텍스트 */
+            margin-top: 5px;
+        }
+        .validation-fail {
+            color: red;
+        }
+        .validation-success {
+            color: green;
+        }
+        /* 부트스트랩 피드백 스타일 유지 */
+        .is-invalid { border-color: #dc3545 !important; }
+        .is-valid { border-color: #28a745 !important; }
+        .invalid-feedback { display: block; color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
+        .valid-feedback { display: block; color: #28a745; font-size: 0.875em; margin-top: 0.25rem; }
+    </style>
+</head>
+<body>
+<div class="container mypage-container">
+    <h2 class="text-center mb-4">마이페이지</h2>
+
+    <h3 class="mb-3">내 정보</h3>
+    <div th:if="${userInfo}" class="mb-4">
+        <div class="row info-row">
+            <div class="col-4 info-label">이메일:</div>
+            <div class="col-8" th:text="${userInfo.email}"></div>
+        </div>
+        <div class="row info-row">
+            <div class="col-4 info-label">이름:</div>
+            <div class="col-8" th:text="${userInfo.name}"></div>
+        </div>
+        <div class="row info-row">
+            <div class="col-4 info-label">생년월일:</div>
+            <div class="col-8" th:text="${userInfo.birthDate}"></div>
+        </div>
+        <div class="row info-row">
+            <div class="col-4 info-label">성별:</div>
+            <div class="col-8" th:text="${userInfo.sex == 'M' ? '남성' : (userInfo.sex == 'F' ? '여성' : '기타')}"></div>
+        </div>
+        <div class="row info-row">
+            <div class="col-4 info-label">국가:</div>
+            <div class="col-8" th:text="${userInfo.country}"></div>
+        </div>
+    </div>
+    <div th:unless="${userInfo}" class="alert alert-warning text-center" role="alert">
+        사용자 정보를 불러올 수 없습니다.
+    </div>
+
+    <h3 class="mb-3 mt-5">비밀번호 변경</h3>
+    <form id="changePasswordForm">
+        <div class="mb-3">
+            <label for="currentPassword" class="form-label">현재 비밀번호 <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            <div id="currentPasswordFeedback" class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3">
+            <label for="newPassword" class="form-label">새 비밀번호 <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+            <div id="newPasswordFeedback" class="invalid-feedback"></div>
+            <div id="newPasswordValidationTip" class="form-text password-validation-tip">
+                <ul class="list-unstyled mb-0">
+                    <li id="lenCheck">8자 이상 20자 이하</li>
+                    <li id="alphaCheck">영문 1개 이상 (대소문자 구분 없음)</li>
+                    <li id="numCheck">숫자 1개 이상</li>
+                    <li id="specialCheck">특수문자 1개 이상</li>
+                </ul>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="confirmNewPassword" class="form-label">새 비밀번호 확인 <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="confirmNewPassword" required>
+            <div id="confirmNewPasswordFeedback" class="invalid-feedback"></div>
+            <div id="newPasswordMatchResult" class="form-text"></div>
+        </div>
+        <div class="d-grid gap-2">
+            <button type="button" class="btn btn-primary" id="changePasswordBtn">비밀번호 변경</button>
+        </div>
+    </form>
+    <div id="changePasswordResult" class="mt-3 text-center"></div>
+
+    <div class="mt-4 text-center">
+        <a href="/" class="btn btn-secondary">홈으로 돌아가기</a>
+        <a href="/auth/logout" class="btn btn-danger ms-2">로그아웃</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let isCurrentPasswordEntered = false; // 현재 비밀번호 입력 여부
+    let isNewPasswordValid = false;     // 새 비밀번호 형식 유효성
+    let isNewPasswordMatched = false;   // 새 비밀번호 확인 일치
+
+    /**
+     * 유효성 검사 피드백 메시지를 표시합니다. (공통 함수)
+     * @param {string} elementId - 대상 HTML 요소의 ID
+     * @param {string} message - 표시할 메시지
+     * @param {boolean|null} isValid - 유효성 여부 (true: 유효, false: 유효하지 않음, null: 메시지만 표시)
+     */
+    function showFeedback(elementId, message, isValid) {
+        const $element = $(`#${elementId}`);
+        const $feedback = $(`#${elementId}Feedback`); // 모든 피드백은 -Feedback 접미사를 가진다고 가정
+        $element.removeClass('is-valid is-invalid');
+        $feedback.removeClass('valid-feedback invalid-feedback');
+        $feedback.text('');
+
+        if (message) {
+            $feedback.text(message);
+            if (isValid === true) {
+                $element.addClass('is-valid');
+                $feedback.addClass('valid-feedback');
+            } else if (isValid === false) {
+                $element.addClass('is-invalid');
+                $feedback.addClass('invalid-feedback');
+            }
+        }
+    }
+
+    // 새 비밀번호 강도 검사 함수 (회원가입 페이지와 동일한 규칙 적용)
+    function checkPasswordStrength(password) {
+        const lenCheck = password.length >= 8 && password.length <= 20; // 8자 이상 20자 이하
+        const alphaCheck = /[a-zA-Z]/.test(password); // 영문 (대소문자 구분 없음)
+        const numCheck = /[0-9]/.test(password);
+        const specialCheck = /[!@#$%^&*()_+\-=\[\]{};':"|,.<>\/?~]/.test(password);
+
+        // 각 검사 항목의 상태 업데이트
+        $('#newPasswordValidationTip #lenCheck').toggleClass('validation-success', lenCheck).toggleClass('validation-fail', !lenCheck);
+        $('#newPasswordValidationTip #alphaCheck').toggleClass('validation-success', alphaCheck).toggleClass('validation-fail', !alphaCheck);
+        $('#newPasswordValidationTip #numCheck').toggleClass('validation-success', numCheck).toggleClass('validation-fail', !numCheck);
+        $('#newPasswordValidationTip #specialCheck').toggleClass('validation-success', specialCheck).toggleClass('validation-fail', !specialCheck);
+
+        // 모든 조건 충족 여부 반환
+        return lenCheck && alphaCheck && numCheck && specialCheck;
+    }
+
+    // 현재 비밀번호 입력 필드 유효성
+    $('#currentPassword').on('keyup', function() {
+        const currentPassword = $(this).val();
+        if (currentPassword.length === 0) {
+            showFeedback('currentPassword', '현재 비밀번호를 입력해주세요.', false);
+            isCurrentPasswordEntered = false;
+        } else {
+            showFeedback('currentPassword', '', true); // 입력이 있으면 일단 유효하다고 표시 (서버에서 최종 검증)
+            isCurrentPasswordEntered = true;
+        }
+    });
+
+    // 새 비밀번호 입력 필드 유효성 및 강도 검사
+    $('#newPassword').on('keyup', function() {
+        const newPassword = $(this).val();
+        isNewPasswordValid = checkPasswordStrength(newPassword); // 강도 검사 함수 호출
+
+        if (newPassword.length === 0) {
+            showFeedback('newPassword', '새 비밀번호를 입력해주세요.', false);
+        } else if (!isNewPasswordValid) {
+            showFeedback('newPassword', '비밀번호는 영문, 숫자, 특수문자를 포함하여 8~20자여야 합니다.', false);
+        } else {
+            showFeedback('newPassword', '사용 가능한 비밀번호입니다.', true);
+        }
+        // 새 비밀번호 확인 필드도 같이 검사 트리거
+        $('#confirmNewPassword').trigger('keyup');
+    });
+
+    // 새 비밀번호 확인 일치 검사
+    $('#confirmNewPassword').on('keyup', function() {
+        const newPassword = $('#newPassword').val();
+        const confirmNewPassword = $(this).val();
+
+        if (confirmNewPassword.length === 0) {
+            showFeedback('confirmNewPassword', '새 비밀번호 확인을 입력해주세요.', false);
+            isNewPasswordMatched = false;
+        } else if (newPassword !== confirmNewPassword) {
+            showFeedback('confirmNewPassword', '새 비밀번호가 일치하지 않습니다.', false);
+            isNewPasswordMatched = false;
+        } else {
+            showFeedback('confirmNewPassword', '새 비밀번호가 일치합니다.', true);
+            isNewPasswordMatched = true;
+        }
+    });
+
+    // 비밀번호 변경 요청
+    $('#changePasswordBtn').on('click', function() {
+        const currentPassword = $('#currentPassword').val();
+        const newPassword = $('#newPassword').val();
+
+        // 최종 유효성 검사 (클라이언트 측)
+        if (!isCurrentPasswordEntered || !isNewPasswordValid || !isNewPasswordMatched) {
+            $('#changePasswordResult').text('모든 필수 정보를 올바르게 입력하고 유효성 조건을 충족해야 합니다.').css('color', 'red');
+            return;
+        }
+
+        if (currentPassword === newPassword) {
+            $('#changePasswordResult').text('새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.').css('color', 'red');
+            return;
+        }
+
+        $.ajax({
+            url: '/account/changePassword',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ currentPassword: currentPassword, newPassword: newPassword }),
+            dataType: 'json',
+            success: function(response) {
+                if (response.result === 1) {
+                    $('#changePasswordResult').text(response.msg).css('color', 'green');
+                    // 성공 시 폼 초기화
+                    $('#changePasswordForm')[0].reset();
+                    // 유효성 피드백 초기화
+                    $('#currentPassword, #newPassword, #confirmNewPassword').removeClass('is-valid is-invalid');
+                    $('#currentPasswordFeedback, #newPasswordFeedback, #confirmNewPasswordFeedback').text('');
+                    $('#newPasswordValidationTip li').removeClass('validation-success validation-fail'); // 팁 초기화
+                    $('#newPasswordMatchResult').text('');
+
+                    // 비밀번호 변경 후 로그아웃하여 다시 로그인하도록 유도
+                    setTimeout(function() {
+                        alert("비밀번호가 변경되었습니다. 다시 로그인해주세요.");
+                        window.location.href = '/user/login?passwordChanged=true';
+                    }, 1500);
+                } else {
+                    $('#changePasswordResult').text(response.msg).css('color', 'red');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#changePasswordResult').text('비밀번호 변경 중 오류가 발생했습니다.').css('color', 'red');
+                console.error("비밀번호 변경 오류:", status, error);
+            }
+        });
+    });
+
+    // 초기 로드 시 비밀번호 관련 필드의 유효성 검사 상태 초기화
+    $(document).ready(function() {
+        // 모든 비밀번호 유효성 팁 스타일 초기화
+        $('#newPasswordValidationTip li').removeClass('validation-success validation-fail');
+    });
+
+</script>
+</body>
+</html>
