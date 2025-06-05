@@ -1,4 +1,3 @@
-// kopo.jeonnam.dto.user.UserInfoDTO.java (예시)
 package kopo.jeonnam.dto.user;
 
 import jakarta.validation.constraints.Email;
@@ -7,9 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
-// Lombok의 @Value는 모든 필드를 final로 만들어 불변 객체를 생성하며,
-// getter, equals, hashCode, toString 등을 자동으로 생성합니다.
-// DTO에서 유효성 검사를 위해 setter가 필요 없으므로 적합합니다.
 @Builder
 public record UserInfoDTO(
         String userId, // MongoDB ObjectId를 String으로 표현
@@ -30,6 +26,11 @@ public record UserInfoDTO(
         @Pattern(regexp = "^\\d{8}$", message = "생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다.")
         String birthDate,
 
+        // ✨ **여기에 휴대폰 번호 필드를 추가합니다!**
+        @NotBlank(message = "휴대폰 번호는 필수 입력값입니다.")
+        @Pattern(regexp = "^(010|011|016|017|018|019)\\d{3,4}\\d{4}$", message = "휴대폰 번호 형식이 올바르지 않습니다. (하이픈 제외 숫자만)")
+        String phoneNum,
+
         @NotBlank(message = "성별은 필수 입력값입니다.")
         String sex,
 
@@ -40,6 +41,6 @@ public record UserInfoDTO(
         String chgDt, // 변경일시
         String exist_yn // 이메일 중복 확인 등에 사용
 ) {
-    // Record는 @Builder와 함께 사용할 때, toBuilder()를 직접 구현해야 할 수 있습니다.
-    // 여기서는 간단한 DTO 사용을 가정합니다.
+        // Record는 @Builder와 함께 사용할 때, toBuilder()를 직접 구현해야 할 수 있습니다.
+        // 여기서는 간단한 DTO 사용을 가정합니다.
 }

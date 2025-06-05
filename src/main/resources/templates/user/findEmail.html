@@ -32,7 +32,15 @@
         </div>
         <div class="mb-3">
             <label for="birthDate" class="form-label">생년월일</label>
-            <input type="date" class="form-control" id="birthDate" name="birthDate" required>
+            <input type="text" class="form-control" id="birthDate" name="birthDate"
+                   placeholder="YYYYMMDD (예: 19900115)" maxlength="8" required>
+            <small class="form-text text-muted">생년월일 8자리를 숫자만 입력해주세요 (예: 19900115).</small>
+        </div>
+        <div class="mb-3">
+            <label for="phoneNum" class="form-label">휴대폰 번호</label>
+            <input type="tel" class="form-control" id="phoneNum" name="phoneNum"
+                   placeholder="하이픈 없이 숫자만 입력 (예: 01012345678)" required>
+            <small class="form-text text-muted">하이픈(-) 없이 숫자만 입력해주세요 (010으로 시작).</small>
         </div>
         <div class="d-grid gap-2">
             <button type="button" class="btn btn-primary" id="findEmailBtn">아이디 찾기</button>
@@ -51,18 +59,39 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $('#findEmailBtn').on('click', function() {
-        const name = $('#name').val();
-        const birthDate = $('#birthDate').val();
+        const name = $('#name').val().trim(); // ✨ trim() 추가
+        let birthDate = $('#birthDate').val().trim(); // ✨ trim() 추가
+        let phoneNum = $('#phoneNum').val().trim(); // ✨ trim() 추가
 
-        if (!name || !birthDate) {
-            $('#findResult').text('이름과 생년월일을 모두 입력해주세요.').css('color', 'red');
+        // 🌟🌟🌟 생년월일 유효성 검사 (8자리 숫자) 🌟🌟🌟
+        const birthDateRegex = /^\d{8}$/;
+        if (!birthDateRegex.test(birthDate)) {
+            $('#findResult').text('생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다.').css('color', 'red');
+            return;
+        }
+
+        // 🌟🌟🌟 휴대폰 번호 유효성 검사 (하이픈 없는 숫자) 🌟🌟🌟
+        const phoneNumRegex = /^(010|011|016|017|018|019)\d{7,8}$/;
+        if (!phoneNumRegex.test(phoneNum)) {
+            $('#findResult').text('휴대폰 번호 형식이 올바르지 않습니다. (하이픈 제외 숫자만)').css('color', 'red');
+            return;
+        }
+
+        // ✨ 입력 필드 자체에서 하이픈을 제거하고 받도록 했으므로,
+        // ✨ 여기서 추가적인 replace 로직은 필요 없습니다!
+        // ✨ 그대로 전송하면 됩니다.
+
+        // 모든 필수 필드 유효성 검사 (비어있는지 확인)
+        if (!name || !birthDate || !phoneNum) {
+            $('#findResult').text('이름, 생년월일, 휴대폰 번호를 모두 입력해주세요.').css('color', 'red');
             return;
         }
 
         $.ajax({
-            url: '/account/findEmail', // 변경된 경로
+            url: '/account/findEmail',
             type: 'POST',
-            data: { name: name, birthDate: birthDate },
+            // ⭐ data에 변환 없이 그대로 사용 (이미 사용자 입력 단계에서 형식을 맞춤) ⭐
+            data: { name: name, birthDate: birthDate, phoneNum: phoneNum },
             dataType: 'json',
             success: function(response) {
                 if (response.result === 1) {
@@ -72,8 +101,8 @@
                 }
             },
             error: function(xhr, status, error) {
-                $('#findResult').text('아이디 찾기 중 오류가 발생했습니다.').css('color', 'red');
-                console.error("아이디 찾기 오류:", status, error);
+                $('#findResult').text('아이디 찾기 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.').css('color', 'red');
+                console.error("아이디 찾기 오류:", status, error, xhr.responseText); // ✨ 오류 응답 확인을 위해 xhr.responseText 추가
             }
         });
     });

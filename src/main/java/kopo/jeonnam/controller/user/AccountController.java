@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional; // Optional import 추가 (혹시 없으면)
+
 /**
  * 사용자 계정 정보(회원가입, 이메일 인증, 비밀번호 변경 등) 관련 요청을 처리하는 컨트롤러.
  * Spring MVC의 Controller 역할을 수행하며, Lombok의 @Slf4j를 통해 로깅 기능을,
@@ -95,6 +97,7 @@ public class AccountController {
                 .password(requestDto.password())
                 .name(requestDto.name())
                 .birthDate(requestDto.birthDate())
+                .phoneNum(requestDto.phoneNum()) // ✨ **회원가입 요청 시 phoneNum도 DTO에 담아서 서비스로 전달!**
                 .sex(requestDto.sex())
                 .country(requestDto.country())
                 .build();
@@ -152,7 +155,6 @@ public class AccountController {
             UserInfoDTO queryDTO = UserInfoDTO.builder().email(emailToCheck).build();
             UserInfoDTO rDTO = userInfoService.getEmailExists(queryDTO);
 
-            // rDTO.exist_yn() 값은 Service에서 이미 처리되어 "Y" 또는 "N"으로 넘어오므로 별도 로깅 불필요
             log.info("[AccountController] getEmailExists end. Email: {}, Exists: {}", emailToCheck, rDTO.exist_yn());
             return rDTO;
 
@@ -187,7 +189,6 @@ public class AccountController {
 
         try {
             String verificationCode = mailService.generateVerificationCode();
-            // 생성된 인증코드는 로그에 찍지 않음 (보안)
 
             int sendResult = mailService.sendVerificationMail(emailToVerify, verificationCode);
 
@@ -242,7 +243,6 @@ public class AccountController {
         }
 
         if (cleanedEmail.equals(sessionEmail) && cleanedInputCode.equals(sessionCode)) {
-            // 이메일 인증 성공 시 세션 삭제 로직은 회원가입 최종 완료 시점에 insertUserInfo 메서드에서 처리
             log.info("[AccountController] verifyEmailCode success. Email: {}", cleanedEmail);
             return MsgDTO.builder().result(1).msg("이메일 인증에 성공하였습니다.").build();
         } else {
@@ -251,40 +251,41 @@ public class AccountController {
         }
     }
 
-    /**
-     * ------------------------ 아이디(이메일) 찾기 ------------------------
-     */
 
     /**
      * 아이디(이메일) 찾기 API
-     * 사용자의 이름과 생년월일을 통해 가입된 이메일 주소를 찾아 반환합니다.
+     * 사용자의 이름, 생년월일, 휴대폰 번호를 통해 가입된 이메일 주소를 찾아 반환합니다.
      *
      * @param nameFromRequest 사용자의 이름 (POST 요청의 "name" 파라미터)
      * @param birthDateFromRequest 사용자의 생년월일 (POST 요청의 "birthDate" 파라미터)
+     * @param phoneNumFromRequest 사용자의 휴대폰 번호 (POST 요청의 "phoneNum" 파라미터) ✨ **새롭게 추가된 파라미터**
      * @return 이메일 찾기 결과 메시지와 상태 코드를 담은 MsgDTO 객체
      */
     @ResponseBody
     @PostMapping("/findEmail")
     public MsgDTO findEmail(@RequestParam("name") String nameFromRequest,
-                            @RequestParam("birthDate") String birthDateFromRequest) {
-        log.info("[AccountController] findEmail start. Request Name: {}, BirthDate: {}", nameFromRequest, birthDateFromRequest);
+                            @RequestParam("birthDate") String birthDateFromRequest,
+                            @RequestParam("phoneNum") String phoneNumFromRequest) { // ✨ **phoneNum 파라미터 추가**
+        log.info("[AccountController] findEmail start. Request Name: {}, BirthDate: {}, PhoneNum: {}", nameFromRequest, birthDateFromRequest, phoneNumFromRequest);
 
         String cleanedName = CmmUtil.nvl(nameFromRequest);
         String cleanedBirthDate = CmmUtil.nvl(birthDateFromRequest);
+        String cleanedPhoneNum = CmmUtil.nvl(phoneNumFromRequest); // ✨ **phoneNum 정제**
 
-        if (cleanedName.isEmpty() || cleanedBirthDate.isEmpty()) {
-            log.warn("[AccountController] findEmail - Name or birthDate is missing. Name: {}, BirthDate: {}", nameFromRequest, birthDateFromRequest);
-            return MsgDTO.builder().result(0).msg("이름과 생년월일을 모두 입력해주세요.").build();
+        if (cleanedName.isEmpty() || cleanedBirthDate.isEmpty() || cleanedPhoneNum.isEmpty()) { // ✨ **phoneNum 유효성 검사 추가**
+            log.warn("[AccountController] findEmail - Name, birthDate, or phoneNum is missing.");
+            return MsgDTO.builder().result(0).msg("이름, 생년월일, 휴대폰 번호를 모두 입력해주세요.").build();
         }
 
         try {
-            UserInfoDTO rDTO = userInfoService.findEmailByNameAndBirthDate(cleanedName, cleanedBirthDate);
+            // ✨ **수정: findEmailByNameAndBirthDateAndPhoneNum 메서드 호출**
+            UserInfoDTO rDTO = userInfoService.findEmailByNameAndBirthDateAndPhoneNum(cleanedName, cleanedBirthDate, cleanedPhoneNum);
 
             if (rDTO != null && !CmmUtil.nvl(rDTO.email()).isEmpty()) {
                 log.info("[AccountController] findEmail success. Found Email: {}", rDTO.email());
                 return MsgDTO.builder().result(1).msg("회원님의 이메일은 [" + rDTO.email() + "]입니다.").build();
             } else {
-                log.warn("[AccountController] findEmail failed - No account found for name: {}, birthDate: {}", cleanedName, cleanedBirthDate);
+                log.warn("[AccountController] findEmail failed - No account found for name: {}, birthDate: {}, phoneNum: {}", cleanedName, cleanedBirthDate, cleanedPhoneNum);
                 return MsgDTO.builder().result(0).msg("입력하신 정보와 일치하는 이메일이 없습니다. 다시 확인해주세요.").build();
             }
         } catch (Exception e) {
@@ -295,9 +296,6 @@ public class AccountController {
         }
     }
 
-    /**
-     * ------------------------ 비밀번호 재설정 (임시 비밀번호 발급) ------------------------
-     */
 
     /**
      * 비밀번호 재설정 (임시 비밀번호 발급) API
@@ -323,7 +321,6 @@ public class AccountController {
         try {
             MsgDTO resultMsg = userInfoService.resetUserPassword(email, name);
 
-            // 최종 결과 메시지는 클라이언트에게 반환되므로, 로그에는 간략한 성공/실패만 남김
             if (resultMsg.result() == 1) {
                 log.info("[AccountController] resetPassword success. Email: {}", email);
             } else {
@@ -338,9 +335,6 @@ public class AccountController {
         }
     }
 
-    /**
-     * ------------------------ 비밀번호 변경 ------------------------
-     */
 
     /**
      * 비밀번호 변경 처리 API

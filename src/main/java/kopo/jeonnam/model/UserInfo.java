@@ -4,7 +4,7 @@ import kopo.jeonnam.dto.user.UserInfoDTO;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import lombok.Value; // @Value 어노테이션 추가
+import lombok.Value;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,10 +29,11 @@ public class UserInfo {
     private final String password;
     private final String name;
     private final String birthDate;
+
+    private final String phoneNum; // ✨ **여기에 휴대폰 번호 필드 추가!**
+
     private final String sex;
     private final String country;
-
-
 
 
     /**
@@ -44,11 +45,13 @@ public class UserInfo {
      */
     public static UserInfo fromDTO(UserInfoDTO dto) {
         return UserInfo.builder()
-                .userId(dto.userId() != null ? new ObjectId(dto.userId()) : new ObjectId()) // userId가 있다면 사용, 없다면 새로 생성
+                // ✨ 레코드의 필드 접근은 'dto.필드명()' 방식입니다!
+                .userId(dto.userId() != null ? new ObjectId(dto.userId()) : new ObjectId())
                 .email(dto.email())
                 .password(dto.password())
                 .name(dto.name())
                 .birthDate(dto.birthDate())
+                .phoneNum(dto.phoneNum()) // ✨ **dto에서 phoneNum 가져와서 추가!**
                 .sex(dto.sex())
                 .country(dto.country())
                 .build();
@@ -66,6 +69,7 @@ public class UserInfo {
                 .password(this.password) // 비밀번호는 DTO에서 필요에 따라 제거될 수 있음
                 .name(this.name)
                 .birthDate(this.birthDate)
+                .phoneNum(this.phoneNum) // ✨ **모델의 phoneNum을 DTO로 변환 시 추가!**
                 .sex(this.sex)
                 .country(this.country)
                 .exist_yn("Y") // 이 모델이 존재하므로 "Y"로 설정

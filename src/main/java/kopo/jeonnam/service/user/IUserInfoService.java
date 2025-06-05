@@ -7,7 +7,7 @@ import kopo.jeonnam.dto.user.UserInfoDTO;
  * 사용자 정보 관련 서비스 인터페이스
  */
 public interface IUserInfoService {
-    
+
     /**
      * 회원가입 처리
      * @param userInfoDTO 사용자 정보
@@ -15,7 +15,7 @@ public interface IUserInfoService {
      * @throws Exception 예외 발생 시
      */
     int insertUserInfo(UserInfoDTO userInfoDTO) throws Exception;
-    
+
     /**
      * 이메일 중복 확인
      * @param userInfoDTO 이메일 정보
@@ -23,7 +23,7 @@ public interface IUserInfoService {
      * @throws Exception 예외 발생 시
      */
     UserInfoDTO getEmailExists(UserInfoDTO userInfoDTO) throws Exception;
-    
+
     /**
      * 이름과 이메일로 사용자 찾기
      * @param userInfoDTO 이름, 이메일 정보
@@ -31,7 +31,7 @@ public interface IUserInfoService {
      * @throws Exception 예외 발생 시
      */
     UserInfoDTO findUserByNameAndEmail(UserInfoDTO userInfoDTO) throws Exception;
-    
+
     /**
      * 비밀번호 재설정
      * @param email 이메일
@@ -40,7 +40,7 @@ public interface IUserInfoService {
      * @throws Exception 예외 발생 시
      */
     MsgDTO resetUserPassword(String email, String name) throws Exception;
-    
+
     /**
      * 이메일로 사용자 찾기
      * @param email 이메일
@@ -48,7 +48,7 @@ public interface IUserInfoService {
      * @throws Exception 예외 발생 시
      */
     UserInfoDTO findByEmail(String email) throws Exception;
-    
+
     /**
      * 비밀번호 변경
      * @param email 이메일
@@ -58,7 +58,16 @@ public interface IUserInfoService {
      */
     boolean changePassword(String email, String currentPassword, String newPassword);
 
-    UserInfoDTO findEmailByNameAndBirthDate(String name, String birthDate) throws Exception;
+    // ✨ **기존 findEmailByNameAndBirthDate 대신, 휴대폰 번호까지 포함된 메서드를 추가!**
+    /**
+     * 이름, 생년월일, 휴대폰 번호로 이메일 찾기
+     * @param name 사용자의 이름
+     * @param birthDate 사용자의 생년월일
+     * @param phoneNum 사용자의 휴대폰 번호
+     * @return 사용자 정보 DTO (이메일 포함), 없으면 null
+     * @throws Exception 예외 발생 시
+     */
+    UserInfoDTO findEmailByNameAndBirthDateAndPhoneNum(String name, String birthDate, String phoneNum) throws Exception;
 
 
     /**
