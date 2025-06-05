@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지 - 전남 영화/드라마 여행</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+            text-align: center;
+        }
+        .welcome-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container welcome-container">
+    <h1>환영합니다!</h1>
+    <p th:if="${session.email}">
+        <strong th:text="${session.email}">user@example.com</strong>님, 성공적으로 로그인되었습니다.
+    </p>
+    <p>전남 영화/드라마 여행 서비스에 오신 것을 환영합니다.</p>
+    <a href="/" class="btn btn-primary mt-3">홈으로 돌아가기</a>
+    <a href="/user/myPage" class="btn btn-info mt-3 ms-2">마이페이지</a>
+    <a href="/auth/logout" class="btn btn-danger mt-3 ms-2">로그아웃</a> </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
