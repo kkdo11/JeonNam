@@ -1,4 +1,4 @@
-package kopo.jeonnam.model;
+package kopo.jeonnam.repository.entity.user;
 
 import kopo.jeonnam.dto.user.UserInfoDTO;
 import lombok.AccessLevel;

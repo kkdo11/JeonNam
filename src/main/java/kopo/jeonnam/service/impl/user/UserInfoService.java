@@ -3,7 +3,7 @@ package kopo.jeonnam.service.impl.user;
 import kopo.jeonnam.dto.user.MailDTO;
 import kopo.jeonnam.dto.user.MsgDTO;
 import kopo.jeonnam.dto.user.UserInfoDTO;
-import kopo.jeonnam.model.UserInfo;
+import kopo.jeonnam.repository.entity.user.UserInfo;
 import kopo.jeonnam.repository.mongo.user.UserRepository;
 import kopo.jeonnam.service.user.IMailService;
 import kopo.jeonnam.service.user.IUserInfoService;
@@ -124,6 +124,7 @@ public class UserInfoService implements IUserInfoService {
             return UserInfoDTO.builder()
                     .email(user.getEmail()) // ✨ UserInfo는 getEmail() 사용
                     .build();
+
         }
 
         logger.warn("❗ 사용자 정보 일치하지 않음 - 이름: {}, 생년월일: {}, 휴대폰 번호: {}", name, birthDate, phoneNum);
