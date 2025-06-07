@@ -1,6 +1,6 @@
 package kopo.jeonnam.repository.mongo.user;
 
-import kopo.jeonnam.model.UserInfo;
+import kopo.jeonnam.repository.entity.UserInfo;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;

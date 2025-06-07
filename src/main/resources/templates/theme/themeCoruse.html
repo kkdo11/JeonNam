@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>남도 추천 여행코스 불러오기</title>
+    <style>
+        body { font-family: '맑은 고딕', Arial, sans-serif; margin: 40px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h2>남도 추천 여행코스 데이터 불러오기</h2>
+<button onclick="fetchRecommendCourses()">데이터 불러와 저장하기</button>
+<div id="result"></div>
+
+<script>
+    function fetchRecommendCourses() {
+        document.getElementById('result').innerText = '불러오는 중...';
+        fetch('/api/recommend-course/fetch')
+            .then(response => response.text())
+            .then(msg => {
+                document.getElementById('result').innerText = msg;
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = '오류 발생: ' + err;
+            });
+    }
+</script>
+</body>
+</html>
+
