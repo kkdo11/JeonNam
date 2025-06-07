@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DataLoader implements CommandLineRunner {
+public class ProductDataLoader implements CommandLineRunner {
 
     private final IProductService productService;
 
