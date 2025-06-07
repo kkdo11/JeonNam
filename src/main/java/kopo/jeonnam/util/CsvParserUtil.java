@@ -1,14 +1,17 @@
 package kopo.jeonnam.util;
 
+import kopo.jeonnam.dto.csv.MediaSpotDTO;
 import kopo.jeonnam.dto.csv.ProductDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -75,56 +78,78 @@ public class CsvParserUtil {
         }
         return rawArea;
     }
-}
 
-//파싱 X
-//package kopo.jeonnam.util;
-//
-//import kopo.jeonnam.dto.csv.ProductDTO;
-//import lombok.extern.slf4j.Slf4j;
-//import org.apache.commons.csv.CSVFormat;
-//import org.apache.commons.csv.CSVRecord;
-//
-//import java.io.BufferedReader;
-//import java.io.InputStream;
-//import java.io.InputStreamReader;
-//import java.nio.charset.Charset;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//@Slf4j
-//public class CsvParserUtil {
-//
-//    public static List<ProductDTO> parseProducts(InputStream csvInputStream) {
-//        List<ProductDTO> productList = new ArrayList<>();
-//        try (BufferedReader reader = new BufferedReader(
-//                new InputStreamReader(csvInputStream, Charset.forName("MS949")))) {
-//
-//            Iterable<CSVRecord> records = CSVFormat.DEFAULT
-//                    .withFirstRecordAsHeader()
-//                    .parse(reader);
-//
-//            for (CSVRecord record : records) {
-//                ProductDTO dto = ProductDTO.builder()
-//                        .proId(null)
-//                        .proRegNo(record.get("등록번호").trim())
-//                        .proName(record.get("등록명칭").trim())
-//                        .proRegDate(record.get("등록일자").trim())
-//                        .proArea(record.get("대상지역").trim())
-//                        .proPlanQty(record.get("생산계획량(톤)").trim())
-//                        .proCompany(record.get("업체명").trim())
-//                        .proBaseDate(record.get("데이터기준일자").trim())
-//                        .build();
-//
-//                productList.add(dto);
-//            }
-//
-//            log.info("✅ CSV 파싱 완료, 총 {}개 아이템 읽음", productList.size());
-//
-//        } catch (Exception e) {
-//            log.error("❌ CSV 파싱 중 오류 발생", e);
-//        }
-//
-//        return productList;
-//    }
-//}
+    public static List<MediaSpotDTO> parseMediaSpots(InputStream csvInputStream) {
+        List<MediaSpotDTO> list = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new BOMInputStream(csvInputStream), StandardCharsets.UTF_8))) {
+
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .parse(reader);
+
+            for (CSVRecord record : records) {
+                String ctprvnNm = record.get("CTPRVN_NM").trim();
+
+                if (ctprvnNm == null) continue;
+                if (!"전라남도".equals(ctprvnNm)) continue;
+
+                String rawTitle = record.get("POI_NM").trim();
+                String cleanedTitle = cleanTitle(rawTitle);
+
+                // title이 빈 문자열이면 skip
+                if (cleanedTitle.isEmpty()) continue;
+
+                MediaSpotDTO dto = MediaSpotDTO.builder()
+                        .spotId(record.get("ID").trim())
+                        .spotNm(cleanedTitle)
+                        .spotArea(record.get("SIGNGU_NM").trim())
+                        .spotLegalDong(record.get("LEGALDONG_NM").trim())
+                        .spotRi(record.get("LI_NM").trim())
+                        .spotBunji(record.get("LNBR_NO").trim())
+                        .spotRoadAddr(record.get("RDNMADR_NM").trim())
+                        .spotLon(record.get("LC_LO").trim())
+                        .spotLat(record.get("LC_LA").trim())
+                        .build();
+
+                list.add(dto);
+            }
+
+            log.info("✅ MediaSpot CSV 파싱 완료, 전라남도 데이터 총 {}개", list.size());
+
+        } catch (Exception e) {
+            log.error("❌ MediaSpot CSV 파싱 중 오류 발생", e);
+        }
+
+        return list;
+    }
+
+    /**
+     * 촬영지 제목 클린업
+     * - 앞에 "영화" 제거
+     * - 뒤에 "촬영지", "촬영장", "영화", "세트장" 제거
+     * - "나주영상테마파크" 제거
+     */
+    private static String cleanTitle(String title) {
+        String result = title;
+
+        // 앞에 "영화" 제거
+        if (result.startsWith("영화")) {
+            result = result.substring(2).trim();
+        }
+
+        // 뒤에 특정 단어 제거
+        String[] suffixes = {"촬영지", "촬영장", "영화", "세트장"};
+        for (String suffix : suffixes) {
+            if (result.endsWith(suffix)) {
+                result = result.substring(0, result.length() - suffix.length()).trim();
+            }
+        }
+
+        // "나주영상테마파크" 제거 (앞이나 중간에 있으면)
+        result = result.replace("나주영상테마파크", "").trim();
+
+        return result;
+    }
+}

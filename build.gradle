@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    // CSV UTF-8(BOM)
+    implementation 'commons-io:commons-io:2.11.0'
     // CSV 읽기용 Apache Commons CSV
     implementation 'org.apache.commons:commons-csv:1.9.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
