@@ -13,7 +13,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +83,7 @@ public class CsvParserUtil {
 
     public static List<MediaSpotDTO> parseMediaSpots(InputStream csvInputStream) {
         List<MediaSpotDTO> list = new ArrayList<>();
+        Set<String> spotNameSet = new HashSet<>();  // 중복 방지용 Set
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new BOMInputStream(csvInputStream), StandardCharsets.UTF_8))) {
@@ -91,15 +94,13 @@ public class CsvParserUtil {
 
             for (CSVRecord record : records) {
                 String ctprvnNm = record.get("CTPRVN_NM").trim();
-
-                if (ctprvnNm == null) continue;
-                if (!"전라남도".equals(ctprvnNm)) continue;
+                if (ctprvnNm == null || !"전라남도".equals(ctprvnNm)) continue;
 
                 String rawTitle = record.get("POI_NM").trim();
                 String cleanedTitle = cleanTitle(rawTitle);
 
-                // title이 빈 문자열이면 skip
                 if (cleanedTitle.isEmpty()) continue;
+                if (spotNameSet.contains(cleanedTitle)) continue;  // 중복 방지
 
                 MediaSpotDTO dto = MediaSpotDTO.builder()
                         .spotId(record.get("ID").trim())
@@ -114,9 +115,10 @@ public class CsvParserUtil {
                         .build();
 
                 list.add(dto);
+                spotNameSet.add(cleanedTitle);  // 등록
             }
 
-            log.info("✅ MediaSpot CSV 파싱 완료, 전라남도 데이터 총 {}개", list.size());
+            log.info("✅ MediaSpot CSV 파싱 완료, 전라남도 중복 제거 후 총 {}개", list.size());
 
         } catch (Exception e) {
             log.error("❌ MediaSpot CSV 파싱 중 오류 발생", e);

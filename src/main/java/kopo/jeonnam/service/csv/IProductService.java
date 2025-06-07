@@ -14,5 +14,4 @@ public interface IProductService {
     List<ProductDTO> findByAreaAndKeyword(String area, String keyword); //검색
     void saveAll(List<ProductDTO> dtoList); // 여러 개 저장
     boolean existsAny();  // DB에 저장된 데이터가 있는지 확인
-
 }

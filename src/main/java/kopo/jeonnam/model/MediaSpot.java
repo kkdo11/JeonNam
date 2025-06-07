@@ -32,6 +32,7 @@ public class MediaSpot {
     private final String spotRoadAddr;   // 도로명주소명
     private final String spotLon;        // 경도 (LC_LO)
     private final String spotLat;        // 위도 (LC_LA)
+    private String posterUrl; // 👈 TMDB 포스터 URL 캐시용
 
     /**
      * 🛠 DTO → Entity 변환 메서드

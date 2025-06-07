@@ -3,6 +3,7 @@ package kopo.jeonnam.service.impl.csv;
 import kopo.jeonnam.dto.csv.MediaSpotDTO;
 import kopo.jeonnam.model.MediaSpot;
 import kopo.jeonnam.repository.mongo.csv.MediaSpotRepository;
+import kopo.jeonnam.service.api.ITmdbService;
 import kopo.jeonnam.service.csv.IMediaSpotService;
 import kopo.jeonnam.util.CsvParserUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class MediaSpotService implements IMediaSpotService {
 
     private final MediaSpotRepository repository;
+    private final ITmdbService tmdbService;
 
     @Override
     public void loadMediaSpotsFromCsv(InputStream csvInputStream) throws Exception {
@@ -27,6 +29,8 @@ public class MediaSpotService implements IMediaSpotService {
         List<MediaSpot> spots = dtos.stream()
                 .map(dto -> {
                     String spotNm = dto.spotNm().replace("촬영지", "").trim();
+                    String posterUrl = tmdbService.getPosterUrlByTitle(spotNm).orElse(null);
+
                     return MediaSpot.builder()
                             .spotNm(spotNm)
                             .spotArea(dto.spotArea())
@@ -36,6 +40,7 @@ public class MediaSpotService implements IMediaSpotService {
                             .spotRoadAddr(dto.spotRoadAddr())
                             .spotLon(dto.spotLon())
                             .spotLat(dto.spotLat())
+                            .posterUrl(posterUrl) // 👈 캐시 저장
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -46,7 +51,9 @@ public class MediaSpotService implements IMediaSpotService {
 
     @Override
     public List<MediaSpot> getAllJeonnamSpots() {
-        return repository.findBySpotLegalDongContaining("전라남도");
+        List<MediaSpot> all = repository.findAll();
+        log.info("전체 촬영지 개수: {}", all.size());
+        return all;
     }
 
     @Override
