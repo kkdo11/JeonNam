@@ -1,6 +1,6 @@
 package kopo.jeonnam.controller.theme;
 
-import kopo.jeonnam.repository.entity.RecommendCourseEntity;
+import kopo.jeonnam.repository.entity.theme.RecommendCourseEntity;
 import kopo.jeonnam.service.theme.IRecommendCourseImageService;
 import kopo.jeonnam.service.theme.IRecommendCourseService; // RecommendCourseEntity 조회를 위해 필요
 import lombok.RequiredArgsConstructor;

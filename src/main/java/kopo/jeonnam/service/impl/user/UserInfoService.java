@@ -3,7 +3,7 @@ package kopo.jeonnam.service.impl.user;
 import kopo.jeonnam.dto.user.MailDTO;
 import kopo.jeonnam.dto.user.MsgDTO;
 import kopo.jeonnam.dto.user.UserInfoDTO;
-import kopo.jeonnam.repository.entity.UserInfo;
+import kopo.jeonnam.repository.entity.user.UserInfo;
 import kopo.jeonnam.repository.mongo.user.UserRepository;
 import kopo.jeonnam.service.user.IMailService;
 import kopo.jeonnam.service.user.IUserInfoService;

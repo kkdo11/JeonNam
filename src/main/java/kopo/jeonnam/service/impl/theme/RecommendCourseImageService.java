@@ -1,29 +1,28 @@
-// kopo.jeonnam.service.impl.theme.RecommendCourseImageService.java
 package kopo.jeonnam.service.impl.theme;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import kopo.jeonnam.repository.entity.RecommendCourseImageEntity; // 이 엔티티를 사용합니다.
+import kopo.jeonnam.repository.entity.theme.RecommendCourseImageEntity;
 import kopo.jeonnam.repository.mongo.theme.RecommendCourseImageRepository;
 import kopo.jeonnam.service.theme.IRecommendCourseImageService;
 import kopo.jeonnam.util.NetworkUtil;
-import kopo.jeonnam.util.XmlParserUtil;
+import kopo.jeonnam.util.XmlParserUtil; // XmlParserUtil 임포트
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set; // 중복 방지를 위해 Set 임포트
+import java.util.HashSet; // 중복 방지를 위해 HashSet 임포트
+import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class RecommendCourseImageService implements IRecommendCourseImageService {
-
-    private static final Logger logger = LoggerFactory.getLogger(RecommendCourseImageService.class);
 
     private final RecommendCourseImageRepository recommendCourseImageRepository;
 
@@ -33,106 +32,139 @@ public class RecommendCourseImageService implements IRecommendCourseImageService
     @Value("${recommendcourse.api.key}")
     private String apiKey;
 
-    public RecommendCourseImageService(RecommendCourseImageRepository recommendCourseImageRepository) {
-        this.recommendCourseImageRepository = recommendCourseImageRepository;
-    }
-
+    /**
+     * 특정 courseInfoIds에 해당하는 이미지 데이터를 외부 API에서 받아와 MongoDB에 저장합니다.
+     * @param courseInfoIds 쉼표로 구분된 courseInfoId 문자열
+     * @return 저장된 이미지 데이터 개수
+     */
     @Override
     public int fetchAndSaveRecommendCourseImages(String courseInfoIds) {
-        logger.info(">> fetchAndSaveRecommendCourseImages 서비스 시작 (courseInfoIds: {})", courseInfoIds);
-
+        log.info(">> fetchAndSaveRecommendCourseImages 서비스 시작: courseInfoIds={}", courseInfoIds);
         if (courseInfoIds == null || courseInfoIds.trim().isEmpty()) {
-            logger.warn("입력된 courseInfoIds가 비어있습니다. 처리를 중단합니다.");
+            log.warn("  courseInfoIds가 null 또는 비어있어 이미지 데이터를 가져올 수 없습니다.");
             return 0;
         }
 
-        List<String> idList = Arrays.asList(courseInfoIds.split(","));
-        int totalSavedCount = 0;
+        int savedCount = 0;
+        Set<String> processedImageIds = new HashSet<>(); // 중복 이미지 방지를 위한 Set
 
-        for (String courseInfoId : idList) {
-            String trimmedId = courseInfoId.trim();
-            if (trimmedId.isEmpty()) {
-                continue;
-            }
+        try {
+            String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
 
-            logger.info("  >> courseInfoId: {} 에 대한 이미지 데이터 처리 시작", trimmedId);
-            try {
-                String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
-                String url = String.format("%s?serviceKey=%s&courseInfoId=%s", apiUrl, encodedKey, trimmedId);
-                logger.info("    API 호출 URL: {}", url);
+            // 쉼표로 구분된 courseInfoIds를 개별 ID로 분리
+            List<String> individualCourseInfoIds = Arrays.asList(courseInfoIds.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+
+            // 각 개별 courseInfoId에 대해 API 호출
+            for (String singleCourseInfoId : individualCourseInfoIds) {
+                String url = String.format("%s?serviceKey=%s&numOfRows=10&pageNo=1&courseInfoId=%s",
+                        apiUrl, encodedKey, URLEncoder.encode(singleCourseInfoId, StandardCharsets.UTF_8));
+                log.info("  이미지 API 호출 URL: {}", url);
 
                 String response = NetworkUtil.get(url);
 
-                Optional<JsonNode> rootNodeOptional = XmlParserUtil.parseXmlToJsonNode(response);
-
-                if (rootNodeOptional.isEmpty()) {
-                    logger.error("    API 응답 XML 파싱 실패 또는 유효하지 않은 응답 (courseInfoId: {})", trimmedId);
+                if (response == null || !response.trim().startsWith("<")) {
+                    log.error("  이미지 API 응답 오류(비XML 또는 null): {}", response);
                     continue;
                 }
-                JsonNode root = rootNodeOptional.get();
 
-                String resultCode = XmlParserUtil.getTextAtPath(root, "", "header", "resultCode");
-                String resultMsg = XmlParserUtil.getTextAtPath(root, "알 수 없는 오류", "header", "resultMsg");
+                // 응답 원문 로그 추가
+                log.info("  이미지 API 원문 응답: {}", response);
+                JsonNode rootNode = XmlParserUtil.parseXmlToJsonNode(response).orElse(null);
+                if (rootNode == null) {
+                    log.error("  XML 파싱 실패 또는 빈 응답 (courseInfoId: {})", singleCourseInfoId);
+                    continue;
+                }
 
+                // header/body가 없을 때 예외 처리
+                JsonNode header = rootNode.path("header");
+                JsonNode body = rootNode.path("body");
+                if (header.isMissingNode() || body.isMissingNode()) {
+                    // 혹시 cmmMsgHeader 구조일 경우도 체크
+                    JsonNode cmmHeader = rootNode.path("cmmMsgHeader");
+                    if (!cmmHeader.isMissingNode()) {
+                        String errMsg = cmmHeader.path("errMsg").asText();
+                        String returnAuthMsg = cmmHeader.path("returnAuthMsg").asText();
+                        String returnReasonCode = cmmHeader.path("returnReasonCode").asText();
+                        log.error("  이미지 API 인증 오류: {}, {}, {} (courseInfoId: {})", errMsg, returnAuthMsg, returnReasonCode, singleCourseInfoId);
+                    } else {
+                        log.warn("  이미지 API 응답에 header/body가 없음. 원문: {}", response);
+                    }
+                    continue;
+                }
+
+                String resultCode = header.path("resultCode").asText();
+                String resultMsg = header.path("resultMsg").asText("알 수 없는 오류");
                 if (!"00".equals(resultCode)) {
-                    logger.error("    API 응답 오류 - 코드: {}, 메시지: {} (courseInfoId: {})", resultCode, resultMsg, trimmedId);
+                    log.error("  이미지 API 응답 오류 - 코드: {}, 메시지: {} (courseInfoId: {})", resultCode, resultMsg, singleCourseInfoId);
                     continue;
                 }
 
-                // 이미지 데이터 추출 경로: <response><body><items><item>
-                Optional<JsonNode> itemsNodeOptional = XmlParserUtil.getNodeAtPath(root, "body", "items", "item");
-
-                List<RecommendCourseImageEntity> entitiesToSave = new ArrayList<>();
-                int currentSavedCount = 0;
-
-                if (itemsNodeOptional.isPresent()) {
-                    JsonNode itemsNode = itemsNodeOptional.get();
-
-                    if (itemsNode.isArray()) {
-                        logger.debug("    courseInfoId {} 에 대한 아이템 (배열 형태): {}개", trimmedId, itemsNode.size());
-                        for (JsonNode item : itemsNode) {
-                            // mapJsonNodeToEntity 호출 시 courseInfoId를 함께 넘깁니다.
-                            entitiesToSave.add(mapJsonNodeToEntity(item, trimmedId));
-                            currentSavedCount++;
+                JsonNode items = body.path("items").path("item");
+                if (items.isArray()) {
+                    for (JsonNode item : items) {
+                        RecommendCourseImageEntity entity = mapJsonNodeToImageEntity(item, singleCourseInfoId);
+                        if (entity != null && processedImageIds.add(entity.get_id())) {
+                            recommendCourseImageRepository.save(entity);
+                            savedCount++;
+                            log.debug("    이미지 저장 완료: _id={}", entity.get_id());
+                        } else if (entity != null) {
+                            log.debug("    이미지 _id: {} 는 이미 처리된 항목이므로 스킵합니다.", entity.get_id());
                         }
-                    } else { // 단일 객체 형태
-                        logger.debug("    courseInfoId {} 에 대한 아이템 (단일 객체 형태)", trimmedId);
-                        // mapJsonNodeToEntity 호출 시 courseInfoId를 함께 넘깁니다.
-                        entitiesToSave.add(mapJsonNodeToEntity(itemsNode, trimmedId));
-                        currentSavedCount++;
+                    }
+                } else if (!items.isMissingNode()) {
+                    RecommendCourseImageEntity entity = mapJsonNodeToImageEntity(items, singleCourseInfoId);
+                    if (entity != null && processedImageIds.add(entity.get_id())) {
+                        recommendCourseImageRepository.save(entity);
+                        savedCount++;
+                        log.debug("    단일 이미지 저장 완료: _id={}", entity.get_id());
+                    } else if (entity != null) {
+                        log.debug("    이미지 _id: {} 는 이미 처리된 항목이므로 스킵합니다.", entity.get_id());
                     }
                 } else {
-                    logger.info("    courseInfoId {} 에 대한 아이템 데이터가 없습니다.", trimmedId);
+                    log.info("  courseInfoId '{}'에 대한 이미지 데이터가 없습니다.", singleCourseInfoId);
                 }
-
-                if (currentSavedCount > 0) {
-                    logger.info("    courseInfoId {} 에 대해 {}개의 RecommendCourseImageEntity 저장/업데이트 시도...", trimmedId, currentSavedCount);
-                    recommendCourseImageRepository.saveAll(entitiesToSave);
-                    logger.info("    courseInfoId {} 에 대해 {}개의 RecommendCourseImageEntity 저장/업데이트 완료.", trimmedId, currentSavedCount);
-                    totalSavedCount += currentSavedCount;
-                } else {
-                    logger.info("    courseInfoId {} 에 대해 저장할 RecommendCourseImageEntity가 없습니다.", trimmedId);
-                }
-
-            } catch (Exception e) {
-                logger.error("  courseInfoId {} 데이터 처리 중 예상치 못한 예외 발생: {}", trimmedId, e.getMessage(), e);
             }
+        } catch (Exception e) {
+            log.error("!! 이미지 데이터 처리 중 예상치 못한 예외 발생: {}", e.getMessage(), e);
+            return 0;
         }
+        log.info(">> fetchAndSaveRecommendCourseImages 서비스 종료. 총 {}개 이미지 저장.", savedCount);
+        return savedCount;
+    }
 
-        logger.info(">> fetchAndSaveRecommendCourseImages 서비스 종료. 총 저장/업데이트 건수: {}", totalSavedCount);
-        return totalSavedCount;
+    /**
+     * 모든 이미지 엔티티를 조회합니다.
+     * @return 모든 RecommendCourseImageEntity 리스트
+     */
+    @Override
+    public List<RecommendCourseImageEntity> getAllRecommendCourseImages() {
+        log.info(">> getAllRecommendCourseImages 서비스 호출");
+        return recommendCourseImageRepository.findAll();
     }
 
     /**
      * JsonNode에서 데이터를 추출하여 RecommendCourseImageEntity 객체로 매핑합니다.
-     * 실제 이미지 API 응답 필드명인 courseFileNm과 courseFileUrl을 사용합니다.
-     * courseInfoId는 API 응답에 없으므로, 호출 시 외부에서 주입받습니다.
+     * @param item JsonNode 형태의 단일 아이템 데이터
+     * @param courseInfoId 원본 코스의 courseInfoId (매핑을 위해 전달)
+     * @return 매핑된 RecommendCourseImageEntity 객체
      */
-    private RecommendCourseImageEntity mapJsonNodeToEntity(JsonNode item, String courseInfoId) {
+    private RecommendCourseImageEntity mapJsonNodeToImageEntity(JsonNode item, String courseInfoId) {
+        String courseFileUrl = item.path("courseFileUrl").asText(null);
+        if (courseFileUrl == null || courseFileUrl.isEmpty()) {
+            log.warn("  API 응답에서 courseFileUrl이 없어 이미지 엔티티를 생성할 수 없습니다. item: {}", item);
+            return null; // ID로 사용할 수 없는 경우 null 반환
+        }
+
         return RecommendCourseImageEntity.builder()
-                .courseFileUrl(item.path("courseFileUrl").asText(null)) // URL을 ID로 사용
-                .courseInfoId(courseInfoId) // 외부에서 주입받은 courseInfoId
-                .courseFileNm(item.path("courseFileNm").asText(null)) // 파일명
+                ._id(courseFileUrl) // courseFileUrl을 _id로 사용 (고유해야 함)
+                .courseInfoId(courseInfoId) // 상위 코스 정보 ID
+                .courseFileUrl(courseFileUrl)
+                .courseFileNm(item.path("courseFileNm").asText(null))
+                .courseFilePath(item.path("courseFilePath").asText(null))
                 .build();
     }
 }

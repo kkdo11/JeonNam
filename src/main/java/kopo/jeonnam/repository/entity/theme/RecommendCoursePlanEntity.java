@@ -1,4 +1,4 @@
-package kopo.jeonnam.repository.entity;
+package kopo.jeonnam.repository.entity.theme;
 
 import org.springframework.data.annotation.Id; // MongoDB의 _id 필드에 매핑
 import org.springframework.data.mongodb.core.mapping.Document; // MongoDB 컬렉션 매핑 어노테이션
