@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Getter
 @Setter
 @NoArgsConstructor // Lombok의 기본 생성자 자동 생성
-@Document(collection = "recommend_course") // MongoDB 컬렉션 이름 지정
+@Document(collection = "recommend_course") // MongoDB 컬렉션 이름 지정함
 public class RecommendCourseEntity {
 
     @Id // 이 필드가 MongoDB의 _id가 됩니다.

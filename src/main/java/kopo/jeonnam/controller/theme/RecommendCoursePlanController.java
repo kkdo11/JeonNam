@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 남도 추천 여행 코스 Plan 관련 API 컨트롤러
- * recommend_course 컬렉션의 모든 courseKey별로 외부 API를 호출하여 Plan을 저장합니다.
+ * recommend_course 컬렉션의 모든 courseKey별로 외부 API를 호출하여 Plan을 저장합니다
  * @author
  * @since 2025-06-07
  */

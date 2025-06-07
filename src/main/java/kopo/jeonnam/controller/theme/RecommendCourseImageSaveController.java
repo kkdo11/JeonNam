@@ -24,7 +24,7 @@ public class RecommendCourseImageSaveController {
 
     /**
      * 모든 저장된 추천 코스의 courseInfoIds를 기반으로 이미지 데이터를 초기화/업데이트합니다.
-     * 이 엔드포인트는 기존 데이터에 기반한 새로운 데이터 저장/갱신 작업을 시작하므로 POST를 사용합니다.
+     * 이 엔드포인트는 기존 데이터에 기반한 새로운 데이터 저장/갱신 작업을 시작하므로 POST를 사용.
      *
      * @return 처리 결과 메시지
      */

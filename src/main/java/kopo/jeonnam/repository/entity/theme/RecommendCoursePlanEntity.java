@@ -14,7 +14,7 @@ import lombok.ToString; // toString() 메서드를 자동으로 생성
 /**
  * recommend_course_plan 컬렉션에 저장될 추천 코스 계획 정보를 정의하는 MongoDB 엔티티 클래스
  * 이 엔티티는 특정 추천 코스(planCourseId)에 대한 상세 계획 정보를 담으며,
- * 각 계획 항목은 고유한 planInfoId를 가집니다.
+ * 각 계획 항목은 고유한 planInfoId를 가집니다
  */
 @Getter // 모든 필드에 대한 Getter 메서드를 자동으로 생성합니다.
 @Setter // 모든 필드에 대한 Setter 메서드를 자동으로 생성합니다.

@@ -21,7 +21,7 @@ public interface IRecommendCourseService {
     Optional<RecommendCourseEntity> getRecommendCourseDetail(String courseId);
 
     /**
-     * 쉼표로 구분된 courseInfoId 문자열을 받아 해당 ID들에 연결된 이미지 데이터를 조회합니다.
+     * 쉼표로 구분된 courseInfoId 문자열을 받아 해당 ID들에 연결된 이미지 데이터를 조회합니다
      * @param courseInfoIds 쉼표로 구분된 courseInfoId 문자열
      * @return 조회된 RecommendCourseImageEntity 리스트
      */

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 남도 추천 여행 코스 관련 API 컨트롤러
- * 외부 API에서 코스 데이터를 가져와 저장하는 역할을 담당합니다.
+ * 외부 API에서 코스 데이터를 가져와 저장하는 역할을 담당합니다
  * @author
  * @since 2025-06-07
  */

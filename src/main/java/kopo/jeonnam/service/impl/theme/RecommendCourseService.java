@@ -39,7 +39,7 @@ public class RecommendCourseService implements IRecommendCourseService {
      * 남도 추천 여행 코스 데이터를 외부 API에서 받아와 MongoDB에 저장합니다.
      * 계절별로 반복 호출하며, 중복 코스는 Set으로 필터링합니다.
      *
-     * @return 저장된 고유 추천 코스 개수
+     * @return 저장된 고유 추천 코스 개수를 반환합니다
      */
     @Override
     public int fetchAndSaveRecommendCourses() {

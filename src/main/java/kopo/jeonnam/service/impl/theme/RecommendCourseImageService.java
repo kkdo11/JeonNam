@@ -35,7 +35,7 @@ public class RecommendCourseImageService implements IRecommendCourseImageService
     /**
      * 특정 courseInfoIds에 해당하는 이미지 데이터를 외부 API에서 받아와 MongoDB에 저장합니다.
      * @param courseInfoIds 쉼표로 구분된 courseInfoId 문자열
-     * @return 저장된 이미지 데이터 개수
+     * @return 저장된 이미지 데이터 개수를 반환
      */
     @Override
     public int fetchAndSaveRecommendCourseImages(String courseInfoIds) {

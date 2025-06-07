@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RecommendCourseImageRepository extends MongoRepository<RecommendCourseImageEntity, String> {
-
+//
 }

@@ -19,9 +19,6 @@ import java.util.List;
 
 /**
  * 특정 추천 코스(courseKey)에 대한 상세 계획(Plan) 정보를 외부 API에서 가져와 MongoDB에 저장하는 서비스 구현체
- *
- * 협업 및 디버깅을 위해 주요 단계별로 상세 로그를 남기며,
- * 예외 상황, 데이터 파싱, 저장 등 모든 주요 로직에 주석을 추가하였습니다.
  */
 @Service
 public class RecommendCoursePlanService implements IRecommendCoursePlanService {

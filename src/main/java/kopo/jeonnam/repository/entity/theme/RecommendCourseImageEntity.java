@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Getter
 @Setter
 @NoArgsConstructor
-@Document(collection = "recommend_course_image") // MongoDB 컬렉션 이름 지정
+@Document(collection = "recommend_course_image") // MongoDB 컬렉션 이름 지정함
 public class RecommendCourseImageEntity {
 
     @Id // 이 필드가 MongoDB의 _id가 됩니다. 이미지 파일 URL이 고유하다면 ID로 사용 가능

@@ -15,7 +15,7 @@ public class XmlParserUtil {
 
     /**
      * XML 문자열을 JsonNode로 파싱합니다.
-     * 유효하지 않은 XML이거나 파싱 중 오류 발생 시 Optional.empty()를 반환합니다.
+     * 유효하지 않은 XML이거나 파싱 중 오류 발생 시 Optional.empty()를 반환합니다
      *
      * @param xmlString 파싱할 XML 문자열
      * @return 파싱된 JsonNode를 포함하는 Optional, 오류 발생 시 Optional.empty()

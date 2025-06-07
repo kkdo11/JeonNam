@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface RecommendCoursePlanRepository extends MongoRepository<RecommendCoursePlanEntity, String> {
-    // 필요시 커스텀 쿼리 메서드 추가 가능
+    // 필요시 커스텀 쿼리 메서드 추가
 }

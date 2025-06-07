@@ -11,9 +11,6 @@ import lombok.ToString;         // toString() 메서드 자동 생성
  * 코스 및 주요 지점 정보를 담는 데이터 전송 객체입니다.
  * Controller/Service/Repository 계층 간 데이터 전달에 사용됩니다.
  *
- * 이 클래스는 Lombok 어노테이션을 사용하여 보일러플레이트 코드를 줄였습니다.
- * @author (작성자)
- * @since 2025-06-07
  */
 @Getter             // 모든 필드에 대한 public Getter 메서드를 자동으로 생성합니다.
 @Setter             // 모든 필드에 대한 public Setter 메서드를 자동으로 생성합니다.
