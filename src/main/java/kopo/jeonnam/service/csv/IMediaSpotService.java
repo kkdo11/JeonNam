@@ -1,5 +1,6 @@
 package kopo.jeonnam.service.csv;
 
+import kopo.jeonnam.dto.csv.MediaSpotMapDTO;
 import kopo.jeonnam.model.MediaSpot;
 
 import java.io.InputStream;
@@ -26,4 +27,9 @@ public interface IMediaSpotService {
     List<MediaSpot> searchBySpotNm(String keyword);
 
     boolean existsAny();
+
+    /**
+     * 지도 표시에 사용할 DTO 리스트 반환
+     */
+    List<MediaSpotMapDTO> getAllMapReadySpots();
 }
