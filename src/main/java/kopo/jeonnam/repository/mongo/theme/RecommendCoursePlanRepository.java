@@ -4,6 +4,8 @@ import kopo.jeonnam.repository.entity.theme.RecommendCoursePlanEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 추천 여행 코스 상세 일정(Plan) 정보를 MongoDB에서 관리하는 Repository 인터페이스입니다.
  *
@@ -12,5 +14,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface RecommendCoursePlanRepository extends MongoRepository<RecommendCoursePlanEntity, String> {
-    // 필요시 커스텀 쿼리 메서드 추가
+    List<RecommendCoursePlanEntity> findAll();
 }

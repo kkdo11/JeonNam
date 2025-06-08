@@ -2,7 +2,9 @@ package kopo.jeonnam.service.impl.theme;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import kopo.jeonnam.dto.theme.RecommendCoursePlanDTO;
 import kopo.jeonnam.repository.entity.theme.RecommendCoursePlanEntity;
+import kopo.jeonnam.repository.mongo.theme.RecommendCourseImageRepository;
 import kopo.jeonnam.repository.mongo.theme.RecommendCoursePlanRepository;
 import kopo.jeonnam.service.theme.IRecommendCoursePlanService;
 import kopo.jeonnam.util.NetworkUtil;
@@ -16,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 특정 추천 코스(courseKey)에 대한 상세 계획(Plan) 정보를 외부 API에서 가져와 MongoDB에 저장하는 서비스 구현체
@@ -26,6 +29,9 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
     private static final Logger logger = LoggerFactory.getLogger(RecommendCoursePlanService.class);
 
     private final RecommendCoursePlanRepository recommendCoursePlanRepository;
+    private final RecommendCourseImageRepository imageRepository;
+
+
 
     @Value("${recommendcourse.api.planlist.url}")
     private String apiUrl;
@@ -33,8 +39,10 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
     @Value("${recommendcourse.api.key}")
     private String apiKey;
 
-    public RecommendCoursePlanService(RecommendCoursePlanRepository recommendCoursePlanRepository) {
+    public RecommendCoursePlanService(RecommendCoursePlanRepository recommendCoursePlanRepository,
+                                      RecommendCourseImageRepository imageRepository) {
         this.recommendCoursePlanRepository = recommendCoursePlanRepository;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -112,6 +120,77 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
             logger.info(">> fetchAndSaveRecommendCoursePlans 서비스 종료 (courseKey: {})", courseKey);
         }
     }
+
+    @Override
+    public List<RecommendCoursePlanDTO> getAllPlansWithImages() {
+        List<RecommendCoursePlanEntity> plans = recommendCoursePlanRepository.findAll();
+        List<RecommendCoursePlanDTO> result = new ArrayList<>();
+
+        for (RecommendCoursePlanEntity plan : plans) {
+            RecommendCoursePlanDTO dto = new RecommendCoursePlanDTO();
+            dto.setPlanInfoId(plan.getPlanInfoId());
+            dto.setPlanName(plan.getPlanName());
+            dto.setPlanArea(plan.getPlanArea());
+            dto.setPlanAddr(plan.getPlanAddr());
+            dto.setPlanPhone(plan.getPlanPhone());
+            dto.setPlanHomepage(plan.getPlanHomepage());
+            dto.setPlanParking(plan.getPlanParking());
+            dto.setPlanContents(plan.getPlanContents());
+
+            try {
+                dto.setPlanLatitude(Double.parseDouble(plan.getPlanLatitude()));
+                dto.setPlanLongitude(Double.parseDouble(plan.getPlanLongitude()));
+            } catch (NumberFormatException e) {
+                logger.warn("잘못된 위경도: {}", plan.getPlanInfoId());
+                dto.setPlanLatitude(0);
+                dto.setPlanLongitude(0);
+            }
+
+            List<String> imageUrls = imageRepository.findByCourseInfoId(plan.getPlanInfoId())
+                    .stream()
+                    .map(image -> image.getCourseFileUrl())
+                    .toList();
+            dto.setImageUrls(imageUrls);
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+
+    @Override
+    public Optional<RecommendCoursePlanDTO> getPlanWithImagesById(String planInfoId) {
+        return recommendCoursePlanRepository.findById(planInfoId).map(plan -> {
+            RecommendCoursePlanDTO dto = new RecommendCoursePlanDTO();
+            dto.setPlanInfoId(plan.getPlanInfoId());
+            dto.setPlanName(plan.getPlanName());
+            dto.setPlanArea(plan.getPlanArea());
+            dto.setPlanAddr(plan.getPlanAddr());
+            dto.setPlanPhone(plan.getPlanPhone());
+            dto.setPlanHomepage(plan.getPlanHomepage());
+            dto.setPlanParking(plan.getPlanParking());
+            dto.setPlanContents(plan.getPlanContents());
+
+            try {
+                dto.setPlanLatitude(Double.parseDouble(plan.getPlanLatitude()));
+                dto.setPlanLongitude(Double.parseDouble(plan.getPlanLongitude()));
+            } catch (NumberFormatException e) {
+                logger.warn("잘못된 위경도: {}", planInfoId);
+                dto.setPlanLatitude(0);
+                dto.setPlanLongitude(0);
+            }
+
+            List<String> imageUrls = imageRepository.findByCourseInfoId(plan.getPlanInfoId())
+                    .stream()
+                    .map(image -> image.getCourseFileUrl())
+                    .toList();
+            dto.setImageUrls(imageUrls);
+
+            return dto;
+        });
+    }
+
 
     /**
      * JsonNode에서 데이터를 추출하여 RecommendCoursePlanEntity 객체로 매핑합니다.
