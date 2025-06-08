@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>추천 코스 지도</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #map {
+            width: 100%;
+            height: 900px;
+        }
+        .info-window img {
+            width: 150px;
+            margin-top: 5px;
+        }
+    </style>
+    <!-- ✅ Injected from Spring: ${naverMapClientKey} -->
+    <script th:src="'https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + ${naverMapClientKey}"></script>
+</head>
+<body>
+<h2>추천 코스 지도 (Thymeleaf)</h2>
+<div id="map"></div>
+
+<script th:inline="javascript">
+    let map;
+
+    function initMap() {
+        const mapCenter = new naver.maps.LatLng(34.9, 126.5);
+        map = new naver.maps.Map('map', {
+            center: mapCenter,
+            zoom: 9
+        });
+
+        loadMarkers();
+    }
+
+    let currentOpenWindow = null;
+
+    function loadMarkers() {
+        fetch("/api/recommend-course-plan/all")
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(plan => {
+                    const marker = new naver.maps.Marker({
+                        position: new naver.maps.LatLng(plan.planLatitude, plan.planLongitude),
+                        map: map
+                    });
+
+                    const infoContent = `
+                    <div class="info-window">
+                        <h4>${plan.planName}</h4>
+                        <p><strong>지역:</strong> ${plan.planArea}</p>
+                        <p><strong>주소:</strong> ${plan.planAddr}</p>
+                        <p><strong>연락처:</strong> ${plan.planPhone || '없음'}</p>
+                        <p><strong>주차:</strong> ${plan.planParking || '정보 없음'}</p>
+                        <p><a href="${plan.planHomepage}" target="_blank">홈페이지</a></p>
+                        <p>${plan.planContents?.slice(0, 100) || ''}...</p>
+                        ${plan.imageUrls.map(url => `<img src="${url}" />`).join("")}
+                    </div>
+                `;
+
+                    const infoWindow = new naver.maps.InfoWindow({
+                        content: infoContent,
+                        maxWidth: 500
+                    });
+
+                    naver.maps.Event.addListener(marker, "click", () => {
+                        // If this infoWindow is already open, close it
+                        if (currentOpenWindow === infoWindow) {
+                            infoWindow.close();
+                            currentOpenWindow = null;
+                        } else {
+                            // Close any previously open window
+                            if (currentOpenWindow) {
+                                currentOpenWindow.close();
+                            }
+                            infoWindow.open(map, marker);
+                            currentOpenWindow = infoWindow;
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error("지도 데이터를 불러오는 중 오류 발생:", error);
+                alert("지도 데이터를 불러오는 데 실패했습니다.");
+            });
+    }
+
+    window.onload = initMap;
+</script>
+</body>
+</html>

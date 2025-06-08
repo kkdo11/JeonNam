@@ -1,5 +1,6 @@
 package kopo.jeonnam.controller.theme;
 
+import kopo.jeonnam.dto.theme.RecommendCoursePlanDTO;
 import kopo.jeonnam.repository.mongo.theme.RecommendCourseRepository;
 import kopo.jeonnam.repository.entity.theme.RecommendCourseEntity;
 import kopo.jeonnam.service.theme.IRecommendCoursePlanService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -57,5 +59,27 @@ public class RecommendCoursePlanController {
         log.info("[RecommendCoursePlanController] 전체 저장 완료: {}건 (모든 courseKey)", totalSaved);
         return ResponseEntity.ok("총 " + totalSaved + "건 저장 완료 (모든 courseKey)");
     }
+
+    /**
+     * 전체 recommend_course_plan + 이미지 정보를 JSON 형태로 반환
+     * (지도 마커용)
+     */
+    @GetMapping("/all")
+    public ResponseEntity<List<RecommendCoursePlanDTO>> getAllCoursePlansWithImages() {
+        List<RecommendCoursePlanDTO> result = recommendCoursePlanService.getAllPlansWithImages();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 단일 recommend_course_plan + 이미지 조회
+     * (상세 팝업용)
+     */
+    @GetMapping("/detail")
+    public ResponseEntity<RecommendCoursePlanDTO> getPlanWithImagesById(@RequestParam String planInfoId) {
+        return recommendCoursePlanService.getPlanWithImagesById(planInfoId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
 }
