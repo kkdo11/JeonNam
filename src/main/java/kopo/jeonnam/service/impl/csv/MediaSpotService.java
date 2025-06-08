@@ -1,6 +1,7 @@
 package kopo.jeonnam.service.impl.csv;
 
 import kopo.jeonnam.dto.csv.MediaSpotDTO;
+import kopo.jeonnam.dto.csv.MediaSpotMapDTO;
 import kopo.jeonnam.model.MediaSpot;
 import kopo.jeonnam.repository.mongo.csv.MediaSpotRepository;
 import kopo.jeonnam.service.api.ITmdbService;
@@ -65,4 +66,38 @@ public class MediaSpotService implements IMediaSpotService {
     public boolean existsAny() {
         return repository.count() > 0;
     }
+
+    @Override
+    public List<MediaSpotMapDTO> getAllMapReadySpots() {
+        return repository.findAll().stream().map(spot -> {
+            String address = String.format("%s %s %s %s %s",
+                    safe(spot.getSpotArea()),
+                    safe(spot.getSpotLegalDong()),
+                    safe(spot.getSpotRi()),
+                    safe(spot.getSpotRoadAddr()),
+                    safe(spot.getSpotBunji())
+            ).trim().replaceAll(" +", " ");
+
+            return MediaSpotMapDTO.builder()
+                    .spotNm(spot.getSpotNm())
+                    .address(address)
+                    .lat(parseDouble(spot.getSpotLat()))
+                    .lon(parseDouble(spot.getSpotLon()))
+                    .posterUrl(spot.getPosterUrl())
+                    .build();
+        }).toList();
+    }
+
+    private String safe(String s) {
+        return s != null ? s : "";
+    }
+
+    private double parseDouble(String s) {
+        try {
+            return Double.parseDouble(s);
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
 }

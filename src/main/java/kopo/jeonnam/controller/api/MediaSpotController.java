@@ -1,5 +1,6 @@
 package kopo.jeonnam.controller.api;
 
+import kopo.jeonnam.dto.csv.MediaSpotMapDTO;
 import kopo.jeonnam.model.MediaSpot;
 import kopo.jeonnam.service.csv.IMediaSpotService;
 import kopo.jeonnam.service.api.ITmdbService;
@@ -45,5 +46,10 @@ public class MediaSpotController {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/map")
+    public List<MediaSpotMapDTO> getMapReadyMediaSpots() {
+        return mediaSpotService.getAllMapReadySpots(); // returns MediaSpotMapDTO list
     }
 }

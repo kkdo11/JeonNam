@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>미디어 촬영지 지도</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #map {
+            width: 100%;
+            height: 900px;
+        }
+
+        .info-window img {
+            width: 150px;
+            margin-top: 5px;
+        }
+    </style>
+    <!-- ✅ Injected from Spring -->
+    <script th:src="'https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + ${naverMapClientKey}"></script>
+</head>
+<body>
+<h2>미디어 촬영지 지도 (Thymeleaf)</h2>
+<div id="map"></div>
+
+<script th:inline="javascript">
+    let map;
+    let currentOpenWindow = null;
+
+    function initMap() {
+        const mapCenter = new naver.maps.LatLng(34.9, 126.5);
+        map = new naver.maps.Map('map', {
+            center: mapCenter,
+            zoom: 9
+        });
+
+        loadMediaSpotMarkers();
+    }
+
+    function loadMediaSpotMarkers() {
+        fetch("/api/media-spots/map")
+            .then(response => response.json())
+            .then(spots => {
+                spots.forEach(spot => {
+                    const marker = new naver.maps.Marker({
+                        position: new naver.maps.LatLng(spot.lat, spot.lon),
+                        map: map,
+                        icon: {
+                            content: '<div style="background-color:#ff5757; width:14px; height:14px; border-radius:50%;"></div>'
+                        }
+                    });
+                    const posterUrl = spot.posterUrl && spot.posterUrl !== "null"
+                        ? spot.posterUrl
+                        : "/img/no-image.png"; // fallback image
+
+                    const infoContent = `
+                        <div class="info-window">
+                            <h4>${spot.spotNm}</h4>
+                            <p>${spot.address}</p>
+                            <img src="${posterUrl}" alt="포스터 이미지" />
+                        </div>
+`;
+
+
+                    const infoWindow = new naver.maps.InfoWindow({
+                        content: infoContent,
+                        maxWidth: 500
+                    });
+
+                    naver.maps.Event.addListener(marker, "click", () => {
+                        if (currentOpenWindow === infoWindow) {
+                            infoWindow.close();
+                            currentOpenWindow = null;
+                        } else {
+                            if (currentOpenWindow) {
+                                currentOpenWindow.close();
+                            }
+                            infoWindow.open(map, marker);
+                            currentOpenWindow = infoWindow;
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error("미디어 촬영지 데이터를 불러오는 중 오류 발생:", error);
+                alert("지도 데이터를 불러오는 데 실패했습니다.");
+            });
+    }
+
+    window.onload = initMap;
+</script>
+</body>
+</html>
