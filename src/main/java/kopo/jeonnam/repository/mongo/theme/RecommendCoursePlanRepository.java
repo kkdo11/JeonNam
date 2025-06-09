@@ -15,4 +15,8 @@ import java.util.List;
 @Repository
 public interface RecommendCoursePlanRepository extends MongoRepository<RecommendCoursePlanEntity, String> {
     List<RecommendCoursePlanEntity> findAll();
+
+    long countByPlanCourseId(String planCourseId);
+
+
 }

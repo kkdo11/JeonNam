@@ -24,4 +24,6 @@ public interface IRecommendCoursePlanService {
      * 특정 코스 planInfoId에 해당하는 장소 하나만 조회
      */
     Optional<RecommendCoursePlanDTO> getPlanWithImagesById(String planInfoId);
+
+    boolean existsAnyByCourseKey(String courseKey);
 }

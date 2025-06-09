@@ -32,6 +32,12 @@ public class RecommendCourseImageService implements IRecommendCourseImageService
     @Value("${recommendcourse.api.key}")
     private String apiKey;
 
+
+    @Override
+    public boolean existsAny() {
+        return recommendCourseImageRepository.count() > 0;
+    }
+
     /**
      * 특정 courseInfoIds에 해당하는 이미지 데이터를 외부 API에서 받아와 MongoDB에 저장합니다.
      * @param courseInfoIds 쉼표로 구분된 courseInfoId 문자열

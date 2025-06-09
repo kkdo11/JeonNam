@@ -32,4 +32,7 @@ public interface IRecommendCourseService {
      * @return 모든 RecommendCourseEntity 리스트
      */
     List<RecommendCourseEntity> getAllRecommendCourses(); // 추가된 메서드
+
+
+    boolean existsAny();
 }

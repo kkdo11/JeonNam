@@ -36,6 +36,16 @@ public class RecommendCourseService implements IRecommendCourseService {
     private String apiKey;
 
     /**
+     * 이미 추천 코스 데이터가 존재하는지 여부를 확인합니다.
+     * @return true: 하나라도 존재 / false: 없음
+     */
+    @Override
+    public boolean existsAny() {
+        return recommendCourseRepository.count() > 0;
+    }
+
+
+    /**
      * 남도 추천 여행 코스 데이터를 외부 API에서 받아와 MongoDB에 저장합니다.
      * 계절별로 반복 호출하며, 중복 코스는 Set으로 필터링합니다.
      *
@@ -45,7 +55,9 @@ public class RecommendCourseService implements IRecommendCourseService {
     public int fetchAndSaveRecommendCourses() {
         log.info(">> fetchAndSaveRecommendCourses 서비스 시작");
         recommendCourseRepository.deleteAll();
-        int numOfRows = 10;
+
+        int pageSize = 100;
+
         Set<RecommendCourseEntity> uniqueCourses = new HashSet<>();
         List<String> seasons = Arrays.asList("봄", "여름", "가을", "겨울");
         XmlMapper xmlMapper = new XmlMapper();
@@ -53,8 +65,8 @@ public class RecommendCourseService implements IRecommendCourseService {
         for (String season : seasons) {
             log.info("### 계절: {} 데이터 처리 시작 ###", season);
             String encodedSeason = encodeUtf8(season);
-            String initialUrl = String.format("%s?serviceKey=%s&numOfRows=%d&pageNo=1&courseCategory=%s",
-                    apiUrl, encodeUtf8(apiKey), numOfRows, encodedSeason);
+            String initialUrl = String.format("%s?serviceKey=%s&startPage=1&pageSize=%d&courseCategory=%s",
+                    apiUrl, encodeUtf8(apiKey), pageSize, encodedSeason);
             log.info("초기 API 호출 URL (Total Count 확인용): {}", initialUrl);
             String initialResponse = NetworkUtil.get(initialUrl);
             log.info("API 원문 응답: {}", initialResponse);
@@ -86,11 +98,11 @@ public class RecommendCourseService implements IRecommendCourseService {
                 log.warn("계절: {} - API에서 가져올 데이터가 없습니다.", season);
                 continue;
             }
-            int totalPages = (int) Math.ceil((double) totalCount / numOfRows);
+            int totalPages = (int) Math.ceil((double) totalCount / pageSize);
             log.info("계절: {} - 총 페이지 수: {}", season, totalPages);
             for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
-                String pageUrl = String.format("%s?serviceKey=%s&numOfRows=%d&pageNo=%d&courseCategory=%s",
-                        apiUrl, encodeUtf8(apiKey), numOfRows, pageNo, encodedSeason);
+                String pageUrl = String.format("%s?serviceKey=%s&pageSize=%d&pageNo=%d&courseCategory=%s",
+                        apiUrl, encodeUtf8(apiKey), pageSize, pageNo, encodedSeason);
                 log.info("데이터 호출 URL (계절: {}, 페이지: {}): {}", season, pageNo, pageUrl);
                 String pageResponse = NetworkUtil.get(pageUrl);
                 JsonNode pageRoot = parseXml(xmlMapper, pageResponse);

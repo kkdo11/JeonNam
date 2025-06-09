@@ -18,4 +18,7 @@ public interface IRecommendCourseImageService {
      * @return 모든 RecommendCourseImageEntity 리스트
      */
     List<RecommendCourseImageEntity> getAllRecommendCourseImages();
+
+
+    boolean existsAny();
 }

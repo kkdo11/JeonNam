@@ -39,6 +39,12 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
     @Value("${recommendcourse.api.key}")
     private String apiKey;
 
+    @Override
+    public boolean existsAnyByCourseKey(String courseKey) {
+        return recommendCoursePlanRepository.countByPlanCourseId(courseKey) > 0;
+    }
+
+
     public RecommendCoursePlanService(RecommendCoursePlanRepository recommendCoursePlanRepository,
                                       RecommendCourseImageRepository imageRepository) {
         this.recommendCoursePlanRepository = recommendCoursePlanRepository;
@@ -55,9 +61,12 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
     public int fetchAndSaveRecommendCoursePlans(String courseKey) {
         logger.info(">> fetchAndSaveRecommendCoursePlans 서비스 시작 (courseKey: {})", courseKey);
         try {
+
+
+
             // API 호출 URL 생성 및 로그
             String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
-            String url = String.format("%s?serviceKey=%s&planCourseId=%s", apiUrl, encodedKey, courseKey);
+            String url = String.format("%s?serviceKey=%s&startPage=1&pageSize=1000&planCourseId=%s", apiUrl, encodedKey, courseKey);
             logger.info("API 호출 URL: {}", url);
 
             // API 호출 및 응답 수신
