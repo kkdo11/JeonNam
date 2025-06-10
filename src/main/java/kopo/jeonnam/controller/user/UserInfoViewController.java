@@ -137,4 +137,23 @@ public class UserInfoViewController {
             return "redirect:/auth/login"; // 로그인 페이지로 리다이렉트 (Auth 컨트롤러 매핑 사용)
         }
     }
+
+
+    /**
+     * 로그인 성공 페이지 이동
+     */
+    @GetMapping(value = "index")
+    public String loginSuccess() {
+        log.info(this.getClass().getName() + ".user/loginResult Start!");
+
+        log.info(this.getClass().getName() + ".user/loginResult End!");
+
+        return "user/index";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate(); // 세션 초기화 (로그아웃)
+        return "redirect:/user/index"; // 메인 페이지로 리디렉션
+    }
 }

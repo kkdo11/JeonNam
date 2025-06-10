@@ -1,35 +1,562 @@
-<!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>메인 페이지 - 전남 영화/드라마 여행</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Untree.co">
+    <link rel="shortcut icon" href="/images/JN_favicon.png">
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap4" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/css/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/daterangepicker.css">
+    <link rel="stylesheet" href="/css/aos.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
     <style>
-        body {
-            padding-top: 50px;
-            text-align: center;
-        }
-        .welcome-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: #fff;
+        .media-thumb {
+            aspect-ratio: 2.5/ 4;
+            position: relative;
+            overflow: hidden;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
+
+        .media-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .media-thumb .media-text {
+            display: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            /*background: rgba(0, 0, 0, 0.6);*/
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .media-thumb:hover .media-text {
+            display: block;
+        }
+
+
+
+
+
     </style>
+
+    <title>전남와따</title>
 </head>
+
 <body>
-<div class="container welcome-container">
-    <h1>환영합니다!</h1>
-    <p th:if="${session.email}">
-        <strong th:text="${session.email}">user@example.com</strong>님, 성공적으로 로그인되었습니다.
-    </p>
-    <p>전남 영화/드라마 여행 서비스에 오신 것을 환영합니다.</p>
-    <a href="/" class="btn btn-primary mt-3">홈으로 돌아가기</a>
-    <a href="/user/myPage" class="btn btn-info mt-3 ms-2">마이페이지</a>
-    <a href="/auth/logout" class="btn btn-danger mt-3 ms-2">로그아웃</a> </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<div class="site-mobile-menu site-navbar-target">
+    <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+            <span class="icofont-close js-menu-toggle"></span>
+        </div>
+    </div>
+    <div class="site-mobile-menu-body"></div>
+</div>
+
+<!--네비바 start-->
+<nav class="site-nav">
+    <div class="container">
+        <div class="site-navigation">
+            <a href="index.html" class="logo m-0">
+                <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
+            </a>
+
+            <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
+                <li class="active"><a href="/user/index">홈</a></li>
+                <li><a href="services.html">미디어 여행</a></li>
+                <li><a href="about.html">테마 여행</a></li>
+                <li><a href="contact.html">AI 추천 여행</a></li>
+                <li><a href="contact.html">로그인</a></li>
+            </ul>
+
+            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
+                <span></span>
+            </a>
+
+        </div>
+    </div>
+</nav>
+<!--네비바 end-->
+
+
+<!--메인 상위 start-->
+<div class="hero">
+    <div class="container">
+        <div class="row align-items-center" >
+
+            <div class="col-lg-7"> <div class="intro-wrap">
+                <h1 class="mb-5"><span class="d-block">전남와따에서</span> <span class="typed-words" style="font-size: 2.3rem"></span></h1>
+
+                <div class="row">
+                    <div class="col-12">
+                        <form class="form">
+                            <div class="row mb-2">
+                                <div class="col-sm-12 col-md-6 mb-3 mb-lg-0 col-lg-2" style="padding-left: 5px; padding-right: 5px;"> <select name="" id="" class="form-control custom-select">
+                                    <option value="목포시">목포시</option>
+                                    <option value="여수시">여수시</option>
+                                    <option value="순천시">순천시</option>
+                                    <option value="나주시">나주시</option>
+                                    <option value="광양시">광양시</option>
+                                    <!--										<option value="담양군">담양군</option>-->
+                                    <!--										<option value="곡성군">곡성군</option>-->
+                                    <!--										<option value="구례군">구례군</option>-->
+                                    <!--										<option value="고흥군">고흥군</option>-->
+                                    <!--										<option value="보성군">보성군</option>-->
+                                    <!--										<option value="화순군">화순군</option>-->
+                                    <!--										<option value="장흥군">장흥군</option>-->
+                                    <!--										<option value="강진군">강진군</option>-->
+                                    <!--										<option value="해남군">해남군</option>-->
+                                    <!--										<option value="영암군">영암군</option>-->
+                                    <!--										<option value="무안군">무안군</option>-->
+                                    <!--										<option value="함평군">함평군</option>-->
+                                    <!--										<option value="영광군">영광군</option>-->
+                                    <!--										<option value="장성군">장성군</option>-->
+                                    <!--										<option value="완도군">완도군</option>-->
+                                    <!--										<option value="진도군">진도군</option>-->
+                                    <!--										<option value="신안군">신안군</option>-->
+                                </select>
+                                </div>
+                                <div class="col-sm-12 col-md-6 mb-3 mb-lg-0 col-lg-5" style="padding-left: 5px; padding-right: 5px;"> <input type="text" class="form-control" name="daterange">
+                                </div>
+                                <div class="col-sm-12 col-md-6 mb-3 mb-lg-0 col-lg-2" style="padding-left: 5px; padding-right: 5px;"> <input type="text" class="form-control" placeholder="여행인원">
+                                </div>
+                                <div class="col-sm-12 col-md-6 mb-3 mb-lg-0 col-lg-3" style="padding-left: 5px; padding-right: 5px;"> <input type="submit" class="btn btn-primary btn-block" value="Search">
+                                </div>
+                            </div>
+                            <div class="row align-items-center">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="slides">
+                    <img src="/images/JN_index_image1.jpg" alt="Image" class="img-fluid active">
+                    <img src="/images/JN_index_image2.jpg" alt="Image" class="img-fluid">
+                    <img src="/images/JN_index_image3.jpg" alt="Image" class="img-fluid">
+                    <img src="/images/JN_index_image4.jpg" alt="Image" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--메인 상위 end-->
+
+
+<!--포스터 카드 start-->
+<div class="untree_co-section">
+    <div class="container">
+        <div class="row text-center justify-content-center mb-5">
+            <div class="col-lg-7"><h2 class="section-title text-center">전남에서 만난 명장면</h2></div>
+        </div>
+
+        <div class="owl-carousel owl-3-slider">
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster1.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>언니네 산지직송2</h3>
+                        <span class="location">완도</span>
+                    </div>
+                    <img src="/images/JN_poster1.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster2.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>폭싹 속았수다</h3>
+                        <span class="location">순천 드라마 촬영장</span>
+                    </div>
+                    <img src="/images/JN_poster2.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster3.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>남남</h3>
+                        <span class="location">소호동동다리</span>
+                    </div>
+                    <img src="/images/JN_poster3.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster4.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>오징어 게임 2</h3>
+                        <span class="location">큰끝등대</span>
+                    </div>
+                    <img src="/images/JN_poster4.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster5.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>옥씨부인전</h3>
+                        <span class="location">영화[역린]촬영지</span>
+                    </div>
+                    <img src="/images/JN_poster5.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+            <div class="item">
+                <a class="media-thumb" href="/images/JN_poster6.jpg" data-fancybox="gallery">
+                    <div class="media-text">
+                        <h3>파친코</h3>
+                        <span class="location">유달초등학교</span>
+                    </div>
+                    <img src="/images/JN_poster6.jpg" alt="Image" class="img-fluid">
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!--포스터 카드 end-->
+
+
+<!--서비스 소개 start-->
+<div class="untree_co-section">
+    <div class="container">
+        <div class="row mb-5 justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h2 class="section-title text-center mb-3">전남 여행, 이렇게 시작해요</h2>
+                <p>
+                    전남 여행, 어디부터 가야 할지 고민된다면?<br>
+                    전남와따가 드라마 촬영지부터 맛있는 특산물까지 싹 모아왔어요.<br>
+                    마음에 드는 장소만 쏙쏙 찜하고, AI가 딱 맞는 코스를 짜줄게요!
+                </p>
+            </div>
+        </div>
+        <div class="row align-items-stretch">
+            <div class="col-lg-4 order-lg-1">
+                <div class="h-100"><div class="frame h-100"><div class="feature-img-bg h-100" style="background-image: url('/images/JN_index_image5.jpg');"></div></div></div>
+            </div>
+
+            <div class="col-6 col-sm-6 col-lg-4 feature-1-wrap d-md-flex flex-md-column order-lg-1" >
+
+                <div class="feature-1 d-md-flex">
+                    <div class="align-self-center">
+                        <iconify-icon icon="map:movie-theater" width="60" height="60"  style="color: #f1a501"></iconify-icon>
+                        <h3>영화·드라마 속 그 장소</h3>
+                        <p class="mb-0">전남 곳곳에 숨겨진 인기 촬영지를 확인하고, <br>마음에 드는 장소를 나만의 여행에 저장해보세요.</p>
+                    </div>
+                </div>
+
+                <div class="feature-1 ">
+                    <div class="align-self-center">
+                        <iconify-icon icon="meteor-icons:robot" width="60" height="60"  style="color: #f1a501"></iconify-icon>
+                        <h3>AI가 여행 코스를 똑똑하게 완성</h3>
+                        <p class="mb-0">AI가 경로와 소요시간을 계산해 일정을 짜고, 완성된 일정은 영어·중국어로 자동 번역까지!</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-6 col-sm-6 col-lg-4 feature-1-wrap d-md-flex flex-md-column order-lg-3" >
+
+                <div class="feature-1 d-md-flex">
+                    <div class="align-self-center">
+                        <iconify-icon icon="mingcute:map-pin-fill" width="60" height="60"  style="color: #f1a501"></iconify-icon>
+                        <h3>전남이 직접 추천하는 핫플레이스</h3>
+                        <p class="mb-0">지역별 볼거리, 즐길 거리를 한눈에 보고, 관심 있는 곳을 찜해보세요.</p>
+                    </div>
+                </div>
+
+                <div class="feature-1 d-md-flex">
+                    <div class="align-self-center">
+                        <iconify-icon icon="icon-park-outline:baby-taste" width="60" height="60"  style="color: #f1a501"></iconify-icon>
+                        <h3>여행의 즐거움은 먹는 것!</h3>
+                        <p class="mb-0">전남의 다양한 특산물을 살펴보고, 지역별 특색 있는 상품을 미리 알아보세요.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--서비스 소개 end-->
+
+
+<!--수치 데이터 section start-->
+<div class="untree_co-section count-numbers py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 col-sm-6 col-md-6 col-lg-3">
+                <div class="counter-wrap">
+                    <div class="counter">
+                        <span class="" data-number="12677">12677</span><span>만 명</span>
+                    </div>
+                    <span class="caption">2024년 전남 방문자 수</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-6 col-lg-3">
+                <div class="counter-wrap">
+                    <div class="counter">
+                        <span class="" data-number="82">82</span><span>%</span>
+                    </div>
+                    <span class="caption">전남 재방문 의향률</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-6 col-lg-3">
+                <div class="counter-wrap">
+                    <div class="counter">
+                        <span class="" data-number="180">180</span><span>만 명</span>
+                    </div>
+                    <span class="caption">문화관광 목적지 검색량(2024년 기준)</span>
+                </div>
+            </div>
+            <div class="col-6 col-sm-6 col-md-6 col-lg-3">
+                <div class="counter-wrap">
+                    <div class="counter">
+                        <span class="" data-number="2790">2790</span><span>분</span>
+                    </div>
+                    <span class="caption">전남 평균 체류 시간(2020년~2024년)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--수치 데이터 출처 : https://datalab.visitkorea.or.kr/datalab/portal/loc/getAreaDataForm.do?SGG_CD=46&utm_source=chatgpt.com#-->
+<!--수치 데이터 section start-->
+
+
+
+<!--팅원소개 start-->
+<div class="untree_co-section testimonial-section mt-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 text-center">
+                <h2 class="section-title text-center mb-5">이 사이트를 만든 사람들</h2>
+
+                <div class="owl-single owl-carousel no-nav">
+                    <div class="testimonial mx-auto">
+                        <figure class="img-wrap">
+                            <img src="/images/JN_soyeon.png" alt="Image" class="img-fluid">
+                        </figure>
+                        <h3 class="name">김소연</h3>
+                        <blockquote>
+                            <p>&ldquo;Built with heart, teamwork, and a touch of magic.<br>
+                                We laughed, we coded, we created.
+                                Can’t wait for you to explore it!"</p>
+                        </blockquote>
+                    </div>
+
+                    <div class="testimonial mx-auto">
+                        <figure class="img-wrap">
+                            <img src="/images/JN_soyeon.png" alt="Image" class="img-fluid">
+                        </figure>
+                        <h3 class="name">홍세민</h3>
+                        <blockquote>
+                            <p>"Impossible — that's not a fact, it's just an opinion."</p>
+                        </blockquote>
+                    </div>
+
+                    <div class="testimonial mx-auto">
+                        <figure class="img-wrap">
+                            <img src="/images/JN_soyeon.png" alt="Image" class="img-fluid">
+                        </figure>
+                        <h3 class="name">김태승</h3>
+                        <blockquote>
+                            <p>"I want to sleep"</p>
+                        </blockquote>
+                    </div>
+
+                    <div class="testimonial mx-auto">
+                        <figure class="img-wrap">
+                            <img src="/images/JN_soyeon.png" alt="Image" class="img-fluid">
+                        </figure>
+                        <h3 class="name">이지원</h3>
+                        <blockquote>
+                            <p>"I love Maru"</p>
+                        </blockquote>
+                    </div>
+
+                    <div class="testimonial mx-auto">
+                        <figure class="img-wrap">
+                            <img src="/images/JN_soyeon.png" alt="Image" class="img-fluid">
+                        </figure>
+                        <h3 class="name">김도원</h3>
+                        <blockquote>
+                            <p>"I want to go home"</p>
+                        </blockquote>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--팀원소개-->
+
+
+
+
+<!--남도여행길잡이 링크 start-->
+<div class="py-5 cta-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-12">
+                <h2 class="mb-2 text-white">남도의 아름다움을 경험하세요</h2>
+                <p class="mb-4 lead text-white text-white-opacity">숨겨진 보석 같은 전라남도의 매력을 지금 바로 경험해보세요.</p>
+                <p class="mb-0"><a href="https://www.namdokorea.com/" class="btn btn-outline-white text-white btn-md font-weight-bold">남도여행 길잡이</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<!--남도여행길잡이 링크 end-->
+
+
+<!--footer start-->
+<div class="site-footer">
+    <div class="inner first">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-6">
+                    <div class="widget">
+                        <h3 class="heading">서비스 안내</h3>
+                        <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
+                            전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
+                            여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
+                            남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
+                            최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
+                            <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
+                    </div>
+                </div>
+                <div class="col-md-7 col-lg-2 pl-lg-5">
+                    <div class="widget">
+                        <h3 class="heading">Pages</h3>
+                        <ul class="links list-unstyled">
+                            <li><a href="#">미디어 여행</a></li>
+                            <li><a href="#">테마 여행</a></li>
+                            <li><a href="#">AI 추천 여행</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="widget">
+                        <h3 class="heading">Contact</h3>
+                        <ul class="list-unstyled quick-info links">
+                            <li class="email"><a href="#">mail@example.com</a></li>
+                            <li class="phone"><a href="#">+82 02-2186-5800</a></li>
+                            <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="inner dark">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-8 mb-3 mb-md-0 mx-auto">
+                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--footer end-->
+
+
+<!--<div id="overlayer"></div>-->
+<!--<div class="loader">-->
+<!--    <div class="spinner-border" role="status">-->
+<!--        <span class="sr-only">Loading...</span>-->
+<!--    </div>-->
+<!--</div>-->
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/popper.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/jquery.animateNumber.min.js"></script>
+<script src="/js/jquery.waypoints.min.js"></script>
+<script src="/js/jquery.fancybox.min.js"></script>
+<script src="/js/aos.js"></script>
+<script src="/js/moment.min.js"></script>
+<script>
+    moment.locale('ko'); // 한국어 로케일 설정
+    // 'L'을 명시적으로 정의
+    moment.updateLocale('ko', {
+        longDateFormat : {
+            L  : 'YYYY.MM.DD', // 기본 날짜 형식 (예: 2025.06.10)
+            LL : 'YYYY년 M월 D일',
+            LLL : 'YYYY년 M월 D일 HH시 mm분',
+            LLLL : 'YYYY년 M월 D일 dddd HH시 mm분'
+        }
+    });
+
+</script>
+
+<script src="/js/daterangepicker.js"></script>
+
+<script src="/js/typed.js"></script>
+<script>
+    $(function() {
+        var slides = $('.slides'),
+            images = slides.find('img');
+
+        images.each(function(i) {
+            $(this).attr('data-id', i + 1);
+        })
+
+        var typed = new Typed('.typed-words', {
+            strings: ["드라마 속 전남, 이제는 여행지로",
+                "AI가 추천하는 나만의 여행",
+                "영화 촬영지도, 전남 특산물도 한눈에",
+                "전남, 알고 가면 더 특별한 여행"],
+            typeSpeed: 80,
+            backSpeed: 80,
+            backDelay: 4000,
+            startDelay: 1000,
+            loop: true,
+            showCursor: true,
+            preStringTyped: (arrayPos, self) => {
+                arrayPos++;
+                console.log(arrayPos);
+                $('.slides img').removeClass('active');
+                $('.slides img[data-id="'+arrayPos+'"]').addClass('active');
+            }
+
+        });
+    })
+</script>
+
+<script src="/js/custom.js"></script>
+
 </body>
+
 </html>
