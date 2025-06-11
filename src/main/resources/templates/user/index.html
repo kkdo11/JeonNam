@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--<html lang="en">-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -81,7 +82,7 @@
 <nav class="site-nav">
     <div class="container">
         <div class="site-navigation">
-            <a href="index.html" class="logo m-0">
+            <a href="/user/index" class="logo m-0">
                 <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
             </a>
 
@@ -91,7 +92,17 @@
                 <li><a href="about.html">테마 여행</a></li>
                 <li><a href="contact.html">AI 추천 여행</a></li>
                 <li><a href="contact.html">전남 먹거리</a></li>
-                <li><a href="contact.html">로그인</a></li>
+<!--                <li><a href="/user/login">로그인</a></li>-->
+
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email == null}">
+                    <a href="/user/login">로그인</a>
+                </li>
+                <li th:if="${session.email != null}">
+                    <a href="/user/logout">로그아웃</a>
+                </li>
+
+
             </ul>
 
             <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
@@ -110,6 +121,11 @@
         <div class="row align-items-center" >
 
             <div class="col-lg-7"> <div class="intro-wrap">
+                <div th:if="${session.name != null}">
+                    <h3 th:text="'안녕하세요, ' + ${session.name} + '님!'"></h3>
+                </div>
+
+
                 <h1 class="mb-5"><span class="d-block">전남와따에서</span> <span class="typed-words" style="font-size: 2.3rem"></span></h1>
 
                 <div class="row">
@@ -377,11 +393,11 @@
 
                     <div class="testimonial mx-auto">
                         <figure class="img-wrap">
-                            <img src="/images/JN_jiwon.png" alt="Image" class="img-fluid">
+                            <img src="/images/JN_jiwon.jpg" alt="Image" class="img-fluid">
                         </figure>
                         <h3 class="name">이지원</h3>
                         <blockquote>
-                            <p>"I love Maru"</p>
+                            <p>"會者定離 去者必返"</p>
                         </blockquote>
                     </div>
 
@@ -391,7 +407,7 @@
                         </figure>
                         <h3 class="name">김도원</h3>
                         <blockquote>
-                            <p>"I want to go home"</p>
+                            <p>"할 수 있는 모든 것을 하라. 그리고 나머지는 그냥 흘려보내라 "</p>
                         </blockquote>
                     </div>
 

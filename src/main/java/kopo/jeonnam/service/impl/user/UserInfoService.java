@@ -201,7 +201,7 @@ public class UserInfoService implements IUserInfoService {
         try {
             mailService.doSendMail(MailDTO.builder()
                     .toMail(email)
-                    .title("전남 영화/드라마 여행 임시 비밀번호 발급")
+                    .title("전남 와따 임시 비밀번호 발급")
                     .contents("임시 비밀번호: " + tempPassword + "\n로그인 후 반드시 비밀번호를 변경해주세요.")
                     .build());
             logger.info("📧 임시 비밀번호 이메일 발송 시도 성공 - 이메일: {}", email);
