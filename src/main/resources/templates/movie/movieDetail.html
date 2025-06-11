@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Untree.co">
+    <link rel="shortcut icon" href="/images/JN_favicon.png">
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap4" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/css/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/daterangepicker.css">
+    <link rel="stylesheet" href="/css/aos.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        /* 상세 페이지 특정 스타일 */
+        /* 이 컨테이너는 이제 지도와 정보를 포함하는 두 개의 컬럼을 가질 것 */
+        .detail-main-content {
+            display: flex; /* 지도와 정보 영역을 가로로 정렬 */
+            flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
+            gap: 30px; /* 컬럼 사이 간격 */
+            justify-content: center; /* 전체 콘텐츠 가운데 정렬 */
+            align-items: flex-start; /* 상단 정렬 */
+            padding: 40px 0;
+        }
+
+        /* 좌측 지도 영역 */
+        .map-container-col {
+            flex: 1 1 50%; /* flex grow, shrink, basis (대략 50% 너비) */
+            max-width: 50%; /* 최대 너비 설정 */
+            min-width: 300px; /* 최소 너비 (모바일에서 꽉 차도록) */
+            height: 500px; /* 지도 영역 높이 고정 (조정 필요) */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden; /* 지도가 넘치지 않도록 */
+        }
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            color: #666;
+        }
+
+        /* 우측 정보 영역 (포스터와 상세 정보 포함) */
+        .info-poster-container-col {
+            flex: 1 1 45%; /* flex grow, shrink, basis (대략 45% 너비) */
+            max-width: 45%; /* 최대 너비 설정 */
+            min-width: 300px; /* 최소 너비 */
+            display: flex;
+            flex-direction: column; /* 포스터와 정보를 세로로 쌓음 */
+            align-items: center; /* 내부 요소 가운데 정렬 */
+            text-align: center;
+        }
+
+        .poster-area {
+            width: 80%; /* 정보 컨테이너 내에서 포스터 너비 조정 */
+            max-width: 300px; /* 포스터 최대 너비 */
+            margin-bottom: 20px; /* 포스터 아래 여백 */
+        }
+        .poster-area img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            aspect-ratio: 2.5 / 4; /* 포스터 비율 유지 */
+            object-fit: cover;
+            display: block;
+        }
+
+        .info-area {
+            width: 100%; /* 정보 영역은 부모 너비에 맞춤 */
+            text-align: center;
+        }
+        .info-area h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .info-area p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .info-area strong {
+            color: #000;
+        }
+
+        /* 목록으로 돌아가기 버튼 */
+        .back-button-container {
+            margin-top: 30px;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 992px) { /* 태블릿 및 모바일 */
+            .detail-main-content {
+                flex-direction: column; /* 세로로 쌓이도록 변경 */
+                align-items: center; /* 가운데 정렬 */
+                gap: 20px;
+            }
+            .map-container-col,
+            .info-poster-container-col {
+                width: 90%; /* 화면 꽉 채우도록 */
+                max-width: 600px; /* 너무 커지지 않도록 최대 너비 설정 */
+                min-width: auto;
+                height: 350px; /* 모바일에서 지도 높이 조정 */
+            }
+            .info-poster-container-col {
+                height: auto; /* 정보 영역 높이 자동 */
+            }
+            .info-area h1 {
+                font-size: 2rem;
+            }
+            .info-area p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <title>영화 상세 정보</title>
+</head>
+
+<body>
+
+<div class="site-mobile-menu site-navbar-target">
+    <div class="site-mobile-menu-header">
+        <div class="site-mobile-menu-close">
+            <span class="icofont-close js-menu-toggle"></span>
+        </div>
+    </div>
+    <div class="site-mobile-menu-body"></div>
+</div>
+
+<nav class="site-nav">
+    <div class="container">
+        <div class="site-navigation">
+            <a href="/user/index" class="logo m-0">
+                <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
+            </a>
+
+            <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
+                <li><a href="/user/index">홈</a></li>
+                <li class="active"><a href="/media">미디어 여행</a></li>
+                <li><a href="services.html">테마 여행</a></li>
+                <li><a href="about.html">AI 추천 여행</a></li>
+                <li><a href="contact.html">전남 먹거리</a></li>
+                <li><a href="contact.html">로그인</a></li>
+            </ul>
+
+            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
+                <span></span>
+            </a>
+
+        </div>
+    </div>
+</nav>
+
+<div class="hero hero-inner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mx-auto text-center">
+                <div class="intro-wrap">
+                    <h1 class="mb-0" id="detail-page-title">영화 상세 정보</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="untree_co-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10"> <div class="detail-main-content">
+                <div class="map-container-col">
+                    <div class="map-placeholder" id="map-area">
+                        MAP
+                    </div>
+                </div>
+
+                <div class="info-poster-container-col">
+                    <div class="poster-area">
+                        <img id="detail-poster-url" src="/images/loading.gif" alt="영화 포스터 로딩 중">
+                    </div>
+                    <div class="info-area">
+                        <h1 id="detail-movie-name">로딩 중...</h1>
+                        <p><strong>장소:</strong> <span id="detail-place">로딩 중...</span></p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center back-button-container">
+            <div class="col-12 text-center">
+                <button class="btn btn-primary" onclick="window.location.href='/media'">목록으로 돌아가기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="site-footer">
+    <div class="inner first">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-6">
+                    <div class="widget">
+                        <h3 class="heading">서비스 안내</h3>
+                        <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
+                            전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
+                            여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
+                            남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
+                            최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
+                            <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
+                    </div>
+                </div>
+                <div class="col-md-7 col-lg-2 pl-lg-5">
+                    <div class="widget">
+                        <h3 class="heading">Pages</h3>
+                        <ul class="links list-unstyled">
+                            <li><a href="#">미디어 여행</a></li>
+                            <li><a href="#">테마 여행</a></li>
+                            <li><a href="#">AI 추천 여행</a></li>
+                            <li><a href="#">전남 먹거리</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="widget">
+                        <h3 class="heading">Contact</h3>
+                        <ul class="list-unstyled quick-info links">
+                            <li class="email"><a href="#">poly@example.com</a></li>
+                            <li class="phone"><a href="#">+82 02-2186-5800</a></li>
+                            <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="inner dark">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-8 mb-3 mb-md-0 mx-auto">
+                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/popper.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/jquery.animateNumber.min.js"></script>
+<script src="/js/jquery.waypoints.min.js"></script>
+<script src="/js/jquery.fancybox.min.js"></script>
+<script src="/js/aos.js"></script>
+<script src="/js/moment.min.js"></script>
+<script src="/js/daterangepicker.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/custom.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const detailPosterUrlElem = document.getElementById('detail-poster-url');
+        const detailMovieNameElem = document.getElementById('detail-movie-name');
+        const detailPlaceElem = document.getElementById('detail-place');
+        const detailPageTitleElem = document.getElementById('detail-page-title'); // 페이지 상단 제목
+
+        // 1. URL에서 영화 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id'); // 'id' 쿼리 파라미터 값
+
+        if (movieId) {
+            // 2. 백엔드 API 호출하여 영화 상세 정보 가져오기
+            // 백엔드 컨트롤러의 @RequestMapping("/api/movies") + @GetMapping("/detail") = /api/movies/detail
+            fetch(`/api/movies/detail?id=${movieId}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        throw new Error('영화 정보를 찾을 수 없습니다.');
+                    }
+                    if (!response.ok) {
+                        throw new Error(`네트워크 오류: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 3. 가져온 데이터로 HTML 요소 업데이트
+                    if (data) {
+                        detailPosterUrlElem.src = data.posterUrl;
+                        detailPosterUrlElem.alt = data.title; // alt 속성도 업데이트
+                        detailMovieNameElem.textContent = data.title;
+                        detailPlaceElem.textContent = data.location;
+                        detailPageTitleElem.textContent = data.title; // 상단 페이지 제목도 영화 이름으로
+
+                        // x, y 좌표는 지도 담당자에게 전달할 준비 (화면에 직접 표시하진 않음)
+                        const lat = data.y; // MovieEntity의 y는 planLat (위도)
+                        const lon = data.x; // MovieEntity의 x는 planLon (경도)
+
+                        console.log(`지도 담당자를 위한 좌표: 위도=${lat}, 경도=${lon}`);
+
+                        // 지도 담당자가 이 값을 사용할 수 있도록 DOM 요소에 data-* 속성으로 저장
+                        const mapArea = document.getElementById('map-area');
+                        if (mapArea) {
+                            mapArea.dataset.latitude = lat;
+                            mapArea.dataset.longitude = lon;
+                            // 지도 담당자가 이 요소를 찾아 data-latitude, data-longitude 값을 읽어가서 지도를 그릴 수 있습니다.
+                            // 예: 지도 초기화 함수 호출 (지도 담당자가 구현)
+                            // initializeMap(mapArea.id, lat, lon);
+                        }
+
+                    } else {
+                        // 데이터가 없거나 비어있는 경우
+                        detailMovieNameElem.textContent = '영화 정보를 찾을 수 없습니다.';
+                        detailPlaceElem.textContent = '';
+                        detailPosterUrlElem.src = ''; // 이미지 비우기
+                        detailPosterUrlElem.alt = '정보 없음';
+                        detailPageTitleElem.textContent = '정보 없음';
+                        console.warn('받아온 영화 상세 정보가 없습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('영화 상세 정보를 불러오는 데 실패했습니다:', error);
+                    detailMovieNameElem.textContent = '정보 로딩 중 오류 발생';
+                    detailPlaceElem.textContent = error.message;
+                    detailPosterUrlElem.src = '';
+                    detailPosterUrlElem.alt = '에러';
+                    detailPageTitleElem.textContent = '오류';
+                });
+        } else {
+            // 영화 ID가 URL에 없는 경우
+            detailMovieNameElem.textContent = '유효한 영화 ID가 제공되지 않았습니다.';
+            detailPlaceElem.textContent = '';
+            detailPosterUrlElem.src = '';
+            detailPosterUrlElem.alt = 'ID 없음';
+            detailPageTitleElem.textContent = '잘못된 접근';
+            console.warn('URL에 영화 ID가 없습니다.');
+        }
+    });
+</script>
+
+</body>
+</html>
