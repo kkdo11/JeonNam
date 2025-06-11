@@ -19,6 +19,15 @@ public class MediaSpotViewController {
         return "api/mediaSpots";
     }
 
+
+    //poster 보여주는 sample 페이지
+    //기능 샘플 페이지로 활용 가능
+    @GetMapping("/sample")
+    public String sample() {
+        // resources/templates/api/mediaSpots.html 을 렌더링
+        return "api/sample";
+    }
+
     @GetMapping("/map")
     public String mediaSpotsMapView(Model model) {
         model.addAttribute("naverMapClientKey", naverMapClientKey);
