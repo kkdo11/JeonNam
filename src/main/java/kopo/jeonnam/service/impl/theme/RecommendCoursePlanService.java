@@ -43,6 +43,11 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
         return recommendCoursePlanRepository.countByPlanCourseId(courseKey) > 0;
     }
 
+    @Override
+    public boolean existsAny() {
+        return recommendCoursePlanRepository.count() > 0;
+    }
+
 
     public RecommendCoursePlanService(RecommendCoursePlanRepository recommendCoursePlanRepository,
                                       RecommendCourseImageRepository imageRepository) {

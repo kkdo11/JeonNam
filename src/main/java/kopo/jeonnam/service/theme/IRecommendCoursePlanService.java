@@ -26,4 +26,6 @@ public interface IRecommendCoursePlanService {
     Optional<RecommendCoursePlanDTO> getPlanWithImagesById(String planInfoId);
 
     boolean existsAnyByCourseKey(String courseKey);
+
+    boolean existsAny(); // 추천 코스 상세 정보 데이터가 하나라도 존재하는지 확인
 }

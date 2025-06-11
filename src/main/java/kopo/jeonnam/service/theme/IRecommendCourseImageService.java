@@ -20,5 +20,9 @@ public interface IRecommendCourseImageService {
     List<RecommendCourseImageEntity> getAllRecommendCourseImages();
 
 
-    boolean existsAny();
+    /**
+     * 저장된 추천 코스 이미지 데이터가 있는지 확인합니다.
+     * @return 이미 데이터가 존재하면 true, 없으면 false
+     */
+    boolean existsAnyImages();
 }
