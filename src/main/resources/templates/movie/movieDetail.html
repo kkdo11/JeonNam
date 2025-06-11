@@ -6,12 +6,13 @@
     <meta name="author" content="Untree.co">
     <link rel="shortcut icon" href="/images/JN_favicon.png">
 
-    <meta name="description" content="" />
-    <meta name="keywords" content="bootstrap, bootstrap4" />
+    <meta name="description" content=""/>
+    <meta name="keywords" content="bootstrap, bootstrap4"/>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap"
+          rel="stylesheet">
 
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/owl.carousel.min.css">
@@ -42,10 +43,11 @@
             max-width: 50%; /* 최대 너비 설정 */
             min-width: 300px; /* 최소 너비 (모바일에서 꽉 차도록) */
             height: 500px; /* 지도 영역 높이 고정 (조정 필요) */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden; /* 지도가 넘치지 않도록 */
         }
+
         .map-placeholder {
             width: 100%;
             height: 100%;
@@ -73,11 +75,12 @@
             max-width: 300px; /* 포스터 최대 너비 */
             margin-bottom: 20px; /* 포스터 아래 여백 */
         }
+
         .poster-area img {
             width: 100%;
             height: auto;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             aspect-ratio: 2.5 / 4; /* 포스터 비율 유지 */
             object-fit: cover;
             display: block;
@@ -87,17 +90,20 @@
             width: 100%; /* 정보 영역은 부모 너비에 맞춤 */
             text-align: center;
         }
+
         .info-area h1 {
             font-size: 2.5rem;
             margin-bottom: 15px;
             color: #333;
         }
+
         .info-area p {
             font-size: 1.1rem;
             line-height: 1.6;
             color: #555;
             margin-bottom: 10px;
         }
+
         .info-area strong {
             color: #000;
         }
@@ -108,12 +114,14 @@
         }
 
         /* 반응형 디자인 */
-        @media (max-width: 992px) { /* 태블릿 및 모바일 */
+        @media (max-width: 992px) {
+            /* 태블릿 및 모바일 */
             .detail-main-content {
                 flex-direction: column; /* 세로로 쌓이도록 변경 */
                 align-items: center; /* 가운데 정렬 */
                 gap: 20px;
             }
+
             .map-container-col,
             .info-poster-container-col {
                 width: 90%; /* 화면 꽉 채우도록 */
@@ -121,12 +129,15 @@
                 min-width: auto;
                 height: 350px; /* 모바일에서 지도 높이 조정 */
             }
+
             .info-poster-container-col {
                 height: auto; /* 정보 영역 높이 자동 */
             }
+
             .info-area h1 {
                 font-size: 2rem;
             }
+
             .info-area p {
                 font-size: 1rem;
             }
@@ -141,7 +152,6 @@
     <!-- 1. Kakao SDK (autoload=false 설정) -->
     <!-- Kakao SDK - autoload false -->
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=15f402ba36aeaab14a6b06f5dd3f796e&autoload=false&libraries=services"></script>
-
 
 
     <!-- 2. 지도 초기화 함수 포함된 스크립트 -->
@@ -195,7 +205,9 @@
                 <li><a href="contact.html">로그인</a></li>
             </ul>
 
-            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
+            <a href="#"
+               class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light"
+               data-toggle="collapse" data-target="#main-navbar">
                 <span></span>
             </a>
 
@@ -218,30 +230,31 @@
 <div class="untree_co-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-10"> <div class="detail-main-content">
-                <div class="map-container-col">
+            <div class="col-lg-10">
+                <div class="detail-main-content">
                     <div class="map-container-col">
-                        <div id="map-area" data-latitude="34.62939" data-longitude="126.90022" style="width:100%; height:460px;"></div>
+                        <div id="map-area" data-latitude="34.62939" data-longitude="126.90022"
+                             style="width:100%; height:460px;"></div>
+
+                    </div>
+
+                    <div class="info-poster-container-col">
+                        <div class="poster-area">
+                            <img id="detail-poster-url" src="/images/loading.gif" alt="영화 포스터 로딩 중">
+                            <div class="favorite-button-container mt-3"></div>
+                        </div>
+                        <div class="info-area">
+                            <h1 id="detail-movie-name">로딩 중...</h1>
+                            <p><strong>장소:</strong> <span id="detail-place">로딩 중...</span></p>
+                        </div>
+                        <!-- 찜하기 버튼 -->
+                        <button id="favorite-btn" class="btn btn-outline-danger">
+                            <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>
+                            찜하기
+                        </button>
+
                     </div>
                 </div>
-
-                <div class="info-poster-container-col">
-                    <div class="poster-area">
-                        <img id="detail-poster-url" src="/images/loading.gif" alt="영화 포스터 로딩 중">
-                        <div class="favorite-button-container mt-3"></div>
-                    </div>
-                    <div class="info-area">
-                        <h1 id="detail-movie-name">로딩 중...</h1>
-                        <p><strong>장소:</strong> <span id="detail-place">로딩 중...</span></p>
-                    </div>
-                    <!-- 찜하기 버튼 -->
-                    <button id="favorite-btn" class="btn btn-outline-danger">
-                        <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>
-                        찜하기
-                    </button>
-
-                </div>
-            </div>
             </div>
         </div>
 
@@ -296,7 +309,8 @@
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-8 mb-3 mb-md-0 mx-auto">
-                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                        . All Rights Reserved. &mdash; Designed with love by Team 아따
                     </p>
                 </div>
             </div>
@@ -318,7 +332,7 @@
 <script src="/js/custom.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const detailPosterUrlElem = document.getElementById('detail-poster-url');
         const detailMovieNameElem = document.getElementById('detail-movie-name');
         const detailPlaceElem = document.getElementById('detail-place');

@@ -1,6 +1,7 @@
 package kopo.jeonnam.service.theme;
 
 import kopo.jeonnam.dto.theme.RecommendCoursePlanDTO;
+import kopo.jeonnam.repository.entity.theme.RecommendCoursePlanEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +29,6 @@ public interface IRecommendCoursePlanService {
     boolean existsAnyByCourseKey(String courseKey);
 
     boolean existsAny(); // 추천 코스 상세 정보 데이터가 하나라도 존재하는지 확인
+
+    List<RecommendCoursePlanDTO> findNearby(double latMin, double latMax, double lngMin, double lngMax);
 }

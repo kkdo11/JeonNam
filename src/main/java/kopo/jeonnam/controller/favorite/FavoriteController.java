@@ -2,14 +2,17 @@ package kopo.jeonnam.controller.favorite;
 
 import jakarta.servlet.http.HttpSession;
 import kopo.jeonnam.dto.favorite.FavoriteDTO;
+import kopo.jeonnam.dto.theme.RecommendCoursePlanDTO;
 import kopo.jeonnam.repository.entity.favorite.FavoriteEntity;
 import kopo.jeonnam.service.impl.favorite.FavoriteService;
+import kopo.jeonnam.service.impl.theme.RecommendCoursePlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.List;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ import java.security.Principal;
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
+    private final RecommendCoursePlanService recommendCoursePlanService;
 
     @PostMapping
     public ResponseEntity<FavoriteEntity> addFavorite(@RequestBody FavoriteDTO favoriteDTO, HttpSession session) {
@@ -100,5 +104,40 @@ public class FavoriteController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("찜 항목을 찾을 수 없습니다.");
         }
+    }
+
+    @GetMapping("/nearby")
+    public ResponseEntity<List<RecommendCoursePlanDTO>> getNearbyRecommendations(
+            @RequestParam double latMin,
+            @RequestParam double latMax,
+            @RequestParam double lngMin,
+            @RequestParam double lngMax) {
+
+        List<RecommendCoursePlanDTO> dtoList = recommendCoursePlanService.findNearby(latMin, latMax, lngMin, lngMax).stream()
+                .map(entity -> {
+                    RecommendCoursePlanDTO dto = new RecommendCoursePlanDTO();
+                    dto.setPlanInfoId(entity.getPlanInfoId());
+                    dto.setPlanName(entity.getPlanName());
+                    dto.setPlanArea(entity.getPlanArea());
+                    dto.setPlanAddr(entity.getPlanAddr());
+                    dto.setPlanPhone(entity.getPlanPhone());
+                    dto.setPlanHomepage(entity.getPlanHomepage());
+                    dto.setPlanParking(entity.getPlanParking());
+                    dto.setPlanContents(entity.getPlanContents());
+
+                    try {
+                        dto.setPlanLatitude(Double.parseDouble(String.valueOf(entity.getPlanLatitude())));
+                        dto.setPlanLongitude(Double.parseDouble(String.valueOf(entity.getPlanLongitude())));
+                    } catch (NumberFormatException e) {
+                        dto.setPlanLatitude(0);
+                        dto.setPlanLongitude(0);
+                    }
+
+                    dto.setImageUrls(List.of()); // 주변 찜 추천에선 이미지 제외
+
+                    return dto;
+                }).toList();
+
+        return ResponseEntity.ok(dtoList);
     }
 }

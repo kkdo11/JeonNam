@@ -1,6 +1,9 @@
 package kopo.jeonnam.service.impl.favorite;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import kopo.jeonnam.dto.favorite.FavoriteDTO;
 import kopo.jeonnam.repository.entity.favorite.FavoriteEntity;
 import kopo.jeonnam.repository.mongo.favorite.FavoriteRepository;
@@ -46,6 +49,38 @@ public class FavoriteService implements IFavoriteService {
         return favoriteRepository.save(entity);
     }
 
+    @Override
+    public FavoriteDTO toDTO(FavoriteEntity entity) {
+        return new FavoriteDTO(
+                entity.getUserId(),
+                entity.getType(),
+                entity.getName(),
+                entity.getLocation(),
+                entity.getPosterUrl(),
+                entity.getX(),
+                entity.getY(),
+                entity.getPlanPhone(),
+                entity.getPlanHomepage(),
+                entity.getPlanParking(),
+                entity.getPlanContents()
+        );
+    }
+
+    @Override
+    public List<FavoriteDTO> getFavoritesByUserId(String userId) {
+        return favoriteRepository.findByUserId(userId).stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    public List<FavoriteDTO> findNearbyFavorites(String email, double latMin, double latMax, double lngMin, double lngMax) {
+        List<FavoriteEntity> entities = favoriteRepository.findNearby(email, latMin, latMax, lngMin, lngMax);
+        return entities.stream()
+                .map(this::toDTO) // 또는 직접 DTO 생성
+                .collect(Collectors.toList());
+    }
+
     public boolean existsByUserIdAndTypeAndNameAndLocation(String userId, String type, String name, String location) {
         return favoriteRepository.existsByUserIdAndTypeAndNameAndLocation(userId, type, name, location);
     }
@@ -61,6 +96,8 @@ public class FavoriteService implements IFavoriteService {
         }
         return false;
     }
+
+
 
 
 
