@@ -48,6 +48,11 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
         return recommendCoursePlanRepository.count() > 0;
     }
 
+    @Override
+    public List<RecommendCoursePlanDTO> findNearby(double latMin, double latMax, double lngMin, double lngMax) {
+        return recommendCoursePlanRepository.findNearbyPlansWithStringCoordinates(latMin, latMax, lngMin, lngMax);
+    }
+
 
     public RecommendCoursePlanService(RecommendCoursePlanRepository recommendCoursePlanRepository,
                                       RecommendCourseImageRepository imageRepository) {

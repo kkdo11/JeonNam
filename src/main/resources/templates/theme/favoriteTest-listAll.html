@@ -226,6 +226,11 @@
                                         data-bs-target="#course" type="button" role="tab" aria-controls="course"
                                         aria-selected="false">찜한 여행 장소</button>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="nearby-tab" data-bs-toggle="tab"
+                                        data-bs-target="#nearby" type="button" role="tab" aria-controls="nearby"
+                                        aria-selected="false">찜 주변 추천 관광지</button>
+                            </li>
                         </ul>
 
                         <!-- ✅ Tab content -->
@@ -235,21 +240,32 @@
                             <div class="tab-pane fade show active" id="media" role="tabpanel" aria-labelledby="media-tab">
                                 <div th:each="fav : ${movieFavorites}" class="mb-3">
                                     <div class="card shadow-sm">
-                                        <div class="card-body">
-                                            <h5 class="card-title" th:text="${fav.name}">미디어 이름</h5>
-                                            <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>
-                                            <p class="card-text" th:text="'주소: ' + ${fav.location}">주소</p>
-                                            <p th:if="${fav.planPhone != ''}" class="card-text"
-                                               th:text="'전화: ' + ${fav.planPhone}"></p>
-                                            <p th:if="${fav.planHomepage != ''}" class="card-text">
-                                                <a th:href="${fav.planHomepage}" target="_blank">홈페이지 방문</a>
-                                            </p>
-                                            <p th:if="${fav.planContents != ''}" class="card-text"
-                                               th:text="${fav.planContents}"></p>
+                                        <div class="row no-gutters">
+                                            <!-- 포스터 이미지 (있을 때만 표시) -->
+                                            <div th:if="${fav.posterUrl != null and fav.posterUrl != ''}" class="col-md-4">
+                                                <img th:src="${fav.posterUrl}" class="img-fluid rounded-start" th:alt="${fav.name}">
+                                            </div>
+
+                                            <!-- 텍스트 정보 영역 -->
+                                            <div th:class="${fav.posterUrl != null and fav.posterUrl != ''} ? 'col-md-8' : 'col-12'">
+                                                <div class="card-body">
+                                                    <h5 class="card-title" th:text="${fav.name}">미디어 이름</h5>
+                                                    <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>
+                                                    <p class="card-text" th:text="'주소: ' + ${fav.location}">주소</p>
+                                                    <p th:if="${fav.planPhone != ''}" class="card-text"
+                                                       th:text="'전화: ' + ${fav.planPhone}"></p>
+                                                    <p th:if="${fav.planHomepage != ''}" class="card-text">
+                                                        <a th:href="${fav.planHomepage}" target="_blank">홈페이지 방문</a>
+                                                    </p>
+                                                    <p th:if="${fav.planContents != ''}" class="card-text"
+                                                       th:text="${fav.planContents}"></p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
 
                             <!-- 🏞️ 여행 장소 탭 -->
                             <div class="tab-pane fade" id="course" role="tabpanel" aria-labelledby="course-tab">
@@ -268,6 +284,13 @@
                                                th:text="${fav.planContents}"></p>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="nearby" role="tabpanel" aria-labelledby="nearby-tab">
+                                <div id="nearby-result" class="mb-3">
+                                    <!-- JS will insert content here -->
+                                    <p>주변 관광지를 불러오는 중입니다...</p>
                                 </div>
                             </div>
 
