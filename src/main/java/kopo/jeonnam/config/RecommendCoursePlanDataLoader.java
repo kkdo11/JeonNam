@@ -23,7 +23,7 @@ public class RecommendCoursePlanDataLoader implements CommandLineRunner {
 
         // 컬렉션에 데이터가 하나라도 존재하는지 확인
         if (recommendCoursePlanService.existsAny()) {
-            log.info("ℹ️ 이미 추천 코스 상세 정보 데이터가 존재하여 자동 로딩을 건너뜁니다.");
+            log.info("ℹ️ 이미 추천 코스 상세 정보 데이터가 존재하여 자동 로딩을 건너뜝니다.");
             return; // 데이터가 있으면 메서드 종료
         }
 
