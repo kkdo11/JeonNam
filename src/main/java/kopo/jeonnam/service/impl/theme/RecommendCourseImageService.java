@@ -34,8 +34,10 @@ public class RecommendCourseImageService implements IRecommendCourseImageService
 
 
     @Override
-    public boolean existsAny() {
-        return recommendCourseImageRepository.count() > 0;
+    public boolean existsAnyImages() {
+        // ⭐ 여기에 실제 이미지 데이터 존재 여부를 확인하는 로직을 넣어주세요.
+        // 예를 들어, 이미지 테이블에 데이터가 하나라도 있는지 세는 방식 등으로요.
+        return recommendCourseImageRepository.count() > 0; // 예시: 레포지토리에 count() 메서드가 있다고 가정
     }
 
     /**
