@@ -5,10 +5,12 @@ public record FavoriteDTO(
         String type,
         String name,
         String location,
-        String x,
-        String y,
+        String posterUrl,
+        double x,
+        double y,
         String planPhone,
         String planHomepage,
         String planParking,
         String planContents
-) {}
+) {
+}

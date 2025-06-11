@@ -28,6 +28,7 @@ public class MovieViewController {
     @GetMapping("/movie/detail")
     public String showMovieDetailPage(@RequestParam(required = false) String id, Model model) {
         model.addAttribute("kakaoJsKey", kakaoJsKey);
+
         return "movie/movieDetail"; // movie/movieDetail.html 템플릿을 찾습니다.
     }
 }

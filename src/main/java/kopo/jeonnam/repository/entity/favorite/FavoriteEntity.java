@@ -1,33 +1,48 @@
 package kopo.jeonnam.repository.entity.favorite;
 
-import lombok.*;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "favorite")
-@CompoundIndexes({
-        @CompoundIndex(name = "user_name_type_idx", def = "{'userId': 1, 'name': 1, 'type': 1}", unique = true)
-})
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class FavoriteEntity {
+
     @Id
     private String id;
 
     private String userId;
-    private String type;
+    private String type; // "media", "place", ...
     private String name;
     private String location;
-    private String x;
-    private String y;
-
+    private double x;
+    private double y;
+    private String posterUrl;
     private String planPhone;
     private String planHomepage;
     private String planParking;
     private String planContents;
+
+    @Builder
+    public FavoriteEntity(String id, String userId, String type, String name, String location,
+                          double x, double y, String posterUrl,
+                          String planPhone, String planHomepage,
+                          String planParking, String planContents) {
+        this.id = id;
+        this.userId = userId;
+        this.type = type;
+        this.name = name;
+        this.location = location;
+        this.x = x;
+        this.y = y;
+        this.posterUrl = posterUrl;    // 제대로 할당됨
+        this.planPhone = planPhone;
+        this.planHomepage = planHomepage;
+        this.planParking = planParking;
+        this.planContents = planContents;
+    }
 }
