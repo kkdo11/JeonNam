@@ -32,7 +32,6 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
     private final RecommendCourseImageRepository imageRepository;
 
 
-
     @Value("${recommendcourse.api.planlist.url}")
     private String apiUrl;
 
@@ -63,7 +62,6 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
         try {
 
 
-
             // API 호출 URL 생성 및 로그
             String encodedKey = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
             String url = String.format("%s?serviceKey=%s&startPage=1&pageSize=1000&planCourseId=%s", apiUrl, encodedKey, courseKey);
@@ -71,6 +69,7 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
 
             // API 호출 및 응답 수신
             String response = NetworkUtil.get(url);
+            logger.info("[DEBUG] API 원본 응답: \n{}", response);
 
             // 1. API 응답 유효성 검사 (null이거나 XML 형식이 아니면 오류)
             if (response == null || response.trim().isEmpty() || !response.trim().startsWith("<")) {
@@ -82,12 +81,23 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
             XmlMapper xmlMapper = new XmlMapper();
             JsonNode root = xmlMapper.readTree(response.getBytes(StandardCharsets.UTF_8));
 
-            // 2. API 응답 헤더 파싱 및 결과 코드 확인
+            // ✅ 비표준 에러 구조 대응 (e.g. <OpenAPI_ServiceResponse><cmmMsgHeader>...)
+            if (root.has("cmmMsgHeader")) {
+                JsonNode errHeader = root.path("cmmMsgHeader");
+                String errMsg = errHeader.path("errMsg").asText("서비스 오류");
+                String returnAuthMsg = errHeader.path("returnAuthMsg").asText("");
+                String returnReasonCode = errHeader.path("returnReasonCode").asText("");
+
+                logger.error("API 응답 에러 (제한 초과 등) - errMsg: {}, returnAuthMsg: {}, reasonCode: {} (courseKey: {})",
+                        errMsg, returnAuthMsg, returnReasonCode, courseKey);
+                return 0;
+            }
+
+            // ✅ 표준 응답 구조 처리
             JsonNode headerNode = root.path("header");
             String resultCode = headerNode.path("resultCode").asText("");
             String resultMsg = headerNode.path("resultMsg").asText("알 수 없는 오류");
 
-            // API 호출 결과 코드 확인: "00"만 성공으로 간주
             if (!"00".equals(resultCode)) {
                 logger.error("API 응답 오류 - 코드: {}, 메시지: {} (courseKey: {})", resultCode, resultMsg, courseKey);
                 return 0;
@@ -203,6 +213,7 @@ public class RecommendCoursePlanService implements IRecommendCoursePlanService {
 
     /**
      * JsonNode에서 데이터를 추출하여 RecommendCoursePlanEntity 객체로 매핑합니다.
+     *
      * @param item JsonNode의 item 노드
      * @return RecommendCoursePlanEntity 객체
      */

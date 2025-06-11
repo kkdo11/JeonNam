@@ -42,6 +42,7 @@ public class RecommendCoursePlanController {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
         List<RecommendCourseEntity> courseList = recommendCourseRepository.findAll();
         int totalSaved = 0;
+
         for (RecommendCourseEntity course : courseList) {
             String courseKey = course.getCourseKey();
             if (courseKey != null && !courseKey.isEmpty()) {
@@ -49,6 +50,10 @@ public class RecommendCoursePlanController {
                     int saved = recommendCoursePlanService.fetchAndSaveRecommendCoursePlans(courseKey);
                     totalSaved += saved;
                     log.info("[RecommendCoursePlanController] courseKey={} 저장 성공: {}건", courseKey, saved);
+
+                    // ✅ [NEW] Add delay between requests to avoid rate limiting
+                    Thread.sleep(1000); // 0.5초 딜레이 (필요에 따라 1000ms로 조정)
+
                 } catch (Exception e) {
                     log.error("[RecommendCoursePlanController] courseKey={} 저장 실패: {}", courseKey, e.getMessage(), e);
                 }
@@ -56,6 +61,7 @@ public class RecommendCoursePlanController {
                 log.warn("[RecommendCoursePlanController] courseKey가 null 또는 빈 값입니다. course={}", course);
             }
         }
+
         log.info("[RecommendCoursePlanController] 전체 저장 완료: {}건 (모든 courseKey)", totalSaved);
         return ResponseEntity.ok("총 " + totalSaved + "건 저장 완료 (모든 courseKey)");
     }
