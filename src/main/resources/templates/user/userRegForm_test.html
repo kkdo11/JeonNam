@@ -3,16 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="shortcut icon" href="/images/JN_favicon.png">
-
-
-        <title>전남와따 - 회원가입</title>
+        <title>회원가입 - 전남 영화/드라마 여행</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <style>
             body {
-                /*padding-top: 50px;*/
-                /*background-color: #f8f9fa;*/
+                padding-top: 50px;
+                background-color: #f8f9fa;
             }
             .register-container {
                 max-width: 700px;
@@ -24,9 +21,9 @@
             }
             /* 유효성 검사 피드백 스타일 */
             .is-invalid { border-color: #dc3545 !important; }
-            .is-valid { border-color: #fd8d18 !important; }
+            .is-valid { border-color: #28a745 !important; }
             .invalid-feedback { display: block; color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
-            .valid-feedback { display: block; color: #ff8506; font-size: 0.875em; margin-top: 0.25rem; }
+            .valid-feedback { display: block; color: #28a745; font-size: 0.875em; margin-top: 0.25rem; }
 
             /* 비밀번호 유효성 검사 팁 스타일 추가 */
             .password-validation-tip {
@@ -38,232 +35,94 @@
                 color: red;
             }
             .validation-success {
-                color: #fd8d18;
+                color: green;
             }
-        </style>
-
-        <style>
-            html, body {
-                height: 100%;
-                margin: 0;
-                font-family: 'Inter', sans-serif;
-            }
-            .main-container {
-                display: flex;
-                min-height: 100vh; /* 기존 height: 100vh 에서 변경 */
-            }
-            .left-panel {
-                flex: 1;
-                display: flex;
-                flex-direction: column; /* 세로 방향 정렬 */
-                justify-content: flex-start; /* 상단 정렬 */
-                padding: 2rem;
-                background-color: #f8f9fa;
-                overflow-y: auto; /* 긴 내용일 경우 스크롤 */
-            }
-            .register-container {
-                width: 100%;
-                max-width: 500px;
-                padding: 0;               /* 여백 제거 또는 최소화 원할 경우 */
-                background: none;         /* 배경 제거 */
-                border: none;             /* 테두리 제거 */
-                border-radius: 0;         /* 둥근 모서리 제거 */
-                box-shadow: none;         /* 그림자 제거 */
-            }
-
-            .right-panel {
-                flex: 1;
-                background: linear-gradient(135deg, #fad58b, #fd8d18);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                padding: 2rem;
-                min-height: 100vh;  /* 💡 추가 */
-            }
-            .right-panel img {
-                max-width: 220px;
-                margin-bottom: 20px;
-            }
-            .btn-primary {
-                background-color: #f1a501;
-                border-color: #f1a501;
-            }
-            .btn-primary:hover {
-                background-color: #e69800;
-                border-color: #e69800;
-            }
-            .btn-outline-secondary, .btn-outline-primary, .btn-outline-success {
-                border-color: #f1a501;
-                color: #f1a501;
-            }
-            .btn-outline-secondary:hover, .btn-outline-primary:hover, .btn-outline-success:hover {
-                background-color: #f1a501;
-                color: #fff;
-            }
-            .form-control:focus, .form-select:focus {
-                border-color: #f1a501;
-                box-shadow: 0 0 0 0.2rem rgba(241, 165, 1, 0.25);
-            }
-            .invalid-feedback { display: block; color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; }
-            .valid-feedback { display: block; color: #ff8506; font-size: 0.875em; margin-top: 0.25rem; }
-            @media (max-width: 991px) {
-                .right-panel {
-                    display: none;
-                }
-            }
-            .btn-watta {
-                background-color: #f1a501;
-                color: white;
-                border: none;
-                padding: 0.4rem 0.75rem;
-                font-weight: 600;
-                border-radius: 0.4rem;
-                transition: background-color 0.3s ease;
-            }
-
-            .btn-watta:hover {
-                background-color: #e69800;
-                color: white;
-            }
-
-            .btn-watta:disabled {
-                background-color: #f5d080;
-                color: white;
-                opacity: 0.7;
-            }
-            .btn-primary:disabled {
-                background-color: #e69800;  /* 원하는 색상 */
-                border-color: #e69800;
-            }
-
-            .btn btn-primary w-100 {
-                background-color: #ff8506;
-                border-color: #ff8506;
-            }
-
-
         </style>
     </head>
     <body>
-
-    <div class="main-container">
-        <!-- 왼쪽 회원가입 폼 영역 -->
-        <div class="left-panel">
-
-            <div class="text-start mb-4">
-                <a href="/user/index">
-                <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
-                </a>
+    <div class="container register-container">
+        <h2 class="text-center mb-4">회원가입</h2>
+        <form id="userRegForm" action="/account/insertUserInfo" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">이메일 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="이메일 주소 입력" required>
+                    <button class="btn btn-outline-secondary" type="button" id="checkEmailBtn">중복 확인</button>
+                    <button class="btn btn-outline-primary ms-2" type="button" id="sendVerificationEmailBtn">인증 메일 전송</button>
+                </div>
+                <div id="emailFeedback" class="invalid-feedback"></div>
             </div>
-<!--            <div class="register-container">-->
-<!--                <h2 class="text-center mb-4 text-orange">회원가입</h2>-->
-                <!-- 기존 form 태그부터 끝까지 그대로 유지 -->
-                <div class=" register-container">
 
-                    <h1 class="fw-bold mb-3">회원가입</h1>
-                    <p class="mb-4 text-muted">😊전남와따에서 만나는 즐거운 여행😊</p>
-
-
-
-
-                    <form id="userRegForm" action="/account/insertUserInfo" method="post" >
-                        <div class="mb-3">
-                            <label for="email" class="form-label">이메일 <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="email" class="form-control" id="email" name="email" placeholder="이메일 주소 입력" required>
-                                <button class="btn btn-watta" type="button" id="checkEmailBtn">중복 확인</button>
-<!--                                <button class="btn btn-outline-secondary" type="button" id="checkEmailBtn">중복 확인</button>-->
-                                <button class="btn btn-watta ms-2" type="button" id="sendVerificationEmailBtn">인증 메일 전송</button>
-<!--                                <button class="btn btn-outline-primary ms-2" type="button" id="sendVerificationEmailBtn">인증 메일 전송</button>-->
-                            </div>
-                            <div id="emailFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="verificationCode" class="form-label">인증 코드 <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="verificationCode" name="verificationCode" placeholder="인증 코드 입력" required disabled>
-                                <button class="btn btn-watta" type="button" id="verifyEmailCodeBtn" disabled>코드 확인</button>
-<!--                                <button class="btn btn-outline-success" type="button" id="verifyEmailCodeBtn" disabled>코드 확인</button>-->
-                            </div>
-                            <div id="verificationCodeFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">비밀번호 <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="8~20자, 영문, 숫자, 특수문자 포함" required>
-                            <div id="passwordFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">비밀번호 확인 <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 재입력" required>
-                            <div id="confirmPasswordFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">이름 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="이름 입력" required>
-                            <div id="nameFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="birthDate" class="form-label">생년월일 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="birthDate" name="birthDate"
-                                   placeholder="YYYYMMDD (예: 19900115)" maxlength="8" required>
-                            <div id="birthDateFeedback" class="invalid-feedback"></div>
-<!--                            <div class="form-text mt-2">생년월일 8자리를 숫자만 입력해주세요 (예: 19900115).</div>-->
-                        </div>
-                        <div class="mb-3">
-                            <label for="phoneNum" class="form-label">휴대폰 번호 <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="phoneNum" name="phoneNum"
-                                   placeholder="하이픈 없이 숫자만 입력 (예: 01012345678)" required>
-                            <div id="phoneNumFeedback" class="invalid-feedback"></div>
-<!--                            <div class="form-text mt-2">하이픈(-) 없이 숫자만 입력해주세요 (010으로 시작).</div>-->
-                        </div>
-                        <div class="mb-3">
-                            <label for="sex" class="form-label">성별 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="sex" name="sex" required>
-                                <option value="">선택</option>
-                                <option value="M">남</option>
-                                <option value="F">여</option>
-                            </select>
-                            <div id="sexFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="country" class="form-label">국가 <span class="text-danger">*</span></label>
-                            <select class="form-select" id="country" name="country" required>
-                                <option value="">선택</option>
-                                <option value="KR">대한민국</option>
-                                <option value="US">미국</option>
-                                <option value="JP">일본</option>
-                                <option value="CN">중국</option>
-                                <option value="ETC">기타</option>
-                            </select>
-                            <div id="countryFeedback" class="invalid-feedback"></div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">회원가입</button>
-                    </form>
-                    <div class="mt-3 text-center">
-                        이미 계정이 있으신가요? <a href="/user/login">로그인</a>
-                    </div>
-<!--                </div>-->
+            <div class="mb-3">
+                <label for="verificationCode" class="form-label">인증 코드 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="verificationCode" name="verificationCode" placeholder="인증 코드 입력" required disabled>
+                    <button class="btn btn-outline-success" type="button" id="verifyEmailCodeBtn" disabled>코드 확인</button>
+                </div>
+                <div id="verificationCodeFeedback" class="invalid-feedback"></div>
             </div>
-        </div>
 
-        <!-- 오른쪽 배경 영역 -->
-        <div class="right-panel">
-            <img src="/images/JN_logo_white.png" style="max-width: 20rem" alt="전남와따 로고">
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호 <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="8~20자, 영문, 숫자, 특수문자 포함" required>
+                <div id="passwordFeedback" class="invalid-feedback"></div>
+            </div>
 
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">비밀번호 확인 <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 재입력" required>
+                <div id="confirmPasswordFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">이름 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="이름 입력" required>
+                <div id="nameFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="birthDate" class="form-label">생년월일 <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="birthDate" name="birthDate"
+                       placeholder="YYYYMMDD (예: 19900115)" maxlength="8" required>
+                <div id="birthDateFeedback" class="invalid-feedback"></div>
+                <div class="form-text mt-2">생년월일 8자리를 숫자만 입력해주세요 (예: 19900115).</div>
+            </div>
+            <div class="mb-3">
+                <label for="phoneNum" class="form-label">휴대폰 번호 <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="phoneNum" name="phoneNum"
+                       placeholder="하이픈 없이 숫자만 입력 (예: 01012345678)" required>
+                <div id="phoneNumFeedback" class="invalid-feedback"></div>
+                <div class="form-text mt-2">하이픈(-) 없이 숫자만 입력해주세요 (010으로 시작).</div>
+            </div>
+            <div class="mb-3">
+                <label for="sex" class="form-label">성별 <span class="text-danger">*</span></label>
+                <select class="form-select" id="sex" name="sex" required>
+                    <option value="">선택</option>
+                    <option value="M">남</option>
+                    <option value="F">여</option>
+                </select>
+                <div id="sexFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="country" class="form-label">국가 <span class="text-danger">*</span></label>
+                <select class="form-select" id="country" name="country" required>
+                    <option value="">선택</option>
+                    <option value="KR">대한민국</option>
+                    <option value="US">미국</option>
+                    <option value="JP">일본</option>
+                    <option value="CN">중국</option>
+                    <option value="ETC">기타</option>
+                </select>
+                <div id="countryFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">회원가입</button>
+        </form>
+        <div class="mt-3 text-center">
+            이미 계정이 있으신가요? <a href="/user/login">로그인</a>
         </div>
     </div>
-
-
-
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -488,7 +347,7 @@
             const birthDateRegex = /^\d{8}$/; // 8자리 숫자만 허용하는 정규식
 
             if (birthDate.length === 0) {
-                // showFeedback('birthDate', '생년월일 8자리를 입력해주세요.', false);
+                showFeedback('birthDate', '생년월일 8자리를 입력해주세요.', false);
                 isBirthDateValid = false;
             } else if (!birthDateRegex.test(birthDate)) {
                 showFeedback('birthDate', '생년월일은 8자리 숫자(YYYYMMDD) 형식이어야 합니다.', false);
@@ -510,7 +369,7 @@
             const phoneRegex = /^(010|011|016|017|018|019)\d{7,8}$/; // 01X + 7~8자리 숫자
 
             if (phoneNum.length === 0) {
-                // showFeedback('phoneNum', '휴대폰 번호를 입력해주세요.', false);
+                showFeedback('phoneNum', '휴대폰 번호를 입력해주세요.', false);
                 isPhoneNumValid = false;
             } else if (!phoneRegex.test(phoneNum)) {
                 showFeedback('phoneNum', '올바른 휴대폰 번호 형식이 아닙니다. (하이픈 없이 숫자만)', false);
@@ -526,7 +385,7 @@
         // 성별 필드 유효성 검사 (기존과 동일)
         $('#sex').on('change', function() {
             if ($(this).val() === '') {
-                // showFeedback('sex', '성별을 선택해주세요.', false);
+                showFeedback('sex', '성별을 선택해주세요.', false);
                 isSexValid = false;
             } else {
                 showFeedback('sex', '', true);
@@ -538,7 +397,7 @@
         // 국가 필드 유효성 검사 (기존과 동일)
         $('#country').on('change', function() {
             if ($(this).val() === '') {
-                // showFeedback('country', '국가를 선택해주세요.', false);
+                showFeedback('country', '국가를 선택해주세요.', false);
                 isCountryValid = false;
             } else {
                 showFeedback('country', '', true);
@@ -609,17 +468,15 @@
 
         // 페이지 로드 시 초기 유효성 검사 실행 (모든 필드)
         $(document).ready(function() {
-
-            $('.form-control, .form-select').removeClass('is-valid is-invalid');
-            // $('#email').trigger('keyup');
-            // $('#password').trigger('keyup');
-            // $('#confirmPassword').trigger('keyup');
-            // $('#name').trigger('keyup');
-            // // 생년월일과 휴대폰 번호도 초기 유효성 검사 실행
-            // $('#birthDate').trigger('keyup');
-            // $('#phoneNum').trigger('keyup');
-            // $('#sex').trigger('change');
-            // $('#country').trigger('change');
+            $('#email').trigger('keyup');
+            $('#password').trigger('keyup');
+            $('#confirmPassword').trigger('keyup');
+            $('#name').trigger('keyup');
+            // 생년월일과 휴대폰 번호도 초기 유효성 검사 실행
+            $('#birthDate').trigger('keyup');
+            $('#phoneNum').trigger('keyup');
+            $('#sex').trigger('change');
+            $('#country').trigger('change');
         });
     </script>
 
