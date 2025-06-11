@@ -60,7 +60,13 @@ public class AuthController {
         int res = userInfoService.userLogin(loginDTO);
 
         if (res == 1) { // 로그인 성공
-            session.setAttribute("email", email); // 세션에 이메일 저장
+
+            UserInfoDTO userInfo = userInfoService.findByEmail(email); // 사용자 정보 조회
+            session.setAttribute("email", userInfo.email());
+            session.setAttribute("name", userInfo.name()); // DB에서 가져온 이름 저장
+
+//            session.setAttribute("email", email); // 세션에 이메일 저장
+
             log.info("[AuthController] doLogin success. User Email: {}", email);
             return "redirect:/auth/loginsuccess";
         } else { // 로그인 실패
