@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--<html lang="en">-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -64,6 +65,7 @@
             transition: all 0.3s ease-in-out;
         }
 
+
         .media-thumb:hover .media-text {
             display: block;
         }
@@ -80,6 +82,7 @@
         .pagination .page-item.disabled .page-link {
             color: #6c757d; /* 비활성화된 링크 색상 */
         }
+
     </style>
 
     <title>미디어 여행</title>
@@ -109,7 +112,13 @@
                 <li><a href="about.html">테마 여행</a></li>
                 <li><a href="contact.html">AI 추천 여행</a></li>
                 <li><a href="contact.html">전남 먹거리</a></li>
-                <li><a href="contact.html">로그인</a></li>
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email == null}">
+                    <a href="/user/login">로그인</a>
+                </li>
+                <li th:if="${session.email != null}">
+                    <a href="/user/logout">로그아웃</a>
+                </li>
             </ul>
 
             <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
@@ -282,6 +291,9 @@
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>`;
+
+
+
 
         // 페이지 번호 버튼
         for (let i = 0; i < totalPages; i++) {
