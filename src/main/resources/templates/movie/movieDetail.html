@@ -346,13 +346,10 @@
         const detailPlaceElem = document.getElementById('detail-place');
         const detailPageTitleElem = document.getElementById('detail-page-title'); // 페이지 상단 제목
 
-        // 1. URL에서 영화 ID 가져오기
         const urlParams = new URLSearchParams(window.location.search);
-        const movieId = urlParams.get('id'); // 'id' 쿼리 파라미터 값
+        const movieId = urlParams.get('id');
 
         if (movieId) {
-            // 2. 백엔드 API 호출하여 영화 상세 정보 가져오기
-            // 백엔드 컨트롤러의 @RequestMapping("/api/movies") + @GetMapping("/detail") = /api/movies/detail
             fetch(`/api/movies/detail?id=${movieId}`)
                 .then(response => {
                     if (response.status === 404) {
@@ -364,42 +361,33 @@
                     return response.json();
                 })
                 .then(data => {
-                    // 3. 가져온 데이터로 HTML 요소 업데이트
                     if (data) {
                         detailPosterUrlElem.src = data.posterUrl;
-                        detailPosterUrlElem.alt = data.title; // alt 속성도 업데이트
+                        detailPosterUrlElem.alt = data.title;
                         detailMovieNameElem.textContent = data.title;
                         detailPlaceElem.textContent = data.location;
-                        detailPageTitleElem.textContent = data.title; // 상단 페이지 제목도 영화 이름으로
+                        detailPageTitleElem.textContent = data.title;
 
-                        // x, y 좌표는 지도 담당자에게 전달할 준비 (화면에 직접 표시하진 않음)
-                        const lat = data.y; // MovieEntity의 y는 planLat (위도)
-                        const lon = data.x; // MovieEntity의 x는 planLon (경도)
+                        const lat = data.y;
+                        const lon = data.x;
 
-                        console.log(`지도 담당자를 위한 좌표: 위도=${lat}, 경도=${lon}`);
-
-                        // 지도 담당자가 이 값을 사용할 수 있도록 DOM 요소에 data-* 속성으로 저장
                         const mapArea = document.getElementById('map-area');
                         if (mapArea) {
                             mapArea.dataset.latitude = lat;
                             mapArea.dataset.longitude = lon;
-                            // 지도 담당자가 이 요소를 찾아 data-latitude, data-longitude 값을 읽어가서 지도를 그릴 수 있습니다.
-                            // 예: 지도 초기화 함수 호출 (지도 담당자가 구현)
-                            // initializeMap(mapArea.id, lat, lon);
                         }
 
+                        // 찜 여부 확인 실행
+                        checkFavoriteStatus(data.title, data.location);
+
                     } else {
-                        // 데이터가 없거나 비어있는 경우
                         detailMovieNameElem.textContent = '영화 정보를 찾을 수 없습니다.';
                         detailPlaceElem.textContent = '';
-                        detailPosterUrlElem.src = ''; // 이미지 비우기
+                        detailPosterUrlElem.src = '';
                         detailPosterUrlElem.alt = '정보 없음';
                         detailPageTitleElem.textContent = '정보 없음';
                         console.warn('받아온 영화 상세 정보가 없습니다.');
                     }
-
-                    // 🔥 여기에 추가: 찜 여부 확인 실행
-                    checkFavoriteStatus(data.title, data.location);
                 })
                 .catch(error => {
                     console.error('영화 상세 정보를 불러오는 데 실패했습니다:', error);
@@ -410,7 +398,6 @@
                     detailPageTitleElem.textContent = '오류';
                 });
         } else {
-            // 영화 ID가 URL에 없는 경우
             detailMovieNameElem.textContent = '유효한 영화 ID가 제공되지 않았습니다.';
             detailPlaceElem.textContent = '';
             detailPosterUrlElem.src = '';
@@ -418,33 +405,44 @@
             detailPageTitleElem.textContent = '잘못된 접근';
             console.warn('URL에 영화 ID가 없습니다.');
         }
-    });
-</script>
 
-<script>
-    function checkFavoriteStatus(title, location) {
-        fetch(`/favorite/check?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`)
-            .then(res => {
-                if (res.status === 401) {
-                    alert('로그인이 필요합니다.');
-                    throw new Error('Unauthorized');
-                }
-                return res.json();
-            })
-            .then(isFavorite => {
-                const favIcon = document.getElementById('favorite-icon');
+        const favoriteBtn = document.getElementById('favorite-btn');
+        if (favoriteBtn) {
+            favoriteBtn.addEventListener('click', handleFavoriteClick);
+        }
+    });
+
+    async function checkFavoriteStatus(title, location) {
+        try {
+            const res = await fetch(`/favorite/check?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`);
+            const favIcon = document.getElementById('favorite-icon');
+
+            if (res.ok) {
+                const isFavorite = await res.json();
                 if (favIcon) {
                     favIcon.setAttribute('icon', isFavorite ? 'mdi:heart' : 'mdi:heart-outline');
                 }
-            })
-            .catch(err => {
-                console.error('찜 여부 확인 실패:', err);
-            });
+            } else if (res.status === 401) {
+                console.log("로그인 상태가 아닙니다. 찜 상태를 확인할 수 없습니다. (아이콘은 빈 하트)");
+                if (favIcon) {
+                    favIcon.setAttribute('icon', 'mdi:heart-outline');
+                }
+            } else {
+                console.error('찜 여부 확인 중 오류 발생:', res.status, res.statusText);
+                if (favIcon) {
+                    favIcon.setAttribute('icon', 'mdi:heart-outline');
+                }
+            }
+        } catch (err) {
+            console.error('찜 여부 확인 실패 (네트워크 등):', err);
+            const favIcon = document.getElementById('favorite-icon');
+            if (favIcon) {
+                favIcon.setAttribute('icon', 'mdi:heart-outline');
+            }
+        }
     }
-</script>
 
-<script>
-    document.getElementById('favorite-btn').addEventListener('click', function () {
+    async function handleFavoriteClick() {
         const title = document.getElementById('detail-movie-name').textContent;
         const location = document.getElementById('detail-place').textContent;
         const posterUrl = document.getElementById('detail-poster-url').src;
@@ -453,76 +451,71 @@
         const longitude = mapArea ? mapArea.dataset.longitude : null;
 
         const favIcon = document.getElementById('favorite-icon');
-        const isFavorite = favIcon.getAttribute('icon') === 'mdi:heart';
+        let isCurrentlyFavorite = favIcon.getAttribute('icon') === 'mdi:heart';
 
-        if (isFavorite) {
-            // ✅ 찜 상태 → 찜 취소 요청 (DELETE)
-            fetch(`/favorite?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`, {
-                method: 'DELETE'
-            })
-                .then(res => {
-                    if (!res.ok) {
-                        if (res.status === 401) {
-                            alert('로그인이 필요합니다.');
-                        } else {
-                            alert('찜 취소에 실패했습니다.');
-                        }
-                        throw new Error('찜 취소 실패');
-                    }
-                    return res.text();
-                })
-                .then(() => {
-                    alert(`"${title}" 영화가 찜목록에서 제거되었습니다.`);
-                    favIcon.setAttribute('icon', 'mdi:heart-outline');
-                    this.disabled = false; // 버튼 다시 활성화
-                })
-                .catch(err => {
-                    console.error('찜 취소 중 오류:', err);
+        try {
+            const loginCheckRes = await fetch('/auth/check-login');
+            if (loginCheckRes.status === 401) {
+            alert('찜 기능을 이용하시려면 로그인이 필요합니다. 로그인 페이지로 이동합니다.');// 수정된 메시지
+                window.location.href = '/user/login';
+                return;
+            }
+            if (!loginCheckRes.ok) {
+            alert('서비스 이용에 문제가 발생했습니다. 잠시 후 다시 시도해 주십시오.'); // 수정된 메시지
+                console.error('로그인 상태 확인 실패:', loginCheckRes.status, loginCheckRes.statusText);
+                return;
+            }
+
+            this.disabled = true;
+
+            if (isCurrentlyFavorite) {
+                const res = await fetch(`/favorite?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`, {
+                    method: 'DELETE'
                 });
 
-        } else {
-            // ✅ 찜이 아닌 상태 → 찜 추가 요청 (POST)
-            const favoriteDTO = {
-                type: 'media',
-                name: title || '',
-                location: location || '',
-                posterUrl: posterUrl || '',
-                x: longitude || null,
-                y: latitude || null,
-                planPhone: null,
-                planHomepage: null,
-                planParking: null,
-                planContents: null
-            };
+                if (!res.ok) {
+                    throw new Error('찜 취소에 실패했습니다. 다시 시도해 주십시오.'); // 수정된 메시지
+                }
 
-            fetch('/favorite', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(favoriteDTO)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 401) {
-                            alert('로그인이 필요합니다.');
-                        } else {
-                            alert('찜 추가에 실패했습니다.');
-                        }
-                        throw new Error('찜 추가 실패');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert(`"${data.name}" 영화가 찜목록에 추가되었습니다!`);
-                    favIcon.setAttribute('icon', 'mdi:heart');
-                    this.disabled = false;
-                })
-                .catch(error => {
-                    console.error('찜 추가 중 오류:', error);
+            alert(`"${title}" 영화가 찜 목록에서 제거되었습니다.`); // 수정된 메시지
+                favIcon.setAttribute('icon', 'mdi:heart-outline');
+            } else {
+                const favoriteDTO = {
+                    type: 'media',
+                    name: title || '',
+                    location: location || '',
+                    posterUrl: posterUrl || '',
+                    x: longitude || null,
+                    y: latitude || null,
+                    planPhone: null,
+                    planHomepage: null,
+                    planParking: null,
+                    planContents: null
+                };
+
+                const res = await fetch('/favorite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(favoriteDTO)
                 });
+
+                if (!res.ok) {
+                    throw new Error('찜 추가에 실패했습니다. 다시 시도해 주십시오.'); // 수정된 메시지
+                }
+                const data = await res.json();
+
+            alert(`"${data.name}" 영화가 찜 목록에 추가되었습니다.`); // 수정된 메시지
+                favIcon.setAttribute('icon', 'mdi:heart');
+            }
+        } catch (err) {
+            console.error('찜 기능 처리 중 오류:', err);
+        alert(`오류가 발생했습니다: ${err.message || '알 수 없는 오류'}. 잠시 후 다시 시도해 주십시오.`); // 수정된 메시지
+        } finally {
+            this.disabled = false;
         }
-    });
+    }
 </script>
 
 
