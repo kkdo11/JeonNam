@@ -23,13 +23,13 @@ public class FavoriteViewController {
     @GetMapping("/testAllList")
     public String showFavorites(Model model, HttpSession session) {
         // ✅ 세션에서 userId 가져오기
-//        String userId = (String) session.getAttribute("SS_USER_ID");
-//        if (userId == null) {
-//            log.warn("세션에 사용자 ID가 없습니다. 로그인 필요.");
-//            return "redirect:/login"; // 로그인 페이지로 리디렉션
-//        }
+        String userId = (String) session.getAttribute("email");
+        if (userId == null) {
+            log.warn("세션에 사용자 ID가 없습니다. 로그인 필요.");
+            return "user/login"; // 로그인 페이지로 리디렉션
+        }
 
-        String userId = "taeseung92l@gmail.com";
+//        String userId = "taeseung92l@gmail.com";
         // ✅ 즐겨찾기 전체 조회
         List<FavoriteDTO> favorites = favoriteService.getFavoritesByUserId(userId);
 
