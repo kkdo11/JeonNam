@@ -43,7 +43,7 @@
             flex: 1 1 50%; /* flex grow, shrink, basis (대략 50% 너비) */
             max-width: 50%; /* 최대 너비 설정 */
             min-width: 300px; /* 최소 너비 (모바일에서 꽉 차도록) */
-            height: 500px; /* 지도 영역 높이 고정 (조정 필요) */
+            /*height: 500px; !* 지도 영역 높이 고정 (조정 필요) *!*/
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             overflow: hidden; /* 지도가 넘치지 않도록 */
@@ -142,6 +142,11 @@
             .info-area p {
                 font-size: 1rem;
             }
+            #location-caption {
+                min-height: 90px; /* 너무 높게 늘어나지 않게 */
+            }
+
+
         }
     </style>
     <!-- jquery -->
@@ -243,6 +248,29 @@
                         <div id="map-area" data-latitude="34.62939" data-longitude="126.90022"
                              style="width:100%; height:460px;"></div>
 
+                        <!-- 위치 및 감성 멘트 표시 영역 -->
+                        <div id="location-caption" class="mt-3 text-center">
+<!--                            <p id="detail-place-text" style="font-weight: bold; font-size: 1.1rem;">📍 장소 정보 로딩 중...</p>-->
+                            <p id="emotion-text" class="text-muted">✨ 잠시만 기다려주세요...</p>
+                            <!-- 찜하기 버튼 -->
+                            <button id="favorite-btn" class="btn-favorite" style="
+    margin-bottom: 30px;
+    margin-top: 10px;
+">
+                                <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="22"></iconify-icon>
+                                <span>나만의 여정에 담기</span>
+                            </button>
+
+
+
+
+                            <!--                            <button id="favorite-btn" class="btn btn-outline-danger" style="-->
+<!--    margin-bottom: 20px;">-->
+<!--                                <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>-->
+<!--                                찜하기-->
+<!--                            </button>-->
+                        </div>
+
                     </div>
 
 
@@ -253,13 +281,13 @@
                         </div>
                         <div class="info-area">
                             <h1 id="detail-movie-name">로딩 중...</h1>
-                            <p><strong>장소:</strong> <span id="detail-place">로딩 중...</span></p>
+                            <p><strong>📍 장소 : </strong> <span id="detail-place">로딩 중...</span></p>
                         </div>
-                        <!-- 찜하기 버튼 -->
-                        <button id="favorite-btn" class="btn btn-outline-danger">
-                            <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>
-                            찜하기
-                        </button>
+<!--                        &lt;!&ndash; 찜하기 버튼 &ndash;&gt;-->
+<!--                        <button id="favorite-btn" class="btn btn-outline-danger">-->
+<!--                            <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>-->
+<!--                            찜하기-->
+<!--                        </button>-->
 
                     </div>
                 </div>
@@ -349,6 +377,20 @@
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id');
 
+        // const detailPlaceText = document.getElementById('detail-place-text');
+        const emotionText = document.getElementById('emotion-text');
+
+        const mediaMentions = [
+            "🎬 화면 속 장면이 시작된 이곳, 이제 당신의 여행지가 됩니다!",
+            "👣 익숙한 장면의 배경, 직접 걸어보면 전혀 다른 감동이 있어요!",
+            "🎥 카메라 너머의 진짜 이야기를, 이곳에서 느껴보세요!",
+            "🧭 이 장면, 어디서 봤더라? 바로 당신의 기억 속 그곳이에요!",
+            "💬 드라마 속 대사 생각나죠? 여기가 바로 그 장면이에요!",
+            "🎉 지금 이곳, 나도 콘텐츠의 주인공✨ 된 기분!"
+        ];
+
+
+
         if (movieId) {
             fetch(`/api/movies/detail?id=${movieId}`)
                 .then(response => {
@@ -368,6 +410,11 @@
                         detailPlaceElem.textContent = data.location;
                         detailPageTitleElem.textContent = data.title;
 
+                        // ✅ 지도 아래 위치 정보 및 감성 멘트 출력
+                        // detailPlaceText.textContent = `📍 ${data.location}`;
+                        emotionText.textContent = mediaMentions[Math.floor(Math.random() * mediaMentions.length)];
+
+
                         const lat = data.y;
                         const lon = data.x;
 
@@ -376,6 +423,8 @@
                             mapArea.dataset.latitude = lat;
                             mapArea.dataset.longitude = lon;
                         }
+
+
 
                         // 찜 여부 확인 실행
                         checkFavoriteStatus(data.title, data.location);
@@ -517,6 +566,52 @@
         }
     }
 </script>
+<style>
+    .btn-favorite {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 26px;
+        background: linear-gradient(135deg, #ffa84c, #ff7b00);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 999px;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 15px rgba(255, 123, 0, 0.25);
+        cursor: pointer;
+        font-family: 'Inter', 'Noto Sans KR', sans-serif;
+    }
+
+    .btn-favorite iconify-icon {
+        transition: transform 0.2s ease;
+        color: inherit;
+        width: 20px;
+        height: 20px;
+    }
+
+    .btn-favorite:hover {
+        background: linear-gradient(135deg, #ff7b00, #ffa84c);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 123, 0, 0.4);
+    }
+
+    .btn-favorite:hover iconify-icon {
+        transform: scale(1.2);
+    }
+
+    .btn-favorite.active {
+        background: #ff7b00;
+        box-shadow: 0 8px 20px rgba(255, 123, 0, 0.35);
+    }
+
+    .btn-favorite.active iconify-icon {
+        transform: scale(1.1);
+        color: #fff;
+    }
+</style>
 
 
 </body>
