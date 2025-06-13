@@ -7,10 +7,13 @@ import kopo.jeonnam.service.user.IUserInfoService;
 import kopo.jeonnam.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -25,6 +28,32 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final IUserInfoService userInfoService; // 사용자 정보 비즈니스 로직을 처리하는 서비스 인터페이스
+
+
+    /**
+     * ------------------------ 로그인 상태 확인 API ------------------------
+     */
+
+    /**
+     * 현재 사용자의 로그인 상태를 확인하는 API.
+     * 로그인되어 있으면 200 OK 응답을, 로그인되어 있지 않으면 401 Unauthorized 응답을 반환합니다.
+     * 이 API는 클라이언트(JavaScript)에서 사용자의 로그인 여부를 비동기적으로 확인하는 데 사용됩니다.
+     *
+     * @param session HTTP 세션 객체. 세션에 사용자 이메일 정보가 있는지 확인합니다.
+     * @return 로그인 상태에 따른 ResponseEntity (200 OK 또는 401 Unauthorized)
+     */
+    @GetMapping("/check-login")
+    @ResponseBody // 이 어노테이션이 있어야 메서드 반환값이 HTTP 응답 본문으로 직접 전송됩니다.
+    public ResponseEntity<Void> checkLoginStatus(HttpSession session) {
+        log.info("[UserController] checkLoginStatus start.");
+        if (session.getAttribute("email") != null) {
+            log.info("[UserController] User is logged in.");
+            return ResponseEntity.ok().build(); // 200 OK
+        } else {
+            log.warn("[UserController] User is not logged in. Returning 401 Unauthorized.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+        }
+    }
 
     /**
      * ------------------------ 로그인 처리 ------------------------
