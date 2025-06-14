@@ -142,10 +142,76 @@
                 font-size: 1rem;
             }
         }
+
+
+        /*소연추가 css*/
+        .nav-tabs {
+            border-bottom: 2px solid #f2f2f2;
+            justify-content: space-around;
+        }
+
+        .nav-tabs .nav-link {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: none;
+            font-size: 1.1rem;
+            color: #888;
+            font-weight: 600;
+            padding: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #ff6f00;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #ff6f00;
+        }
+
+        .nav-tabs .nav-link.active::after {
+            content: "";
+            position: absolute;
+            left: 20%;
+            bottom: 0;
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(to right, #ff6f00, #ffa040);
+            border-radius: 2px;
+        }
+
+        .nav-tabs .nav-link:focus {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        #favoriteTabsContent {
+            height: 600px; /* 지도와 맞추기 */
+            overflow-y: auto;
+        }
+
+
+        .card {
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .card:hover {
+            background-color: rgba(250, 228, 188, 0.22); /* 아주 연한 회색 톤 */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+
+        }
+
+
+
+
+
+
     </style>
 
 
-    <title>찜한 목록</title>
+
+    <title>전남와따 - 테마여행</title>
 </head>
 
 <body>
@@ -168,11 +234,17 @@
 
             <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
                 <li><a href="/user/index">홈</a></li>
-                <li class="active"><a href="/media">미디어 여행</a></li>
-                <li><a href="services.html">테마 여행</a></li>
+                <li><a href="/movie">미디어 여행</a></li>
+                <li  class="active"><a href="/favorite/testAllList">테마 여행</a></li>
                 <li><a href="about.html">AI 추천 여행</a></li>
                 <li><a href="contact.html">전남 먹거리</a></li>
-                <li><a href="contact.html">로그인</a></li>
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email == null}">
+                    <a href="/user/login">로그인</a>
+                </li>
+                <li th:if="${session.email != null}">
+                    <a href="/user/logout">로그아웃</a>
+                </li>
             </ul>
 
             <a href="#"
@@ -190,7 +262,7 @@
         <div class="row align-items-center">
             <div class="col-lg-6 mx-auto text-center">
                 <div class="intro-wrap">
-                    <h1 class="mb-0" id="detail-page-title">영화 상세 정보</h1>
+                    <h1 class="mb-0" id="detail-page-title">테마 여행</h1>
                 </div>
             </div>
         </div>
@@ -204,11 +276,11 @@
                 <div class="row">
 
                     <!-- 🗺️ Left: Map -->
-                    <div class="col-lg-6 mb-4">
+                    <div class="col-lg-6 mb-4" >
                         <div id="map-area"
                              data-latitude="34.62939"
                              data-longitude="126.90022"
-                             style="width:100%; height:460px; border-radius:10px;">
+                             style="width:100%;height:670px; border-radius:10px;">
                         </div>
                     </div>
 
@@ -219,22 +291,22 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="media-tab" data-bs-toggle="tab"
                                         data-bs-target="#media" type="button" role="tab" aria-controls="media"
-                                        aria-selected="true">찜한 미디어</button>
+                                        aria-selected="true">저장한 미디어</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="course-tab" data-bs-toggle="tab"
                                         data-bs-target="#course" type="button" role="tab" aria-controls="course"
-                                        aria-selected="false">찜한 여행 장소</button>
+                                        aria-selected="false">저장한 관광지</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="nearby-tab" data-bs-toggle="tab"
                                         data-bs-target="#nearby" type="button" role="tab" aria-controls="nearby"
-                                        aria-selected="false">찜 주변 추천 관광지</button>
+                                        aria-selected="false">내 여정 주변 추천 관광지</button>
                             </li>
                         </ul>
 
                         <!-- ✅ Tab content -->
-                        <div class="tab-content" id="favoriteTabsContent" style="max-height: 460px; overflow-y: auto;">
+                        <div class="tab-content" id="favoriteTabsContent" style="height: 600px; overflow-y: auto;">
 
                             <!-- 🎬 미디어 탭 -->
                             <div class="tab-pane fade show active" id="media" role="tabpanel" aria-labelledby="media-tab">
@@ -251,7 +323,7 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title" th:text="${fav.name}">미디어 이름</h5>
                                                     <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>
-                                                    <p class="card-text" th:text="'주소: ' + ${fav.location}">주소</p>
+                                                    <p class="card-text" th:text="'주소: ' + ${fav.location}">위치</p>
                                                     <p th:if="${fav.planPhone != ''}" class="card-text"
                                                        th:text="'전화: ' + ${fav.planPhone}"></p>
                                                     <p th:if="${fav.planHomepage != ''}" class="card-text">
