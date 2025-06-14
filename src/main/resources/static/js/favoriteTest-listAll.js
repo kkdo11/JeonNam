@@ -45,9 +45,9 @@ function initMap() {
         // ✅ 마커 이미지 설정
         const markerImage = new kakao.maps.MarkerImage(
             item.type === 'media'
-                ? '/images/movie_marker.png'
+                ? '/images/JN_marker1.png'
                 : '/images/course_marker.png',
-            new kakao.maps.Size(40, 40)
+            new kakao.maps.Size(40, 60)
         );
 
         // ✅ 마커 생성
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     data.forEach(item => {
-                        let card = `<div class="card shadow-sm mb-3"><div class="row no-gutters">`;
+                        let card = `<div class="card shadow-sm mb-3 "><div class="row no-gutters">`;
 
                         const hasPoster = item.posterUrl && item.posterUrl.trim() !== "";
 
