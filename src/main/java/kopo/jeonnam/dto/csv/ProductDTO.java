@@ -14,5 +14,9 @@ public record ProductDTO(
         String proArea,     // 지역 (region)
         String proPlanQty,  // 생산 계획량
         String proCompany,  // 업체명
-        String proBaseDate  // 기준일자
+        String proBaseDate,  // 기준일자
+
+        String proFeature,
+        String proBenefit,
+        String imageUrl
 ) {}
