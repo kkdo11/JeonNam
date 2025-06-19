@@ -299,6 +299,11 @@
                                         aria-selected="false">저장한 관광지</button>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="search-tab" data-bs-toggle="tab"
+                                        data-bs-target="#search" type="button" role="tab" aria-controls="search"
+                                        aria-selected="false">관광지 검색</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="nearby-tab" data-bs-toggle="tab"
                                         data-bs-target="#nearby" type="button" role="tab" aria-controls="nearby"
                                         aria-selected="false">내 여정 주변 추천 관광지</button>
@@ -356,6 +361,43 @@
                                                th:text="${fav.planContents}"></p>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+
+                            <!-- 🔍 관광지 검색 탭 -->
+                            <div class="tab-pane fade" id="search" role="tabpanel" aria-labelledby="search-tab">
+                                <div class="w-100 d-flex flex-column align-items-center gap-3">
+
+                                    <!-- 검색 카드 -->
+                                    <div class="card shadow-sm mb-3" style="width: 100%; max-width: 600px;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">관광지 검색</h5>
+                                            <p class="card-text text-muted mb-3">
+                                                관광지 이름 또는 주소를 입력하여<br>
+                                                원하는 위치를 검색할 수 있습니다.
+                                            </p>
+                                            <form id="searchForm">
+                                                <div class="d-flex flex-column gap-2">
+                                                    <input type="text" name="tourName" id="tourName"
+                                                           class="form-control"
+                                                           placeholder="예: 백련사" />
+                                                    <button type="button" class="btn btn-outline-warning mt-2" id="searchTourBtn">검색</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- 검색 결과 카드 -->
+                                    <div class="card shadow-sm" id="searchResultCard" style="display: none; width: 100%; max-width: 600px;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">검색 결과</h5>
+                                            <div id="searchResultList" class="d-flex flex-column gap-3">
+                                                <!-- Search results will be injected here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 

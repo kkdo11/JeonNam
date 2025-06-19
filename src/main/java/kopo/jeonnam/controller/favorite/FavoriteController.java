@@ -2,18 +2,20 @@ package kopo.jeonnam.controller.favorite;
 
 import jakarta.servlet.http.HttpSession;
 import kopo.jeonnam.dto.favorite.FavoriteDTO;
+import kopo.jeonnam.dto.favorite.TourDTO;
 import kopo.jeonnam.dto.theme.RecommendCoursePlanDTO;
 import kopo.jeonnam.repository.entity.favorite.FavoriteEntity;
 import kopo.jeonnam.service.impl.favorite.FavoriteService;
 import kopo.jeonnam.service.impl.theme.RecommendCoursePlanService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/favorite")
@@ -139,5 +141,22 @@ public class FavoriteController {
                 }).toList();
 
         return ResponseEntity.ok(dtoList);
+    }
+
+    @PostMapping("/searchTour")
+    public ResponseEntity<List<TourDTO>> searchTour(@RequestBody TourDTO input) {
+
+
+        log.info("📨 검색 요청 받은 TourDTO: {}", input);
+        log.info("📌 전달받은 tName: {}", input.getTName());
+
+        try {
+            log.info("📨 검색 요청 받은 TourDTO: {}", input); // 로그로 값 확인
+            String keyword = input.getTName();
+            List<TourDTO> resultList = favoriteService.searchTourByKeyword(keyword);
+            return ResponseEntity.ok(resultList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
