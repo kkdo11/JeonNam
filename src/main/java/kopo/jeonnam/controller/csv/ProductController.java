@@ -26,7 +26,7 @@ public class ProductController {
      */
     @GetMapping("/products/page")
     public String viewPage() {
-        return "csv/products"; // templates/products.html
+        return "csv/product"; // templates/products.html
     }
 
     /**

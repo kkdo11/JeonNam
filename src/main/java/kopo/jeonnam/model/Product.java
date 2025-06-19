@@ -31,6 +31,10 @@ public class Product {
     private final String proCompany;
     private final String proBaseDate;
 
+    private String proFeature;
+    private String proBenefit;
+    private String imageUrl;
+
     /**
      * DTO → Entity 변환
      */
@@ -44,6 +48,9 @@ public class Product {
                 .proPlanQty(dto.proPlanQty())
                 .proCompany(dto.proCompany())
                 .proBaseDate(dto.proBaseDate())
+                .proFeature(dto.proFeature())
+                .proBenefit(dto.proBenefit())
+                .imageUrl(dto.imageUrl())
                 .build();
     }
 
@@ -60,6 +67,9 @@ public class Product {
                 .proPlanQty(this.proPlanQty)
                 .proCompany(this.proCompany)
                 .proBaseDate(this.proBaseDate)
+                .proFeature(this.proFeature)
+                .proBenefit(this.proBenefit)
+                .imageUrl(this.imageUrl)
                 .build();
     }
 }
