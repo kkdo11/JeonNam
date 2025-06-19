@@ -20,7 +20,7 @@ public class FavoriteViewController {
 
     private final IFavoriteService favoriteService;
 
-    @GetMapping("/testAllList")
+    @GetMapping("/ ")
     public String showFavorites(Model model, HttpSession session) {
         // ✅ 세션에서 userId 가져오기
         String userId = (String) session.getAttribute("email");

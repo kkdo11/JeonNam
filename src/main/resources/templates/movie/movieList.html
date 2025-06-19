@@ -1,19 +1,11 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--<html lang="en">-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="Untree.co">
+    <title>미디어 여행</title>
+
     <link rel="shortcut icon" href="/images/JN_favicon.png">
-
-    <meta name="description" content="" />
-    <meta name="keywords" content="bootstrap, bootstrap4" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/owl.carousel.min.css">
     <link rel="stylesheet" href="/css/owl.theme.default.min.css">
@@ -26,7 +18,6 @@
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
     <style>
-        /* 이미지 크기 일관성을 위한 스타일 */
         .media-thumb {
             aspect-ratio: 2.5 / 4;
             position: relative;
@@ -36,14 +27,11 @@
             align-items: center;
             justify-content: center;
         }
-
         .media-thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
-        /* 호버 시 텍스트 표시를 위한 스타일 */
         .media-thumb .media-text {
             display: none;
             position: absolute;
@@ -57,13 +45,9 @@
             border-bottom-right-radius: 10px;
             transition: all 0.3s ease-in-out;
         }
-
-
         .media-thumb:hover .media-text {
             display: block;
         }
-
-        /* 페이지네이션 버튼 기본 스타일 */
         .pagination .page-item .page-link {
             color: #403f3f;
         }
@@ -75,23 +59,59 @@
         .pagination .page-item.disabled .page-link {
             color: #6c757d;
         }
+        /* 🎨 검색바 개선 스타일 */
+        .custom-search-bar {
+            border: 2px solid #f3a600;
+            border-radius: 2rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background-color: #fffaf0;
+            height: 45px;
+        }
+
+        .custom-search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0 0.75rem 0 2.25rem;
+            font-size: 0.95rem;
+            color: #333;
+            background-image: url('https://api.iconify.design/emojione:clapper-board.svg?width=20&height=20');
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            background-size: 18px 18px;
+        }
+
+        .custom-search-bar input::placeholder {
+            color: #555;
+        }
+
+        .custom-search-bar input:focus {
+            outline: none;
+        }
+
+        .custom-search-bar button {
+            border: none;
+            background-color: #f3a600;
+            color: #fff;
+            font-weight: bold;
+            padding: 0 1.2rem;
+            height: 100%;
+            font-size: 0.95rem;
+            border-radius: 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .custom-search-bar button:hover {
+            background-color: #d89000;
+        }
 
     </style>
-
-    <title>미디어 여행</title>
 </head>
 
 <body>
-
-<div class="site-mobile-menu site-navbar-target">
-    <div class="site-mobile-menu-header">
-        <div class="site-mobile-menu-close">
-            <span class="icofont-close js-menu-toggle"></span>
-        </div>
-    </div>
-    <div class="site-mobile-menu-body"></div>
-</div>
-
+<!-- ✅ 네비게이션 바 -->
 <nav class="site-nav">
     <div class="container">
         <div class="site-navigation">
@@ -105,22 +125,18 @@
                 <li><a href="/favorite/testAllList">테마 여행</a></li>
                 <li><a href="contact.html">AI 추천 여행</a></li>
                 <li><a href="contact.html">전남 먹거리</a></li>
-                <!-- 로그인 여부에 따라 조건 분기 -->
-                <li th:if="${session.email == null}">
-                    <a href="/user/login">로그인</a>
-                </li>
-                <li th:if="${session.email != null}">
-                    <a href="/user/logout">로그아웃</a>
-                </li>
+                <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
+                <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
             </ul>
 
-            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light" data-toggle="collapse" data-target="#main-navbar">
+            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
                 <span></span>
             </a>
-
         </div>
     </div>
 </nav>
+
+<!-- ✅ Hero 영역 -->
 <div class="hero hero-inner">
     <div class="container">
         <div class="row align-items-center">
@@ -132,116 +148,58 @@
         </div>
     </div>
 </div>
+
+<!-- ✅ 검색창 + 콘텐츠 -->
 <div class="untree_co-section">
     <div class="container">
-        <div class="row" id="media-list-container">
+
+        <div class="row justify-content-end mb-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="custom-search-bar">
+                    <input type="text" id="search-input" placeholder=" 제목 검색" />
+                    <button id="search-button">검색</button>
+                </div>
+            </div>
         </div>
+
+
+
+        <!-- ✅ 미디어 카드 -->
+        <div class="row" id="media-list-container"></div>
+
+        <!-- ✅ 페이지네이션 -->
         <div class="row mt-5">
-            <div class="col-12 text-center" id="pagination-container">
-            </div>
+            <div class="col-12 text-center" id="pagination-container"></div>
         </div>
     </div>
 </div>
-<div class="site-footer">
-    <div class="inner first">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 col-lg-6">
-                    <div class="widget">
-                        <h3 class="heading">서비스 안내</h3>
-                        <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
-                            전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
-                            여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
-                            남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
-                            최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
-                            <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
-                    </div>
-                </div>
-                <div class="col-md-7 col-lg-2 pl-lg-5">
-                    <div class="widget">
-                        <h3 class="heading">Pages</h3>
-                        <ul class="links list-unstyled">
-                            <li><a href="#">미디어 여행</a></li>
-                            <li><a href="#">테마 여행</a></li>
-                            <li><a href="#">AI 추천 여행</a></li>
-                            <li><a href="#">전남 먹거리</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="widget">
-                        <h3 class="heading">Contact</h3>
-                        <ul class="list-unstyled quick-info links">
-                            <li class="email"><a href="#">poly@example.com</a></li>
-                            <li class="phone"><a href="#">+82 02-2186-5800</a></li>
-                            <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="inner dark">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-8 mb-3 mb-md-0 mx-auto">
-                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="/js/jquery-3.4.1.min.js"></script>
-<script src="/js/popper.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
-<script src="/js/owl.carousel.min.js"></script>
-<script src="/js/jquery.animateNumber.min.js"></script>
-<script src="/js/jquery.waypoints.min.js"></script>
-<script src="/js/jquery.fancybox.min.js"></script>
-<script src="/js/aos.js"></script>
-<script src="/js/moment.min.js"></script>
-<script src="/js/daterangepicker.js"></script>
-<script src="/js/typed.js"></script>
-<script src="/js/custom.js"></script>
 
+<!-- ✅ 스크립트 -->
 <script>
-    const API_BASE_URL = '/api/movies/list'; // 영화 목록을 가져올 백엔드 API 기본 URL
-    let currentPage = 0; // 현재 페이지 번호 (0부터 시작)
-    const pageSize = 16; // 한 페이지에 표시할 항목 수 (백엔드와 일치시키는 것이 중요)
-    let totalPages = 0; // 전체 페이지 수
+    const API_BASE_URL = '/api/movies/list';
+    let currentPage = 0;
+    const pageSize = 16;
+    let totalPages = 0;
+    let currentKeyword = '';
 
-    /**
-     * 영화 정보를 바탕으로 카드 형태의 HTML 문자열을 생성합니다.
-     * @param {object} movie - 영화 데이터 객체 (id, posterUrl, title, location 포함)
-     * @returns {string} 생성된 HTML 문자열
-     */
     const createMediaCard = ({ id, posterUrl, title, location }) => `
-      <div class="col-6 col-md-6 col-lg-3">
-        <div class="media-1">
-          <a href="/movie/detail?id=${id}" class="d-block mb-3 media-thumb" data-movie-id="${id}">
-            <img src="${posterUrl}" alt="${title}" class="img-fluid">
-          </a>
-          <div class="d-flex">
-            <div>
-              <h3><a href="/movie/detail?id=${id}">${title}</a></h3> <p>${location}</p>
-            </div>
+    <div class="col-6 col-md-6 col-lg-3">
+      <div class="media-1">
+        <a href="/movie/detail?id=${id}" class="d-block mb-3 media-thumb" data-movie-id="${id}">
+          <img src="${posterUrl}" alt="${title}" class="img-fluid">
+        </a>
+        <div class="d-flex">
+          <div>
+            <h3><a href="/movie/detail?id=${id}">${title}</a></h3> <p>${location}</p>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-    /**
-     * API로부터 받은 미디어 목록을 화면에 렌더링합니다.
-     * @param {Array} mediaList - 표시할 영화 데이터 배열
-     */
     const renderMediaList = (mediaList) => {
         const container = document.getElementById('media-list-container');
-        if (!container) {
-            console.error('오류: 미디어 목록을 표시할 컨테이너 요소를 찾을 수 없습니다.');
-            return;
-        }
-
+        if (!container) return;
         if (!mediaList || mediaList.length === 0) {
             container.innerHTML = '<p class="text-center text-muted">표시할 미디어 여행 정보가 없습니다.</p>';
             return;
@@ -249,11 +207,6 @@
         container.innerHTML = mediaList.map(createMediaCard).join('');
     };
 
-    /**
-     * 로딩 메시지나 에러 메시지를 화면에 표시합니다.
-     * @param {string} msg - 표시할 메시지
-     * @param {boolean} isError - 에러 메시지 여부 (기본값: false)
-     */
     const showMessage = (msg, isError = false) => {
         const container = document.getElementById('media-list-container');
         if (container) {
@@ -261,102 +214,84 @@
         }
     };
 
-    /**
-     * 페이지네이션 UI를 동적으로 생성하고 화면에 렌더링합니다.
-     */
     const renderPagination = () => {
         const paginationContainer = document.getElementById('pagination-container');
-        if (!paginationContainer) {
-            console.error('오류: 페이지네이션 컨테이너 요소를 찾을 수 없습니다.');
+        if (!paginationContainer || totalPages <= 0) {
+            paginationContainer.innerHTML = '';
             return;
         }
 
-        // totalPages가 0 이하면 페이지네이션을 그리지 않습니다.
-        if (totalPages <= 0) {
-            paginationContainer.innerHTML = ''; // 기존 페이지네이션 내용 비우기
-            return;
-        }
-
-        let paginationHtml = '<ul class="pagination justify-content-center">';
-
-        // 이전 페이지 버튼
-        paginationHtml += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>`;
-
-
-
-
-        // 페이지 번호 버튼
+        let html = '<ul class="pagination justify-content-center">';
+        html += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+               <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+             </li>`;
         for (let i = 0; i < totalPages; i++) {
-            paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
-            </li>`;
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                 <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
+               </li>`;
         }
+        html += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
+               <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+             </li>`;
+        html += '</ul>';
+        paginationContainer.innerHTML = html;
 
-        // 다음 페이지 버튼
-        paginationHtml += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>`;
-
-        paginationHtml += '</ul>';
-        paginationContainer.innerHTML = paginationHtml;
-
-        // 페이지 버튼 클릭 이벤트 리스너 추가
-        paginationContainer.querySelectorAll('.page-link').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault(); // 기본 링크 동작 방지
+        paginationContainer.querySelectorAll('.page-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
                 const newPage = parseInt(e.target.dataset.page, 10);
                 if (!isNaN(newPage) && newPage >= 0 && newPage < totalPages) {
-                    currentPage = newPage; // 현재 페이지 업데이트
-                    loadMediaList(); // 새로운 페이지 데이터 로드
+                    currentPage = newPage;
+                    loadMediaList();
                 }
             });
         });
     };
 
-    /**
-     * 백엔드 API로부터 영화 목록 데이터를 비동기적으로 로드합니다.
-     * 현재 페이지와 페이지당 항목 수를 쿼리 파라미터로 전송합니다.
-     */
     async function loadMediaList() {
         showMessage('미디어 여행 정보를 불러오는 중입니다...');
         try {
-            const url = `${API_BASE_URL}?page=${currentPage}&size=${pageSize}`;
+            const url = `${API_BASE_URL}?page=${currentPage}&size=${pageSize}&keyword=${encodeURIComponent(currentKeyword)}`;
             const res = await fetch(url);
-
             if (!res.ok) {
-                // HTTP 상태 코드가 200이 아닌 경우 에러 처리
-                const errorText = await res.text(); // 서버에서 보낸 에러 메시지 확인
-                throw new Error(`데이터를 불러오지 못했습니다. 상태: ${res.status} ${res.statusText} - ${errorText}`);
+                const errorText = await res.text();
+                throw new Error(`상태 ${res.status}: ${res.statusText} - ${errorText}`);
             }
 
             const pageData = await res.json();
-
-            // 백엔드 응답 구조에 따라 pageData.content 및 pageData.totalPages 접근
             renderMediaList(pageData.content);
             totalPages = pageData.totalPages;
-
-            renderPagination(); // 데이터 로드 후 페이지네이션 렌더링
+            renderPagination();
 
         } catch (error) {
-            console.error('미디어 목록 로딩 중 오류 발생:', error);
-            showMessage(`죄송합니다! 미디어 여행 정보를 불러오는 데 실패했습니다: ${error.message}. 잠시 후 다시 시도해주세요.`, true);
-            // 에러 발생 시 페이지네이션도 숨김
+            console.error('로딩 오류:', error);
+            showMessage(`에러 발생: ${error.message}`, true);
             const paginationContainer = document.getElementById('pagination-container');
-            if (paginationContainer) {
-                paginationContainer.innerHTML = '';
-            }
+            if (paginationContainer) paginationContainer.innerHTML = '';
         }
     }
 
-    // DOMContentLoaded 이벤트 발생 시 (HTML 문서 로드 완료 시) 영화 목록 로드 시작
-    window.addEventListener('DOMContentLoaded', loadMediaList);
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('search-button').addEventListener('click', () => {
+            currentKeyword = document.getElementById('search-input').value.trim();
+            currentPage = 0;
+            loadMediaList();
+        });
+
+        document.getElementById('search-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                currentKeyword = document.getElementById('search-input').value.trim();
+                currentPage = 0;
+                loadMediaList();
+            }
+        });
+
+        loadMediaList();
+    });
 </script>
 
+<!-- 필수 JS -->
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 </body>
 </html>
