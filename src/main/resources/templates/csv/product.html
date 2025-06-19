@@ -1,14 +1,38 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>전라남도 농축산물 목록 - 동글동글 UI</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>전남 먹거리</title>
+
+    <link rel="shortcut icon" href="/images/JN_favicon.png">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/css/jquery.fancybox.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Source+Serif+Pro:wght@400;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/daterangepicker.css">
+    <link rel="stylesheet" href="/css/aos.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
     <style>
         body {
             background: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+
+
+        h1, h2, h3 {
+            font-family: 'Source Serif Pro', serif;
         }
 
         #productCardList {
@@ -19,145 +43,361 @@
         }
 
         .product-item {
-            width: 160px;
+            width: 180px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
             text-align: center;
-            cursor: pointer;
-            perspective: 600px;
+        }
+
+        .product-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
         .product-inner {
-            border-radius: 16px;
-            padding: 16px;
-            background: transparent;
-            box-shadow: none;
-            transition: transform 0.2s ease;
-            transform-style: preserve-3d;
+            padding: 1rem;
         }
 
         .product-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
+            width: 100%;
+            height: 140px;
             object-fit: cover;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            background: #e9ecef;
-            transition: box-shadow 0.3s ease;
-        }
-
-        .product-inner:hover .product-img {
-            box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+            border-bottom: 1px solid #f3f3f3;
         }
 
         .product-name {
             font-weight: 600;
-            font-size: 1.1rem;
-            color: #212529;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            /*font-size: 1.05rem;*/
+            color: #222;
+            margin-top: 0.5rem;
         }
 
         .product-area {
             font-size: 0.9rem;
-            color: #6c757d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: #555;
         }
 
-        /* 모달 관련 */
         .modal-dialog.modal-centered-custom {
             max-width: 720px;
         }
 
-        .modal-body {
+        .modal-content {
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+
+        .custom-modal-header {
+            background-color: #fffaf0;
+            border-bottom: 1px solid #f3e4c0;
+            padding: 1rem 1.5rem;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .custom-modal-header .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 2rem;
+        }
+
+        .custom-close {
+            transition: transform 0.2s ease;
+        }
+
+        .custom-close:hover {
+            transform: rotate(90deg) scale(1.2);
+        }
+
+        .modal-body {
+            background: #fffefc;
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: inset 0 0 0 1px #f1f1f1;
             text-align: center;
+            font-family: 'Pretendard', sans-serif;
         }
 
         #modalImage {
-            width: 300px;
-            height: 300px;
-            object-fit: cover;
+            width: 280px;
+            height: 280px;
             border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-            margin-bottom: 24px;
-            background-color: #e9ecef;
+            object-fit: cover;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s;
+        }
+
+        #modalImage:hover {
+            transform: scale(1.02);
         }
 
         .modal-text {
             width: 100%;
-            max-width: 600px;
+            max-width: 640px;
+            margin: 0 auto;
+            font-family: 'Pretendard', sans-serif;
+            text-align: left;
         }
 
         .modal-text h4 {
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            color: #222;
+            text-align: center;
         }
 
         .modal-text p {
             font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 0.75rem;
+            line-height: 1.75;
+            color: #444;
+            margin-bottom: 1rem;
         }
 
         .modal-text p strong {
+            display: block;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
             font-weight: bold;
-            color: #343a40;
+            color: #f3a600;
         }
+
+        .modal-text .info-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #f3a600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .modal-text .info-value {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        input:focus,
+        .form-control:focus {
+            border-color: #f3a600 !important;
+            box-shadow: 0 0 0 0.2rem rgba(243, 166, 0, 0.25);
+            outline: none;
+        }
+        .untree_co-section {
+            background: white;
+            padding: 70px 0;
+        }
+
+
+
     </style>
+
 </head>
-<body class="p-4">
+<body>
+<!-- ✅ 네비게이션 바 -->
+<nav class="site-nav">
+    <div class="container">
+        <div class="site-navigation">
+            <a href="/user/index" class="logo m-0">
+                <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
+            </a>
 
-<div class="container">
-    <h1 class="mb-4 text-center">🌾 전라남도 농축산물 목록</h1>
+            <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
+                <li class="active"><a href="/user/index">홈</a></li>
+                <li><a href="/movie">미디어 여행</a></li>
+                <li><a href="/favorite/testAllList">테마 여행</a></li>
+                <li><a href="contact.html">AI 추천 여행</a></li>
+                <li><a href="/products/page">전남 먹거리</a></li>
+                <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
+                <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
+            </ul>
 
-    <form id="filterForm" class="row g-2 mb-4 justify-content-center">
-        <div class="col-md-3">
-            <input type="text" id="areaInput" class="form-control" placeholder="지역 (예: 나주)" />
+            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
+                <span></span>
+            </a>
         </div>
-        <div class="col-md-3">
-            <input type="text" id="searchInput" class="form-control" placeholder="상품명" />
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">검색</button>
-        </div>
-        <div class="col-md-2">
-            <button type="button" id="resetBtn" class="btn btn-secondary w-100">초기화</button>
-        </div>
-    </form>
-
-    <div id="productCardList">
-        <!-- 동적 삽입 -->
     </div>
-</div>
+</nav>
 
-<!-- 모달 -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-centered-custom modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="productModalLabel">상품 상세정보</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-            </div>
-            <div class="modal-body">
-                <img id="modalImage" src="" alt="상품 이미지" />
-                <div class="modal-text">
-                    <h4 id="modalName"></h4>
-                    <p><strong>지역:</strong> <span id="modalArea"></span></p>
-                    <p><strong>특징:</strong><br><span id="modalFeature"></span></p>
-                    <p><strong>효능:</strong><br><span id="modalBenefit"></span></p>
+<!-- ✅ Hero 영역 -->
+<div class="hero hero-inner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mx-auto text-center">
+                <div class="intro-wrap">
+                    <h1 class="mb-0">전남 먹거리</h1>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<div class="untree_co-section">
+<div class="container" >
+    <!-- 🔍 검색 폼 -->
+    <div class="card p-4 shadow-sm border-0 mb-4" style="border-radius: 1rem; background: #fffefc;">
+        <form id="filterForm" class="row g-3 align-items-center justify-content-center">
+
+            <!-- 지역 입력 -->
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><iconify-icon icon="mdi:map-marker-outline"></iconify-icon></span>
+                    <input type="text" id="areaInput" class="form-control border-start-0" placeholder="지역 (예: 나주)" />
+                </div>
+            </div>
+
+            <!-- 상품명 입력 -->
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><iconify-icon icon="mdi:shopping-outline"></iconify-icon></span>
+                    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="상품명" />
+                </div>
+            </div>
+
+            <!-- 검색 버튼 -->
+            <div class="col-md-2">
+                <button type="submit" class="btn w-100 fw-bold text-white" style="background-color: #f3a600; border-radius: 0.75rem;">
+                    검색
+                </button>
+            </div>
+
+            <!-- 초기화 버튼 -->
+            <div class="col-md-2">
+                <button type="button" id="resetBtn" class="btn btn-outline-dark w-100" style="border-radius: 0.75rem;">
+                    ↺ 초기화
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!--    <form id="filterForm" class="row g-2 mb-4 justify-content-center">-->
+<!--        <div class="col-md-3">-->
+<!--            <input type="text" id="areaInput" class="form-control" placeholder="지역 (예: 나주)" />-->
+<!--        </div>-->
+<!--        <div class="col-md-3">-->
+<!--            <input type="text" id="searchInput" class="form-control" placeholder="상품명" />-->
+<!--        </div>-->
+<!--        <div class="col-md-2">-->
+<!--            <button type="submit" class="btn btn-primary w-100">검색</button>-->
+<!--        </div>-->
+<!--        <div class="col-md-2">-->
+<!--            <button type="button" id="resetBtn" class="btn btn-secondary w-100">초기화</button>-->
+<!--        </div>-->
+<!--    </form>-->
+
+    <div id="productCardList">
+        <!-- 동적 삽입 -->
+    </div>
+</div>
+</div>
+    <!--footer start-->
+    <div class="site-footer">
+        <div class="inner first">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-lg-6">
+                        <div class="widget">
+                            <h3 class="heading">서비스 안내</h3>
+                            <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
+                                전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
+                                여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
+                                남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
+                                최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
+                                <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
+                        </div>
+                    </div>
+                    <div class="col-md-7 col-lg-2 pl-lg-5">
+                        <div class="widget">
+                            <h3 class="heading">Pages</h3>
+                            <ul class="links list-unstyled">
+                                <li><a href="#">미디어 여행</a></li>
+                                <li><a href="#">테마 여행</a></li>
+                                <li><a href="#">AI 추천 여행</a></li>
+                                <li><a href="#">전남 먹거리</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="widget">
+                            <h3 class="heading">Contact</h3>
+                            <ul class="list-unstyled quick-info links">
+                                <li class="email"><a href="#">poly@example.com</a></li>
+                                <li class="phone"><a href="#">+82 02-2186-5800</a></li>
+                                <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inner dark">
+            <div class="container">
+                <div class="row text-center">
+                    <div class="col-md-8 mb-3 mb-md-0 mx-auto">
+                        <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--footer end-->
+<!-- 모달 -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-centered-custom modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header custom-modal-header">
+                <div class="d-flex align-items-center w-100 justify-content-between">
+                    <h5 class="modal-title mb-0">
+                        <span class="me-2"></span> 전남 먹거리 상세정보
+                    </h5>
+                    <button type="button" class="btn-close custom-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+            </div>
+
+
+            <!--            <div class="modal-header">-->
+<!--                <h5 class="modal-title" id="productModalLabel">상품 상세정보</h5>-->
+<!--                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>-->
+<!--            </div>-->
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="상품 이미지" />
+                <div class="modal-text">
+                    <h4 id="modalName"></h4>
+                    <p>
+                        <strong>📍 이 상품은</strong>
+                        <span id="modalArea"></span>에서 자란 지역 특산물이에요.
+                    </p>
+
+                    <p>
+                        <strong>✨ 어떤 특징이 있나요?</strong>
+                        <span id="modalFeature"></span>
+                    </p>
+
+                    <p>
+                        <strong>💪 우리 몸에 어떤 도움이 되나요?</strong>
+                        <span id="modalBenefit"></span>
+                    </p>
+
+
+<!--                    <p><strong>지역</strong> <span id="modalArea"></span></p>-->
+<!--                    <p><strong>특징</strong><span id="modalFeature"></span></p>-->
+<!--                    <p><strong>효능</strong><span id="modalBenefit"></span></p>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 
 <script>
     $(function() {
