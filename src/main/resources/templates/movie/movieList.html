@@ -124,7 +124,7 @@
                 <li><a href="/media">미디어 여행</a></li>
                 <li><a href="/favorite/testAllList">테마 여행</a></li>
                 <li><a href="contact.html">AI 추천 여행</a></li>
-                <li><a href="contact.html">전남 먹거리</a></li>
+                <li><a href="/products/page">전남 먹거리</a></li>
                 <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
                 <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
             </ul>
@@ -173,7 +173,59 @@
         </div>
     </div>
 </div>
+<!--footer start-->
+<div class="site-footer">
+    <div class="inner first">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-6">
+                    <div class="widget">
+                        <h3 class="heading">서비스 안내</h3>
+                        <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
+                            전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
+                            여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
+                            남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
+                            최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
+                            <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
+                    </div>
+                </div>
+                <div class="col-md-7 col-lg-2 pl-lg-5">
+                    <div class="widget">
+                        <h3 class="heading">Pages</h3>
+                        <ul class="links list-unstyled">
+                            <li><a href="#">미디어 여행</a></li>
+                            <li><a href="#">테마 여행</a></li>
+                            <li><a href="#">AI 추천 여행</a></li>
+                            <li><a href="#">전남 먹거리</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="widget">
+                        <h3 class="heading">Contact</h3>
+                        <ul class="list-unstyled quick-info links">
+                            <li class="email"><a href="#">poly@example.com</a></li>
+                            <li class="phone"><a href="#">+82 02-2186-5800</a></li>
+                            <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="inner dark">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-8 mb-3 mb-md-0 mx-auto">
+                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                    </p>
+                </div>
 
+            </div>
+        </div>
+    </div>
+</div>
+<!--footer end-->
 <!-- ✅ 스크립트 -->
 <script>
     const API_BASE_URL = '/api/movies/list';
