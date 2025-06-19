@@ -1,21 +1,33 @@
 package kopo.jeonnam.service.impl.favorite;
 
-import java.util.List;
-import java.util.Optional;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.jeonnam.dto.favorite.FavoriteDTO;
+import kopo.jeonnam.dto.favorite.TourDTO;
 import kopo.jeonnam.repository.entity.favorite.FavoriteEntity;
 import kopo.jeonnam.repository.mongo.favorite.FavoriteRepository;
 import kopo.jeonnam.service.favorite.IFavoriteService;
+import kopo.jeonnam.util.NetworkUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavoriteService implements IFavoriteService {
 
     private final FavoriteRepository favoriteRepository;
+    private final ObjectMapper objectMapper;
+
+    @Value("${KakaoRestApiKey}")
+    private String kakaoRestApiKey;
 
     public static FavoriteEntity fromDTO(FavoriteDTO dto) {
         return FavoriteEntity.builder()
@@ -80,6 +92,52 @@ public class FavoriteService implements IFavoriteService {
                 .map(this::toDTO) // 또는 직접 DTO 생성
                 .collect(Collectors.toList());
     }
+
+    // ✅ Kakao 로컬 API를 이용한 관광지 검색
+    @Override
+    public List<TourDTO> searchTourByKeyword(String keyword) {
+        log.info("🔍 관광지 검색 요청: {}", keyword);
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            log.warn("⚠️ 검색 키워드가 null 또는 빈 문자열입니다.");
+            return Collections.emptyList(); // 또는 예외 throw
+        }
+
+        try {
+            String encodedKeyword = URLEncoder.encode(keyword, StandardCharsets.UTF_8);
+            String url = "https://dapi.kakao.com/v2/local/search/keyword.json?query=" + encodedKeyword;
+
+            String response = NetworkUtil.get(url, Map.of(
+                    "Authorization", "KakaoAK " + kakaoRestApiKey
+            ));
+
+            JsonNode root = objectMapper.readTree(response);
+            JsonNode documents = root.get("documents");
+
+            List<TourDTO> results = new ArrayList<>();
+
+            for (JsonNode doc : documents) {
+                TourDTO dto = new TourDTO();
+                dto.setTName(keyword);
+                dto.setName(doc.path("place_name").asText(""));
+                dto.setAddress(doc.path("road_address_name").asText(""));
+                dto.setPhone(doc.path("phone").asText(""));
+                dto.setUrl(doc.path("place_url").asText(""));
+                dto.setX(doc.path("x").asDouble(0));
+                dto.setY(doc.path("y").asDouble(0));
+                results.add(dto);
+            }
+
+            log.info("✅ 검색 결과 수: {}", results.size());
+            return results;
+
+        } catch (Exception e) {
+            log.error("❌ Kakao 검색 API 오류: {}", e.getMessage(), e);
+            throw new RuntimeException("Kakao 검색 실패", e);
+        }
+    }
+
+
 
     public boolean existsByUserIdAndTypeAndNameAndLocation(String userId, String type, String name, String location) {
         return favoriteRepository.existsByUserIdAndTypeAndNameAndLocation(userId, type, name, location);
