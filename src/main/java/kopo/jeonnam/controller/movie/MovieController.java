@@ -27,31 +27,28 @@ public class MovieController {
 
     private final MovieRepository movieRepository;
 
-    @GetMapping("/list") // 전체 영화 리스트 (페이징) API
+    @GetMapping("/list") // 영화 리스트 (검색 + 페이징)
     public Page<MovieDTO> getPagedMovies(
-            @RequestParam(defaultValue = "0") int page, // 현재 페이지 번호 (0부터 시작)
-            @RequestParam(defaultValue = "16") int size) { // 페이지당 항목 수
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "16") int size,
+            @RequestParam(required = false) String keyword) {
 
-        log.info(this.getClass().getName() + ".getPagedMovies Start! Page: " + page + ", Size: " + size);
+        log.info("🎬 getPagedMovies Start! page={}, size={}, keyword={}", page, size, keyword);
 
         Pageable pageable = PageRequest.of(page, size);
+        Page<MovieEntity> moviePage;
 
-        Page<MovieEntity> moviePage = movieRepository.findAll(pageable);
+        // 🔍 검색 키워드가 있을 경우 title 필터링
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            moviePage = movieRepository.findByTitleContainingIgnoreCase(keyword.trim(), pageable);
+            log.info("🔍 Filtering by keyword: '{}'", keyword);
+        } else {
+            moviePage = movieRepository.findAll(pageable);
+            log.info("📦 No keyword, returning full list.");
+        }
 
-        // ✨✨✨ 여기에 로그를 추가해주세요! ✨✨✨
-        log.info("--- Debugging Page Object ---");
-        log.info("Total Elements: " + moviePage.getTotalElements());
-        log.info("Total Pages: " + moviePage.getTotalPages());
-        log.info("Number (current page): " + moviePage.getNumber());
-        log.info("Size (items per page): " + moviePage.getSize());
-        log.info("Has Content: " + moviePage.hasContent());
-        log.info("Is Empty: " + moviePage.isEmpty());
-        log.info("--- End Debugging Page Object ---");
-        // ✨✨✨ 여기까지 ✨✨✨
-
-
-        if (moviePage.getTotalElements() == 0) {
-            log.info(this.getClass().getName() + ".getPagedMovies: No movies found. Returning empty page.");
+        if (moviePage.isEmpty()) {
+            log.info("🕳 No matching movies. Returning empty page.");
             return Page.empty(pageable);
         }
 
@@ -64,9 +61,12 @@ public class MovieController {
                 movie.getY()
         ));
 
-        log.info(this.getClass().getName() + ".getPagedMovies End! Total Elements: " + movieDTOPage.getTotalElements() + ", Total Pages: " + movieDTOPage.getTotalPages());
+        log.info("✅ getPagedMovies End. TotalElements={}, TotalPages={}",
+                movieDTOPage.getTotalElements(), movieDTOPage.getTotalPages());
+
         return movieDTOPage;
     }
+
 
     @GetMapping("/detail")
     public ResponseEntity<MovieDTO> getMovieDetailApi(@RequestParam String id) {

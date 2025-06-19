@@ -1,6 +1,8 @@
 package kopo.jeonnam.repository.mongo.movie;
 
 import kopo.jeonnam.repository.entity.movie.MovieEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +15,7 @@ public interface MovieRepository extends MongoRepository<MovieEntity, String> {
 
     // ID로 특정 영화를 조회 (Optional을 사용하여 null 처리 용이)
     Optional<MovieEntity> findById(String id);
+
+    Page<MovieEntity> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
 }
