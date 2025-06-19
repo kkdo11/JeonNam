@@ -699,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             rListElement.innerHTML += html;
 
                             const markerImage = new kakao.maps.MarkerImage(
-                                '/images/tourMarker.svg', // ✅ you can customize this image path
+                                '/images/themeSearchMarker.png', // ✅ you can customize this image path
                                 new kakao.maps.Size(40, 40)
                             );
 
