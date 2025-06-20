@@ -12,6 +12,7 @@ public class MovieEntity {
     private String title;
     private String location;   // planArea
     private String posterUrl;  // posterURL
+    private String Addr;  //
     private double x;          // planLon
     private double y;          // planLat
 }

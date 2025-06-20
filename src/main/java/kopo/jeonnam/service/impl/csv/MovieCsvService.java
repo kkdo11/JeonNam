@@ -30,6 +30,7 @@ public class MovieCsvService {
             movie.setTitle(record.get("title"));
             movie.setLocation(record.get("planArea"));
             movie.setPosterUrl(record.get("posterURL"));
+            movie .setAddr(record.get("planAddr"));
 
             try {
                 movie.setX(Double.parseDouble(record.get("planLon")));

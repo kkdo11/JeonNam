@@ -61,6 +61,7 @@ public class MovieService implements IMovieService {
                             entity.getTitle(),
                             entity.getLocation(),
                             entity.getPosterUrl(),
+                            entity.getAddr(),
                             entity.getX(),
                             entity.getY()
                     );
@@ -108,6 +109,7 @@ public class MovieService implements IMovieService {
                     entity.getTitle(),
                     entity.getLocation(),
                     entity.getPosterUrl(),
+                    entity.getAddr(),
                     entity.getX(),
                     entity.getY()
             );

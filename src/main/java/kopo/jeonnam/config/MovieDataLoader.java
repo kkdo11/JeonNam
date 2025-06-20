@@ -14,7 +14,7 @@ public class MovieDataLoader implements CommandLineRunner {
 
     private final MovieCsvService movieCsvService;
     private final MovieRepository movieRepository; // MovieRepository 주입
-
+    // MovieRepository를 주입받아 MongoDB에 영화 데이터를 저장하는 역할을 합니다.
     @Override
     public void run(String... args) throws Exception {
         log.info(this.getClass().getName() + ".run() CSV 데이터 임포트 시작!");

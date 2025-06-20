@@ -57,6 +57,7 @@ public class MovieController {
                 movie.getTitle(),
                 movie.getLocation(),
                 movie.getPosterUrl(),
+                movie.getAddr(),
                 movie.getX(),
                 movie.getY()
         ));
@@ -81,6 +82,7 @@ public class MovieController {
                     entity.getTitle(),
                     entity.getLocation(),
                     entity.getPosterUrl(),
+                    entity.getAddr(),
                     entity.getX(),
                     entity.getY()
             );
