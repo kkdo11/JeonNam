@@ -1,16 +1,27 @@
 package kopo.jeonnam.service.impl.movie;
 
 import kopo.jeonnam.dto.movie.MovieDTO;
+import kopo.jeonnam.dto.movie.MovieSearchRequest;
 import kopo.jeonnam.repository.entity.movie.MovieEntity;
 import kopo.jeonnam.repository.mongo.movie.MovieRepository;
 import kopo.jeonnam.service.movie.IMovieService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.Collections; // 빈 리스트 반환을 위해 추가
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +37,7 @@ public class MovieService implements IMovieService {
 
     // MongoDB Movie 컬렉션에 접근하기 위한 Repository 주입
     private final MovieRepository movieRepository;
+    private final MongoTemplate mongoTemplate;
 
     /**
      * 모든 영화 목록을 조회합니다.
@@ -40,22 +52,16 @@ public class MovieService implements IMovieService {
 
         List<MovieEntity> movieEntities;
         try {
-            // MovieRepository를 통해 모든 MovieEntity 데이터를 조회합니다.
             movieEntities = movieRepository.findAll();
-            log.debug("조회된 MovieEntity 개수: {}", movieEntities.size()); // 디버그 레벨에서 조회된 개수 로깅
+            log.debug("조회된 MovieEntity 개수: {}", movieEntities.size());
         } catch (Exception e) {
-            // 데이터 조회 중 예외 발생 시 에러 로그를 기록하고 빈 리스트 반환
             log.error("getAllMovies 데이터 조회 중 오류 발생: {}", e.getMessage(), e);
             log.info(this.getClass().getName() + ".getAllMovies End! (Error occurred, returning empty list)");
-            return Collections.emptyList(); // 오류 발생 시 빈 리스트 반환
+            return Collections.emptyList();
         }
 
-        // MovieEntity 리스트를 MovieDTO 리스트로 변환합니다.
-        // Stream API를 사용하여 각 Entity를 DTO로 매핑합니다.
         List<MovieDTO> movieDTOs = movieEntities.stream()
                 .map(entity -> {
-                    // 각 MovieEntity를 MovieDTO 생성자를 통해 변환합니다.
-                    // 변환 과정에서 null 값 등 예외 처리 로직을 추가할 수 있습니다.
                     MovieDTO dto = new MovieDTO(
                             entity.getId(),
                             entity.getTitle(),
@@ -65,12 +71,11 @@ public class MovieService implements IMovieService {
                             entity.getX(),
                             entity.getY()
                     );
-                    log.trace("Entity 변환: {} -> {}", entity.getId(), dto.getTitle()); // 상세 변환 로깅
+                    log.trace("Entity 변환: {} -> {}", entity.getId(), dto.getTitle());
                     return dto;
                 })
                 .collect(Collectors.toList());
 
-        // 로그 종료
         log.info(this.getClass().getName() + ".getAllMovies End! (Returned {} movies)", movieDTOs.size());
         return movieDTOs;
     }
@@ -84,25 +89,19 @@ public class MovieService implements IMovieService {
      */
     @Override
     public MovieDTO getMovieDetail(String movieId) {
-        // 로그 시작: 조회할 영화 ID 포함
         log.info(this.getClass().getName() + ".getMovieDetail Start! movieId : {}", movieId);
 
-        // MovieRepository를 통해 ID로 MovieEntity를 조회합니다. Optional로 반환됩니다.
         Optional<MovieEntity> movieOptional;
         try {
             movieOptional = movieRepository.findById(movieId);
         } catch (Exception e) {
-            // 데이터 조회 중 예외 발생 시 에러 로그 기록
             log.error("getMovieDetail 데이터 조회 중 오류 발생 (ID: {}): {}", movieId, e.getMessage(), e);
             log.info(this.getClass().getName() + ".getMovieDetail End! (Error occurred)");
-            return null; // 오류 발생 시 null 반환
+            return null;
         }
 
-        MovieDTO dto = null; // 반환될 DTO 초기화
-
-        // Optional 객체가 값을 포함하고 있는지 확인합니다.
+        MovieDTO dto = null;
         if (movieOptional.isPresent()) {
-            // 값이 존재하면 Entity를 가져와 DTO로 변환합니다.
             MovieEntity entity = movieOptional.get();
             dto = new MovieDTO(
                     entity.getId(),
@@ -113,14 +112,147 @@ public class MovieService implements IMovieService {
                     entity.getX(),
                     entity.getY()
             );
-            log.debug("영화 상세 정보 조회 성공: {}", dto.getTitle()); // 디버그 레벨에서 성공 로깅
+            log.debug("영화 상세 정보 조회 성공: {}", dto.getTitle());
         } else {
-            // 해당 ID의 영화가 없을 경우 경고 로그를 기록합니다.
             log.warn("ID '{}'에 해당하는 영화를 찾을 수 없습니다.", movieId);
         }
 
-        // 로그 종료
         log.info(this.getClass().getName() + ".getMovieDetail End! (Movie found: {})", (dto != null));
-        return dto; // 조회된 DTO 또는 null 반환
+        return dto;
+    }
+
+    /**
+     * 정규표현식 메타문자를 이스케이프하는 유틸리티 메서드.
+     * 사용자가 입력한 문자열에 특수문자가 포함되어 있을 경우, 정규표현식에서 리터럴로 인식되도록 처리합니다.
+     */
+    private String escapeRegex(String text) {
+        return Pattern.quote(text);
+    }
+
+    /**
+     * 검색어를 정규화(Normalize)하여 검색에 방해가 되는 특수문자를 제거하고 공백을 정리하는 유틸리티 메서드.
+     * 예를 들어 "(구) 장흥교도소" -> "구 장흥교도소" 또는 "장흥교도소"로 변환할 수 있습니다.
+     */
+    private String normalizeSearchText(String text) {
+        if (text == null) {
+            return null;
+        }
+        String normalized = text.replaceAll("[()\\-/_.,]", " ");
+        normalized = normalized.replaceAll("\\s+", " ").trim();
+        return normalized;
+    }
+
+
+    @Override
+    public Page<MovieDTO> searchMovies(MovieSearchRequest searchRequest, Pageable pageable) {
+        log.info(this.getClass().getName() + ".searchMovies Start! searchRequest: {}, pageable: {}", searchRequest, pageable);
+
+        Page<MovieDTO> movieDTOSPage;
+
+        try {
+            // 1. 공통 검색 Criteria 구성
+            List<Criteria> searchCriteriaList = new ArrayList<>(); // <-- 여기서 선언됨
+
+            // 검색어를 정규화하여 사용
+            String normalizedKeyword = normalizeSearchText(searchRequest.getKeyword());
+            String normalizedTitle = normalizeSearchText(searchRequest.getTitle());
+            String normalizedLocation = normalizeSearchText(searchRequest.getLocation());
+            String normalizedAddr = normalizeSearchText(searchRequest.getAddr());
+
+            // 1. 통합 검색 키워드 (keyword) 처리
+            if (StringUtils.hasText(normalizedKeyword)) {
+                String keywordRegex = ".*" + escapeRegex(normalizedKeyword) + ".*";
+                // ⭐️ searchCriteriaList 사용
+                searchCriteriaList.add(new Criteria().orOperator(
+                        Criteria.where("title").regex(keywordRegex, "i"),
+                        Criteria.where("location").regex(keywordRegex, "i"),
+                        Criteria.where("Addr").regex(keywordRegex, "i")
+                ));
+            } else {
+                // keyword가 없고 개별 필드 검색 조건이 있는 경우 (AND 조건으로 결합)
+                if (StringUtils.hasText(normalizedTitle)) {
+                    // ⭐️ searchCriteriaList 사용
+                    searchCriteriaList.add(Criteria.where("title").regex(".*" + escapeRegex(normalizedTitle) + ".*", "i"));
+                }
+                if (StringUtils.hasText(normalizedLocation)) {
+                    // ⭐️ searchCriteriaList 사용
+                    searchCriteriaList.add(Criteria.where("location").regex(".*" + escapeRegex(normalizedLocation) + ".*", "i"));
+                }
+                if (StringUtils.hasText(normalizedAddr)) {
+                    // ⭐️ searchCriteriaList 사용
+                    searchCriteriaList.add(Criteria.where("Addr").regex(".*" + escapeRegex(normalizedAddr) + ".*", "i"));
+                }
+            }
+
+            // 2. 검색 조건이 있다면 Criteria.andOperator로 최종 CriteriaDefinition 생성
+            Criteria finalSearchCriteria = null;
+            if (!searchCriteriaList.isEmpty()) {
+                finalSearchCriteria = new Criteria().andOperator(searchCriteriaList.toArray(new Criteria[0]));
+            }
+
+            // 3. 전체 개수를 세기 위한 Query 객체 생성 및 Criteria 적용
+            Query totalCountQuery;
+            if (finalSearchCriteria != null) {
+                totalCountQuery = Query.query(finalSearchCriteria);
+            } else {
+                totalCountQuery = new Query();
+            }
+            long total = mongoTemplate.count(totalCountQuery, MovieEntity.class);
+            log.debug("서비스: 필터링 조건에 맞는 총 영화 개수 = {}", total);
+
+            // 4. 실제 페이지 데이터를 가져오기 위한 Query 객체 생성 및 Criteria 적용
+            Query pagedDataQuery;
+            if (finalSearchCriteria != null) {
+                pagedDataQuery = Query.query(finalSearchCriteria);
+            } else {
+                pagedDataQuery = new Query();
+            }
+
+            // 정렬 조건 추가
+            Sort sort = Sort.by(Sort.Direction.DESC, "_id");
+            if (StringUtils.hasText(searchRequest.getSortBy())) {
+                Sort.Direction direction = Sort.Direction.ASC;
+                if (StringUtils.hasText(searchRequest.getSortDirection()) &&
+                        searchRequest.getSortDirection().equalsIgnoreCase("desc")) {
+                    direction = Sort.Direction.DESC;
+                }
+                sort = Sort.by(direction, searchRequest.getSortBy());
+            }
+            pagedDataQuery.with(sort);
+
+            // 페이징 적용
+            pagedDataQuery.with(pageable);
+            log.debug("서비스: 페이징 적용 (page={}, size={})", pageable.getPageNumber(), pageable.getPageSize());
+
+            // 5. 실제 페이지 데이터 조회
+            List<MovieEntity> movies = mongoTemplate.find(pagedDataQuery, MovieEntity.class);
+            log.debug("서비스: 현재 페이지 조회된 데이터 개수 = {}", movies.size());
+
+            // 6. PageImpl 객체 생성
+            movieDTOSPage = new PageImpl<>(
+                    movies.stream()
+                            .map(entity -> new MovieDTO(
+                                    entity.getId(),
+                                    entity.getTitle(),
+                                    entity.getLocation(),
+                                    entity.getPosterUrl(),
+                                    entity.getAddr(),
+                                    entity.getX(),
+                                    entity.getY()
+                            ))
+                            .collect(Collectors.toList()),
+                    pageable,
+                    total
+            );
+
+        } catch (Exception e) {
+            log.error("searchMovies 데이터 조회 중 오류 발생: searchRequest={}, error={}", searchRequest, e.getMessage(), e);
+            log.info(this.getClass().getName() + ".searchMovies End! (Error occurred, returning empty page)");
+            return Page.empty(pageable);
+        }
+
+        log.info(this.getClass().getName() + ".searchMovies End! TotalElements={}, TotalPages={}, CurrentPageSize={}",
+                movieDTOSPage.getTotalElements(), movieDTOSPage.getTotalPages(), movieDTOSPage.getContent().size());
+        return movieDTOSPage;
     }
 }

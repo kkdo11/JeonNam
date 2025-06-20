@@ -38,10 +38,13 @@ public class MovieController {
         Pageable pageable = PageRequest.of(page, size);
         Page<MovieEntity> moviePage;
 
-        // 🔍 검색 키워드가 있을 경우 title 필터링
+        // 🔍 검색 키워드가 있을 경우 title, location, addr 필터링으로 변경
         if (keyword != null && !keyword.trim().isEmpty()) {
-            moviePage = movieRepository.findByTitleContainingIgnoreCase(keyword.trim(), pageable);
-            log.info("🔍 Filtering by keyword: '{}'", keyword);
+            String trimmedKeyword = keyword.trim();
+            // ⭐ 수정: 새로운 통합 검색 메서드 호출
+            moviePage = movieRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCaseOrAddrContainingIgnoreCase(
+                    trimmedKeyword, trimmedKeyword, trimmedKeyword, pageable);
+            log.info("🔍 Filtering by keyword: '{}' across title, location, addr", keyword);
         } else {
             moviePage = movieRepository.findAll(pageable);
             log.info("📦 No keyword, returning full list.");
