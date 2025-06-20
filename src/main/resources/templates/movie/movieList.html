@@ -107,11 +107,21 @@
             background-color: #d89000;
         }
 
+        /* 미디어 카드 하단 간격 조절 */
+        .media-1 {
+            margin-bottom: 30px; /* 원하는 간격으로 조절하세요 (예: 20px, 30px 등) */
+        }
+
+        /* 제목 중앙 정렬 */
+        .media-1 .d-flex > div {
+            text-align: center; /* 제목과 그 외 텍스트를 중앙 정렬 */
+            width: 100%; /* 부모 너비를 꽉 채우도록 */
+        }
+
     </style>
 </head>
 
 <body>
-<!-- ✅ 네비게이션 바 -->
 <nav class="site-nav">
     <div class="container">
         <div class="site-navigation">
@@ -136,7 +146,6 @@
     </div>
 </nav>
 
-<!-- ✅ Hero 영역 -->
 <div class="hero hero-inner">
     <div class="container">
         <div class="row align-items-center">
@@ -149,31 +158,26 @@
     </div>
 </div>
 
-<!-- ✅ 검색창 + 콘텐츠 -->
 <div class="untree_co-section">
     <div class="container">
 
         <div class="row justify-content-end mb-4">
             <div class="col-12 col-md-6 col-lg-3">
                 <div class="custom-search-bar">
-                    <input type="text" id="search-input" placeholder=" 제목 검색" />
+                    <input type="text" id="search-input" placeholder=" 제목, 장소, 주소 통합 검색" />
                     <button id="search-button">검색</button>
                 </div>
             </div>
         </div>
 
 
+        <div class="row g-x-4" id="media-list-container"></div>
 
-        <!-- ✅ 미디어 카드 -->
-        <div class="row" id="media-list-container"></div>
-
-        <!-- ✅ 페이지네이션 -->
         <div class="row mt-5">
             <div class="col-12 text-center" id="pagination-container"></div>
         </div>
     </div>
 </div>
-<!--footer start-->
 <div class="site-footer">
     <div class="inner first">
         <div class="container">
@@ -225,35 +229,36 @@
         </div>
     </div>
 </div>
-<!--footer end-->
-<!-- ✅ 스크립트 -->
 <script>
-    const API_BASE_URL = '/api/movies/list';
+    // 백엔드 컨트롤러의 /api/movies/list 엔드포인트를 그대로 사용합니다.
+    // 이 엔드포인트가 이제 keyword, page, size 외에 MovieSearchRequest의 다른 필드도 처리합니다.
+    const API_BASE_URL = '/api/movies/list'; // 또는 새로운 API_BASE_URL = '/api/movies/search';
     let currentPage = 0;
     const pageSize = 16;
     let totalPages = 0;
-    let currentKeyword = '';
+    // let currentKeyword = ''; // 이 변수는 이제 직접 사용하지 않고, search-input에서 값을 읽습니다.
 
-    const createMediaCard = ({ id, posterUrl, title, location }) => `
-    <div class="col-6 col-md-6 col-lg-3">
-      <div class="media-1">
-        <a href="/movie/detail?id=${id}" class="d-block mb-3 media-thumb" data-movie-id="${id}">
-          <img src="${posterUrl}" alt="${title}" class="img-fluid">
-        </a>
-        <div class="d-flex">
-          <div>
-            <h3><a href="/movie/detail?id=${id}">${title}</a></h3> <p>${location}</p>
+    // createMediaCard 함수 수정: 'addr' 필드를 추가하여 표시
+    const createMediaCard = ({ id, posterUrl, title }) => `
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="media-1">
+            <a href="/movie/detail?id=${id}" class="d-block mb-3 media-thumb" data-movie-id="${id}">
+              <img src="${posterUrl}" alt="${title}" class="img-fluid">
+            </a>
+            <div class="d-flex">
+              <div>
+                <h3><a href="/movie/detail?id=${id}">${title}</a></h3>
+                </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  `;
+      `;
 
     const renderMediaList = (mediaList) => {
         const container = document.getElementById('media-list-container');
         if (!container) return;
         if (!mediaList || mediaList.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted">표시할 미디어 여행 정보가 없습니다.</p>';
+            container.innerHTML = '<p class="text-center text-muted">표시할 미디어 여행 정보가 없습니다. 다른 검색어를 시도해보세요.</p>';
             return;
         }
         container.innerHTML = mediaList.map(createMediaCard).join('');
@@ -275,16 +280,16 @@
 
         let html = '<ul class="pagination justify-content-center">';
         html += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
-               <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
-             </li>`;
+                   <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+                 </li>`;
         for (let i = 0; i < totalPages; i++) {
             html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                 <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
-               </li>`;
+                     <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
+                   </li>`;
         }
         html += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
-               <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
-             </li>`;
+                   <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+                 </li>`;
         html += '</ul>';
         paginationContainer.innerHTML = html;
 
@@ -294,7 +299,7 @@
                 const newPage = parseInt(e.target.dataset.page, 10);
                 if (!isNaN(newPage) && newPage >= 0 && newPage < totalPages) {
                     currentPage = newPage;
-                    loadMediaList();
+                    loadMediaList(); // 페이지 변경 시에도 검색 함수 호출
                 }
             });
         });
@@ -303,11 +308,35 @@
     async function loadMediaList() {
         showMessage('미디어 여행 정보를 불러오는 중입니다...');
         try {
-            const url = `${API_BASE_URL}?page=${currentPage}&size=${pageSize}&keyword=${encodeURIComponent(currentKeyword)}`;
+            const searchInput = document.getElementById('search-input');
+            const keyword = searchInput.value.trim(); // 현재 입력된 검색어 가져오기
+
+            // URLSearchParams를 사용하여 쿼리 파라미터를 쉽게 구성합니다.
+            const params = new URLSearchParams();
+            params.append('page', currentPage.toString());
+            params.append('size', pageSize.toString());
+
+            if (keyword) {
+                // 백엔드 MovieSearchRequest의 'keyword' 필드에 매핑됩니다.
+                params.append('keyword', keyword);
+                // 만약 특정 필드(title, location, addr)로만 검색하고 싶다면
+                // params.append('title', keyword); 또는 params.append('location', keyword); 등
+            }
+
+            // TODO: 나중에 정렬, 추가 필터링 UI가 있다면 여기에 추가
+            // const sortBy = document.getElementById('sort-by-select').value;
+            // if (sortBy) params.append('sortBy', sortBy);
+            // const sortDirection = document.getElementById('sort-direction-select').value;
+            // if (sortDirection) params.append('sortDirection', sortDirection);
+
+
+            const url = `${API_BASE_URL}?${params.toString()}`;
+            console.log("Fetching data from:", url); // 디버깅을 위해 호출 URL 로그
+
             const res = await fetch(url);
             if (!res.ok) {
                 const errorText = await res.text();
-                throw new Error(`상태 ${res.status}: ${res.statusText} - ${errorText}`);
+                throw new Error(`HTTP 상태 ${res.status}: ${res.statusText} - ${errorText}`);
             }
 
             const pageData = await res.json();
@@ -316,8 +345,8 @@
             renderPagination();
 
         } catch (error) {
-            console.error('로딩 오류:', error);
-            showMessage(`에러 발생: ${error.message}`, true);
+            console.error('미디어 여행 정보 로딩 중 오류 발생:', error);
+            showMessage(`정보를 불러오는 데 실패했습니다: ${error.message}`, true);
             const paginationContainer = document.getElementById('pagination-container');
             if (paginationContainer) paginationContainer.innerHTML = '';
         }
@@ -325,24 +354,23 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('search-button').addEventListener('click', () => {
-            currentKeyword = document.getElementById('search-input').value.trim();
-            currentPage = 0;
+            currentPage = 0; // 새 검색 시 항상 첫 페이지로 초기화
             loadMediaList();
         });
 
         document.getElementById('search-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                currentKeyword = document.getElementById('search-input').value.trim();
-                currentPage = 0;
+                e.preventDefault(); // Enter 키 기본 동작(폼 제출) 방지
+                currentPage = 0; // 새 검색 시 항상 첫 페이지로 초기화
                 loadMediaList();
             }
         });
 
+        // 페이지 로드 시 초기 데이터 로드
         loadMediaList();
     });
 </script>
 
-<!-- 필수 JS -->
 <script src="/js/jquery-3.4.1.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 </body>

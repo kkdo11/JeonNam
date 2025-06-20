@@ -12,7 +12,7 @@ public class MovieDTO {
     private String title;
     private String location;
     private String posterUrl;
-    private String Addr;
+    private String addr;
     private double x;
     private double y;
 

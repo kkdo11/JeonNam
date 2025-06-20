@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--<html lang="en">-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -149,22 +148,16 @@
 
         }
     </style>
-    <!-- jquery -->
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
 
 
-    <!-- 지도 -->
-    <!-- 1. Kakao SDK (autoload=false 설정) -->
-    <!-- Kakao SDK - autoload false -->
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=15f402ba36aeaab14a6b06f5dd3f796e&autoload=false&libraries=services"></script>
 
 
-    <!-- 2. 지도 초기화 함수 포함된 스크립트 -->
     <script type="text/javascript" src="/js/movieDetail.js"></script>
 
 
-    <!-- 3. Kakao SDK가 로드되면 initMap 실행 -->
     <script>
         window.onload = function () {
             if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.load) {
@@ -208,7 +201,6 @@
                 <li><a href="/favorite/testAllList">테마 여행</a></li>
                 <li><a href="about.html">AI 추천 여행</a></li>
                 <li><a href="/products/page">전남 먹거리</a></li>
-                <!-- 로그인 여부에 따라 조건 분기 -->
                 <li th:if="${session.email == null}">
                     <a href="/user/login">로그인</a>
                 </li>
@@ -248,11 +240,8 @@
                         <div id="map-area" data-latitude="34.62939" data-longitude="126.90022"
                              style="width:100%; height:460px;"></div>
 
-                        <!-- 위치 및 감성 멘트 표시 영역 -->
                         <div id="location-caption" class="mt-3 text-center">
-<!--                            <p id="detail-place-text" style="font-weight: bold; font-size: 1.1rem;">📍 장소 정보 로딩 중...</p>-->
                             <p id="emotion-text" class="text-muted">✨ 잠시만 기다려주세요...</p>
-                            <!-- 찜하기 버튼 -->
                             <button id="favorite-btn" class="btn-favorite" style="
     margin-bottom: 30px;
     margin-top: 10px;
@@ -264,11 +253,6 @@
 
 
 
-                            <!--                            <button id="favorite-btn" class="btn btn-outline-danger" style="-->
-<!--    margin-bottom: 20px;">-->
-<!--                                <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>-->
-<!--                                찜하기-->
-<!--                            </button>-->
                         </div>
 
                     </div>
@@ -282,13 +266,8 @@
                         <div class="info-area">
                             <h1 id="detail-movie-name">로딩 중...</h1>
                             <p><strong>📍 장소 : </strong> <span id="detail-place">로딩 중...</span></p>
+                            <p><strong>🏠 주소 : </strong> <span id="detail-address">로딩 중...</span></p>
                         </div>
-<!--                        &lt;!&ndash; 찜하기 버튼 &ndash;&gt;-->
-<!--                        <button id="favorite-btn" class="btn btn-outline-danger">-->
-<!--                            <iconify-icon id="favorite-icon" icon="mdi:heart-outline" width="24"></iconify-icon>-->
-<!--                            찜하기-->
-<!--                        </button>-->
-
                     </div>
                 </div>
             </div>
@@ -372,6 +351,7 @@
         const detailPosterUrlElem = document.getElementById('detail-poster-url');
         const detailMovieNameElem = document.getElementById('detail-movie-name');
         const detailPlaceElem = document.getElementById('detail-place');
+        const detailAddressElem = document.getElementById('detail-address'); // 새로 추가된 주소 엘리먼트
         const detailPageTitleElem = document.getElementById('detail-page-title'); // 페이지 상단 제목
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -408,6 +388,7 @@
                         detailPosterUrlElem.alt = data.title;
                         detailMovieNameElem.textContent = data.title;
                         detailPlaceElem.textContent = data.location;
+                        detailAddressElem.textContent = data.addr; // ✅ 주소 값 설정
                         detailPageTitleElem.textContent = data.title;
 
                         // ✅ 지도 아래 위치 정보 및 감성 멘트 출력
@@ -432,6 +413,7 @@
                     } else {
                         detailMovieNameElem.textContent = '영화 정보를 찾을 수 없습니다.';
                         detailPlaceElem.textContent = '';
+                        detailAddressElem.textContent = ''; // ✅ 주소 값 초기화
                         detailPosterUrlElem.src = '';
                         detailPosterUrlElem.alt = '정보 없음';
                         detailPageTitleElem.textContent = '정보 없음';
@@ -442,6 +424,7 @@
                     console.error('영화 상세 정보를 불러오는 데 실패했습니다:', error);
                     detailMovieNameElem.textContent = '정보 로딩 중 오류 발생';
                     detailPlaceElem.textContent = error.message;
+                    detailAddressElem.textContent = '정보 로딩 중 오류 발생'; // ✅ 주소 값 오류 메시지
                     detailPosterUrlElem.src = '';
                     detailPosterUrlElem.alt = '에러';
                     detailPageTitleElem.textContent = '오류';
@@ -449,6 +432,7 @@
         } else {
             detailMovieNameElem.textContent = '유효한 영화 ID가 제공되지 않았습니다.';
             detailPlaceElem.textContent = '';
+            detailAddressElem.textContent = ''; // ✅ 주소 값 초기화
             detailPosterUrlElem.src = '';
             detailPosterUrlElem.alt = 'ID 없음';
             detailPageTitleElem.textContent = '잘못된 접근';
@@ -505,12 +489,12 @@
         try {
             const loginCheckRes = await fetch('/auth/check-login');
             if (loginCheckRes.status === 401) {
-            alert('찜 기능을 이용하시려면 로그인이 필요합니다. 로그인 페이지로 이동합니다.');// 수정된 메시지
+                alert('찜 기능을 이용하시려면 로그인이 필요합니다. 로그인 페이지로 이동합니다.');// 수정된 메시지
                 window.location.href = '/user/login';
                 return;
             }
             if (!loginCheckRes.ok) {
-            alert('서비스 이용에 문제가 발생했습니다. 잠시 후 다시 시도해 주십시오.'); // 수정된 메시지
+                alert('서비스 이용에 문제가 발생했습니다. 잠시 후 다시 시도해 주십시오.'); // 수정된 메시지
                 console.error('로그인 상태 확인 실패:', loginCheckRes.status, loginCheckRes.statusText);
                 return;
             }
@@ -526,7 +510,7 @@
                     throw new Error('찜 취소에 실패했습니다. 다시 시도해 주십시오.'); // 수정된 메시지
                 }
 
-            alert(`"${title}" 영화가 찜 목록에서 제거되었습니다.`); // 수정된 메시지
+                alert(`"${title}" 영화가 찜 목록에서 제거되었습니다.`); // 수정된 메시지
                 favIcon.setAttribute('icon', 'mdi:heart-outline');
             } else {
                 const favoriteDTO = {
@@ -555,12 +539,12 @@
                 }
                 const data = await res.json();
 
-            alert(`"${data.name}" 영화가 찜 목록에 추가되었습니다.`); // 수정된 메시지
+                alert(`"${data.name}" 영화가 찜 목록에 추가되었습니다.`); // 수정된 메시지
                 favIcon.setAttribute('icon', 'mdi:heart');
             }
         } catch (err) {
             console.error('찜 기능 처리 중 오류:', err);
-        alert(`오류가 발생했습니다: ${err.message || '알 수 없는 오류'}. 잠시 후 다시 시도해 주십시오.`); // 수정된 메시지
+            alert(`오류가 발생했습니다: ${err.message || '알 수 없는 오류'}. 잠시 후 다시 시도해 주십시오.`); // 수정된 메시지
         } finally {
             this.disabled = false;
         }
