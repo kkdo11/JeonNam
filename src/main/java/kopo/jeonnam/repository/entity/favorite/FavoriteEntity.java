@@ -1,6 +1,5 @@
 package kopo.jeonnam.repository.entity.favorite;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,7 @@ public class FavoriteEntity {
     private String type; // "media", "place", ...
     private String name;
     private String location;
+    private String addr;
     private double x;
     private double y;
     private String posterUrl;
@@ -29,7 +29,7 @@ public class FavoriteEntity {
 
     @Builder
     public FavoriteEntity(String id, String userId, String type, String name, String location,
-                          double x, double y, String posterUrl,
+                          String addr, double x, double y, String posterUrl,
                           String planPhone, String planHomepage,
                           String planParking, String planContents) {
         this.id = id;
@@ -37,9 +37,10 @@ public class FavoriteEntity {
         this.type = type;
         this.name = name;
         this.location = location;
+        this.addr = addr; // ✅ assign to field
         this.x = x;
         this.y = y;
-        this.posterUrl = posterUrl;    // 제대로 할당됨
+        this.posterUrl = posterUrl;
         this.planPhone = planPhone;
         this.planHomepage = planHomepage;
         this.planParking = planParking;

@@ -235,7 +235,7 @@
             <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
                 <li><a href="/user/index">홈</a></li>
                 <li><a href="/movie">미디어 여행</a></li>
-                <li  class="active"><a href="/favorite/testAllList">테마 여행</a></li>
+                <li  class="active"><a href="/favorite/">테마 여행</a></li>
                 <li><a href="about.html">AI 추천 여행</a></li>
                 <li><a href="contact.html">전남 먹거리</a></li>
                 <!-- 로그인 여부에 따라 조건 분기 -->
@@ -327,15 +327,34 @@
                                             <div th:class="${fav.posterUrl != null and fav.posterUrl != ''} ? 'col-md-8' : 'col-12'">
                                                 <div class="card-body">
                                                     <h5 class="card-title" th:text="${fav.name}">미디어 이름</h5>
-                                                    <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>
-                                                    <p class="card-text" th:text="'주소: ' + ${fav.location}">위치</p>
+<!--                                                    <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>-->
+                                                    <p class="card-subtitle mb-2 text-muted">유형: 미디어</p>
+                                                    <p class="card-text" th:text="'지역: ' + ${fav.location}">지역</p>
+                                                    <p class="card-text" th:text="'주소: ' + ${fav.addr}">위치</p>
                                                     <p th:if="${fav.planPhone != ''}" class="card-text"
                                                        th:text="'전화: ' + ${fav.planPhone}"></p>
                                                     <p th:if="${fav.planHomepage != ''}" class="card-text">
                                                         <a th:href="${fav.planHomepage}" target="_blank">홈페이지 방문</a>
                                                     </p>
                                                     <p th:if="${fav.planContents != ''}" class="card-text"
-                                                       th:text="${fav.planContents}"></p>
+                                                       th:utext="${#strings.replace(#strings.replace(#strings.replace(#strings.replace(fav.planContents, '\n', '<br/>'), '&', '&amp;'), '<', '&lt;'), '■', '<br/><strong>■</strong>')}">
+                                                    </p>
+                                                    <div class="text-end mt-2">
+                                                        <button class="btn btn-sm btn-outline-secondary move-to-map-btn me-2"
+                                                                th:data-name="${fav.name}"
+                                                                th:data-addr="${fav.addr}"
+                                                                th:data-x="${fav.x}"
+                                                                th:data-y="${fav.y}">
+                                                            지도로 이동
+                                                        </button>
+
+                                                        <button class="btn btn-sm btn-outline-danger delete-favorite-btn"
+                                                                th:data-type="${fav.type}"
+                                                                th:data-name="${fav.name}"
+                                                                th:data-addr="${fav.addr}">
+                                                            삭제
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -350,15 +369,43 @@
                                     <div class="card shadow-sm">
                                         <div class="card-body">
                                             <h5 class="card-title" th:text="${fav.name}">여행지 이름</h5>
-                                            <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>
-                                            <p class="card-text" th:text="'주소: ' + ${fav.location}">주소</p>
+<!--                                            <p class="card-subtitle mb-2 text-muted" th:text="'유형: ' + ${fav.type}">유형</p>-->
+                                            <p class="card-subtitle mb-2 text-muted">유형: 관광지</p>
+                                            <p class="card-text" th:text="'지역: ' + ${fav.location}">지역</p>
+                                            <p class="card-text" th:text="'주소: ' + ${fav.addr}">위치</p>
                                             <p th:if="${fav.planPhone != ''}" class="card-text"
                                                th:text="'전화: ' + ${fav.planPhone}"></p>
                                             <p th:if="${fav.planHomepage != ''}" class="card-text">
                                                 <a th:href="${fav.planHomepage}" target="_blank">홈페이지 방문</a>
                                             </p>
                                             <p th:if="${fav.planContents != ''}" class="card-text"
-                                               th:text="${fav.planContents}"></p>
+                                               th:utext="${#strings.replace(
+                                                    #strings.replace(
+                                                      #strings.replace(
+                                                        #strings.replace(
+                                                          #strings.replace(
+                                                            fav.planContents, '\n', '<br/>'),
+                                                          '&', '&amp;'),
+                                                        '<', '&lt;'),
+                                                      '■', '<br/><strong>■</strong>'),
+                                                    '●', '<br/><strong>●</strong>')}">
+                                            </p>
+                                            <div class="text-end mt-2">
+                                                <button class="btn btn-sm btn-outline-secondary move-to-map-btn me-2"
+                                                        th:data-name="${fav.name}"
+                                                        th:data-addr="${fav.addr}"
+                                                        th:data-x="${fav.x}"
+                                                        th:data-y="${fav.y}">
+                                                    지도로 이동
+                                                </button>
+
+                                                <button class="btn btn-sm btn-outline-danger delete-favorite-btn"
+                                                        th:data-type="${fav.type}"
+                                                        th:data-name="${fav.name}"
+                                                        th:data-addr="${fav.addr}">
+                                                    삭제
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

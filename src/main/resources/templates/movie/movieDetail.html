@@ -198,7 +198,7 @@
             <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
                 <li><a href="/user/index">홈</a></li>
                 <li class="active"><a href="/movie">미디어 여행</a></li>
-                <li><a href="/favorite/testAllList">테마 여행</a></li>
+                <li><a href="/favorite/">테마 여행</a></li>
                 <li><a href="about.html">AI 추천 여행</a></li>
                 <li><a href="/products/page">전남 먹거리</a></li>
                 <li th:if="${session.email == null}">
@@ -408,7 +408,7 @@
 
 
                         // 찜 여부 확인 실행
-                        checkFavoriteStatus(data.title, data.location);
+                        checkFavoriteStatus(data.title, data.addr);
 
                     } else {
                         detailMovieNameElem.textContent = '영화 정보를 찾을 수 없습니다.';
@@ -445,9 +445,9 @@
         }
     });
 
-    async function checkFavoriteStatus(title, location) {
+    async function checkFavoriteStatus(title, addr) {
         try {
-            const res = await fetch(`/favorite/check?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`);
+            const res = await fetch(`/favorite/check?type=media&name=${encodeURIComponent(title)}&addr=${encodeURIComponent(addr)}`);
             const favIcon = document.getElementById('favorite-icon');
 
             if (res.ok) {
@@ -478,6 +478,7 @@
     async function handleFavoriteClick() {
         const title = document.getElementById('detail-movie-name').textContent;
         const location = document.getElementById('detail-place').textContent;
+        const address = document.getElementById('detail-address').textContent;
         const posterUrl = document.getElementById('detail-poster-url').src;
         const mapArea = document.getElementById('map-area');
         const latitude = mapArea ? mapArea.dataset.latitude : null;
@@ -502,7 +503,7 @@
             this.disabled = true;
 
             if (isCurrentlyFavorite) {
-                const res = await fetch(`/favorite?type=media&name=${encodeURIComponent(title)}&location=${encodeURIComponent(location)}`, {
+                const res = await fetch(`/favorite?type=media&name=${encodeURIComponent(title)}&addr=${encodeURIComponent(address)}`, {
                     method: 'DELETE'
                 });
 
@@ -517,6 +518,7 @@
                     type: 'media',
                     name: title || '',
                     location: location || '',
+                    addr: address || '',
                     posterUrl: posterUrl || '',
                     x: longitude || null,
                     y: latitude || null,
