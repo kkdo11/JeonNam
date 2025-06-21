@@ -50,6 +50,7 @@ public class FavoriteController {
                 favoriteDTO.type(),
                 favoriteDTO.name(),
                 favoriteDTO.location(),
+                favoriteDTO.addr(),
                 favoriteDTO.posterUrl(),
                 favoriteDTO.x(),
                 favoriteDTO.y(),
@@ -68,20 +69,20 @@ public class FavoriteController {
     public ResponseEntity<Boolean> checkFavorite(
             @RequestParam String type,
             @RequestParam String name,
-            @RequestParam String location,
+            @RequestParam String addr,
             HttpSession session) {
 
         String email = (String) session.getAttribute("email");
         System.out.println("[CHECK] Email: " + email);
         System.out.println("[CHECK] Type: " + type);
         System.out.println("[CHECK] Name: " + name);
-        System.out.println("[CHECK] Location: " + location);
+        System.out.println("[CHECK] Addr: " + addr);
 
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean exists = favoriteService.existsByUserIdAndTypeAndNameAndLocation(email, type, name, location);
+        boolean exists = favoriteService.existsByUserIdAndTypeAndNameAndAddr(email, type, name, addr);
         System.out.println("[CHECK] Exists: " + exists);
 
         return ResponseEntity.ok(exists);
@@ -91,7 +92,7 @@ public class FavoriteController {
     public ResponseEntity<?> deleteFavorite(
             @RequestParam String type,
             @RequestParam String name,
-            @RequestParam String location,
+            @RequestParam String addr,
             HttpSession session) {
 
         String email = (String) session.getAttribute("email");
@@ -99,7 +100,7 @@ public class FavoriteController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean deleted = favoriteService.deleteByTypeAndNameAndLocation(type, name, location, email);
+        boolean deleted = favoriteService.deleteByTypeAndNameAndAddr(type, name, addr, email);
 
         if (deleted) {
             return ResponseEntity.ok("찜 취소 완료");

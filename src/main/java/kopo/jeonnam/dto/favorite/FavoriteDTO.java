@@ -5,6 +5,7 @@ public record FavoriteDTO(
         String type,
         String name,
         String location,
+        String addr,
         String posterUrl,
         double x,
         double y,
