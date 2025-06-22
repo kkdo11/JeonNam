@@ -514,11 +514,13 @@
                 alert(`"${title}" 영화가 찜 목록에서 제거되었습니다.`); // 수정된 메시지
                 favIcon.setAttribute('icon', 'mdi:heart-outline');
             } else {
+
+
                 const favoriteDTO = {
                     type: 'media',
                     name: title || '',
-                    location: location || '',
-                    addr: address || '',
+                    location: location || '',  // ← 영화의 고유 지역 (e.g., 서울특별시)
+                    addr: address || '',       // ← 상세 주소 (e.g., 강서구 등)
                     posterUrl: posterUrl || '',
                     x: longitude || null,
                     y: latitude || null,
@@ -537,11 +539,11 @@
                 });
 
                 if (!res.ok) {
-                    throw new Error('찜 추가에 실패했습니다. 다시 시도해 주십시오.'); // 수정된 메시지
+                    throw new Error('찜 추가에 실패했습니다. 다시 시도해 주십시오.');
                 }
                 const data = await res.json();
 
-                alert(`"${data.name}" 영화가 찜 목록에 추가되었습니다.`); // 수정된 메시지
+                alert(`"${data.name}" 영화가 찜 목록에 추가되었습니다.`);
                 favIcon.setAttribute('icon', 'mdi:heart');
             }
         } catch (err) {
