@@ -70,7 +70,10 @@ public class FavoriteService implements IFavoriteService {
         }
 
         // Parse 시/군/구 from full address
-        String simplifiedLocation = extractSiGunGu(dto.addr()); // or dto.location()
+        // ✅ 미디어가 아닐 때만 addr에서 시/군/구 추출
+        String simplifiedLocation = "media".equals(dto.type())
+                ? dto.location()  // 그대로 사용
+                : extractSiGunGu(dto.addr());  // addr에서 시/군/구 추출
 
 // Create a new DTO with simplified location
         FavoriteDTO updatedDto = new FavoriteDTO(
