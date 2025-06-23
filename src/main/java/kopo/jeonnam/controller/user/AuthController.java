@@ -97,7 +97,8 @@ public class AuthController {
 //            session.setAttribute("email", email); // 세션에 이메일 저장
 
             log.info("[AuthController] doLogin success. User Email: {}", email);
-            return "redirect:/auth/loginsuccess";
+            return "user/index";
+
         } else { // 로그인 실패
             log.warn("[AuthController] doLogin failed - Email: {}, reason: password mismatch or unregistered account.", email);
             redirectAttributes.addFlashAttribute("errorMsg", "이메일 또는 비밀번호가 일치하지 않습니다.");
@@ -105,24 +106,7 @@ public class AuthController {
         }
     }
 
-    /**
-     * 로그인 성공 후 처리 페이지
-     * 로그인 성공 시 메인 페이지 또는 대시보드 페이지로 이동 전에 추가적인 처리를 할 수 있습니다.
-     * 현재는 단순히 `user/index` 뷰를 반환합니다.
-     *
-     * @param session 세션 객체. 로그인된 사용자의 이메일 정보를 확인합니다.
-     * @return 로그인 성공 시 보여줄 뷰 페이지 경로
-     */
-    @GetMapping("/loginsuccess")
-    public String loginSuccess(HttpSession session) {
-        String email = CmmUtil.nvl((String) session.getAttribute("email"));
-        if (email.isEmpty()) {
-            log.warn("[AuthController] loginSuccess - No login info (email) in session. Unauthorized access.");
-            return "redirect:/auth/login"; // 로그인 정보 없으면 로그인 페이지로 리다이렉트
-        }
-        log.info("[AuthController] loginSuccess page accessed by user: {}", email);
-        return "user/index"; // 예: 로그인 후 메인 페이지 또는 대시보드 페이지
-    }
+
 
     /**
      * ------------------------ 로그아웃 처리 ------------------------
