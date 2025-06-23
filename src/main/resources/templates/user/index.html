@@ -561,6 +561,40 @@
 
         });
     })
+    //날짜 시작 출발 정보
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".form");
+        const dateInput = document.querySelector("input[name='daterange']");
+        const departureSelect = document.querySelector("select");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault(); // 폼 기본 제출 막기
+
+            const selectedDateRange = dateInput.value; // ex: "2025.06.23 - 2025.06.25"
+            const selectedDeparture = departureSelect.value;
+
+            // 날짜 범위 분리
+            const dates = selectedDateRange.split(" - ");
+            const startDate = dates[0] ? dates[0].trim().replace(/\./g, '-') : "";
+            const endDate = dates[1] ? dates[1].trim().replace(/\./g, '-') : startDate;
+
+            // const startDate = dates[0] ? dates[0].trim() : "";
+            // const endDate = dates[1] ? dates[1].trim() : startDate; // endDate 없으면 startDate와 동일하게
+
+            console.log("📌 선택한 출발일:", startDate);
+            console.log("📌 선택한 도착일:", endDate);
+            console.log("📌 선택한 출발역:", selectedDeparture);
+
+            // localStorage에 따로 저장
+            localStorage.setItem("startDate", startDate);
+            localStorage.setItem("endDate", endDate);
+            localStorage.setItem("departurePlace", selectedDeparture);
+
+            // gpt 페이지로 이동
+            window.location.href = "/gpt/view";
+        });
+
+    });
 </script>
 
 <script src="/js/custom.js"></script>

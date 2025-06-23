@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>AI 추천 여행</title>
+
+    <link rel="shortcut icon" href="/images/JN_favicon.png">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/css/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/fonts/icomoon/style.css">
+    <link rel="stylesheet" href="/css/flaticon.css">
+    <link rel="stylesheet" href="/css/daterangepicker.css">
+    <link rel="stylesheet" href="/css/aos.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        /* 커스텀 스타일: 기존 Tailwind 디자인을 Bootstrap에 맞게 재해석 */
+        :root {
+            --orange-primary: #f3a600; /* 전남와따의 주황색 계열 */
+            --orange-secondary: #d89000; /* 더 진한 주황색 */
+            --orange-light: #fffaf0; /* 아주 밝은 주황색 계열 배경 */
+            --orange-text: #403f3f; /* 어두운 회색 텍스트 */
+            --orange-accent: #ffc107; /* 강조 주황색 */
+        }
+
+        /*body {*/
+        /*    background-color: var(--orange-light); !* 전체 배경 색상 적용 *!*/
+        /*    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;*/
+        /*}*/
+
+        .ai-main-content {
+            padding-top: 6rem; /* hero-inner 아래 간격 */
+            padding-bottom: 3rem;
+        }
+
+        .ai-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .ai-card-title {
+            color: var(--orange-text);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem; /* h2에 맞게 조정 */
+        }
+
+        .ai-card-title .icon-circle {
+            background-color: var(--orange-primary);
+            color: #fff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        .ai-form-group label {
+            color: var(--orange-text);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .ai-form-control {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 10px 15px;
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            color: var(--orange-text);
+        }
+
+        .ai-form-control::placeholder {
+            color: #6c757d;
+        }
+
+        .ai-form-control:focus {
+            border-color: var(--orange-accent);
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+            outline: none;
+        }
+
+        .ai-btn-primary {
+            display: inline-flex
+        ;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #ffa84c, #ff7b00);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(255, 123, 0, 0.25);
+            cursor: pointer;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            width: 100%; /* 부모에 맞춰 늘어나게 */
+        }
+
+        .ai-btn-primary:hover {
+            background-color: var(--orange-secondary);
+            border-color: var(--orange-secondary);
+            color: #fff;
+        }
+
+        .ai-btn-secondary {
+            display: inline-flex
+        ;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, #d6d6d6, #9e9e9e);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(255, 123, 0, 0.25);
+            cursor: pointer;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            width: 100%; /* 부모에 맞춰 늘어나게 */
+        }
+
+        .ai-btn-secondary:hover {
+            background-color: #e9ecef;
+            border-color: #dae0e5;
+            color: var(--orange-text);
+        }
+
+        /* 진행 바 스타일 */
+        .progress-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--orange-primary);
+            border-radius: 5px;
+            transition: width 0.6s ease;
+        }
+
+        .step-indicator {
+            color: var(--orange-text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* 찜한 장소 목록 */
+        .location-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        .location-list-item:hover {
+            border-color: var(--orange-accent);
+            background-color: var(--orange-light);
+        }
+
+        .location-list-item.selected {
+            border-color: var(--orange-primary);
+            background-color: rgba(243, 166, 0, 0.08); /* 선택 시 약간 주황색 배경 */
+        }
+
+        .location-list-item .check-icon {
+            color: var(--orange-primary);
+            font-size: 1.1rem;
+        }
+        .location-list-item .check-icon.hidden {
+            visibility: hidden;
+        }
+
+        /* 선택된 장소 태그 */
+        .selected-locations-tags {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #e0e0e0;
+        }
+        .location-tag {
+            background-color: var(--orange-primary);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .location-tag button {
+            background: none;
+            border: none;
+            color: #fff;
+            margin-left: 5px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .location-tag button:hover {
+            opacity: 1;
+        }
+
+        /* 로딩 스피너 및 메시지 */
+        .loading-section {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .spinner-ring {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(243, 166, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--orange-primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: var(--orange-text);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .loading-dots::after {
+            content: '';
+            animation: dots 2s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        .loading-steps {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        .loading-steps div {
+            padding: 5px 0;
+            transition: opacity 0.5s ease;
+        }
+        .loading-steps div.active {
+            font-weight: 600;
+            color: var(--orange-text);
+        }
+
+        /* 결과 섹션 */
+        .result-section h3 {
+            color: var(--orange-text);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .result-section h3 i {
+            margin-right: 10px;
+            color: var(--orange-primary);
+        }
+        .day-schedule-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .day-schedule-card h4 {
+            color: var(--orange-primary);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+            border-bottom: 2px solid rgba(243, 166, 0, 0.1);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .day-schedule-card h4 .day-circle {
+            background-color: var(--orange-primary);
+            color: #fff;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-right: 8px;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 30px; /* 점과 선을 위한 공간 */
+            margin-bottom: 20px;
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 10px; /* 점의 중앙에 오도록 */
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--orange-accent);
+        }
+        .timeline-item:last-child::before {
+            height: 15px; /* 마지막 항목의 선은 아이템의 중간까지만 */
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--orange-primary);
+            border: 3px solid #fff; /* 점 주변 흰색 테두리 */
+            box-shadow: 0 0 0 3px rgba(243, 166, 0, 0.3); /* 점 주변 그림자 */
+        }
+        .timeline-content {
+            background-color: var(--orange-light);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--orange-text);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        .timeline-content h5 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--orange-secondary);
+        }
+        .timeline-content .time {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .timeline-content .address {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 10px;
+        }
+        .timeline-content .address i {
+            margin-right: 5px;
+            color: var(--orange-accent);
+        }
+
+        /* 미리보기 섹션 */
+        .preview-card-item {
+            background-color: var(--orange-light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(243, 166, 0, 0.1);
+        }
+        .preview-card-item h4 {
+            font-weight: 600;
+            color: var(--orange-text);
+            margin-bottom: 8px;
+        }
+        .preview-card-item h4 i {
+            margin-right: 8px;
+            color: var(--orange-primary);
+        }
+        .preview-card-item p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+        .preview-card-item .location-badge {
+            background-color: var(--orange-accent);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        /* Floating Action Button (스크롤 위로) */
+        .floating-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--orange-primary);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: none;
+            cursor: pointer;
+        }
+        .floating-fab:hover {
+            background: var(--orange-secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 미디어 쿼리 삭제: 항상 세로로 쌓이도록 함 */
+        /* @media (min-width: 992px) {
+            .desktop-layout {
+                display: flex;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .desktop-layout {
+                display: block;
+            }
+            .ai-main-content .col-md-6:last-child {
+                margin-top: 30px;
+            }
+        } */
+    </style>
+</head>
+
+<body>
+<nav class="site-nav">
+    <div class="container">
+        <div class="site-navigation">
+            <a href="/user/index" class="logo m-0">
+                <img src="/images/JN_logo_nobg.png" alt="전남와따 로고" style="height: 4rem;">
+            </a>
+
+            <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
+                <li class="active"><a href="/user/index">홈</a></li>
+                <li><a href="/movie">미디어 여행</a></li>
+                <li><a href="/favorite/testAllList">테마 여행</a></li>
+                <li><a href="contact.html">AI 추천 여행</a></li>
+                <li><a href="/products/page">전남 먹거리</a></li>
+                <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
+                <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
+            </ul>
+
+            <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
+                <span></span>
+            </a>
+        </div>
+    </div>
+</nav>
+<div class="hero hero-inner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mx-auto text-center">
+                <div class="intro-wrap">
+                    <h1 class="mb-0">AI 추천 여행</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ai-main-content container">
+    <div class="row"> <div class="col-12 mb-4"> <div class="ai-card"> <div id="previewSection">
+        <h3 class="ai-card-title">
+            <i class="fas fa-eye mr-2"></i>여행 정보 미리보기
+        </h3>
+        <div class="d-flex align-items-center mb-4">
+            <div class="progress-container mr-3">
+                <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span id="stepIndicator" class="step-indicator">0/0</span>
+        </div>
+
+        <div class="mb-3">
+            <div id="datePreview" class="preview-card-item">
+                <h4 class="mb-2"><i class="fas fa-calendar-alt"></i> 여행 기간</h4>
+                <p class="text-muted">날짜를 선택해주세요</p>
+            </div>
+            <div id="departurePreview" class="preview-card-item">
+                <h4 class="mb-2"><i class="fas fa-plane-departure"></i> 출발 정보</h4>
+                <p class="text-muted">출발지와 시간을 입력해주세요</p>
+            </div>
+            <div id="locationPreview" class="preview-card-item">
+                <h4 class="mb-2"><i class="fas fa-map-marked-alt"></i> 선택한 장소</h4>
+                <p class="text-muted">아직 선택된 장소가 없습니다</p>
+            </div>
+        </div>
+    </div>
+
+        <div id="resultSection" style="display: none;">
+            <h3 class="ai-card-title">
+                <i class="fas fa-route mr-2"></i>생성된 여행 일정
+            </h3>
+            <div id="scheduleResult"></div>
+        </div>
+    </div>
+    </div>
+
+        <div class="col-12"> <div id="step1" class="ai-card step-card active">
+            <div class="mb-4">
+                <h2 class="ai-card-title">
+                    <div class="icon-circle">1</div>
+                    언제 떠나시나요?
+                </h2>
+                <p class="text-muted">여행 날짜를 선택해주세요</p>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="displayStartDate" class="ai-form-group-label">출발일</label>
+                <input type="date" id="displayStartDate" class="ai-form-control" onchange="updateDatePreview()">
+            </div>
+            <div class="form-group mb-4">
+                <label for="displayEndDate" class="ai-form-group-label">도착일</label>
+                <input type="date" id="displayEndDate" class="ai-form-control" onchange="updateDatePreview()">
+            </div>
+
+
+            <button onclick="nextStep(2)" class="ai-btn-primary">
+                다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+            <div id="step2" class="ai-card step-card" style="display: none;">
+                <div class="mb-4">
+                    <h2 class="ai-card-title">
+                        <div class="icon-circle">2</div>
+                        어디서 출발하시나요?
+                    </h2>
+                    <p class="text-muted">출발지와 시간을 알려주세요</p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="departurePlace" class="ai-form-group-label">출발 장소</label>
+                    <input type="text" id="departurePlace" placeholder="예: 광주역, 광주공항" class="ai-form-control">
+                </div>
+                <div class="form-group mb-4">
+                    <label for="departureTime" class="ai-form-group-label">출발 시간</label>
+                    <input type="time" id="departureTime" value="09:00" class="ai-form-control">
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <button onclick="prevStep(1)" class="ai-btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>이전
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button onclick="nextStep(3)" class="ai-btn-primary">
+                            다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step3" class="ai-card step-card" style="display: none;">
+                <div class="mb-4">
+                    <h2 class="ai-card-title">
+                        <div class="icon-circle">3</div>
+                        어디를 가고 싶으세요?
+                    </h2>
+                    <p class="text-muted">찜한 장소를 선택해주세요</p>
+                </div>
+
+                <div id="locationContainer" class="list-group mb-3" style="max-height: 250px; overflow-y: auto;">
+                    <div class="text-center py-5">
+                        <div class="spinner-ring"></div>
+                        <span class="d-block mt-3 text-secondary">로딩 중<span class="loading-dots"></span></span>
+                    </div>
+                </div>
+
+                <div id="selectedLocations" class="selected-locations-tags"></div>
+
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <button onclick="prevStep(2)" class="ai-btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>이전
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button onclick="nextStep(4)" class="ai-btn-primary">
+                            다음 단계 <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step4" class="ai-card step-card" style="display: none;">
+                <div class="mb-4">
+                    <h2 class="ai-card-title">
+                        <div class="icon-circle">4</div>
+                        특별한 요청이 있나요?
+                    </h2>
+                    <p class="text-muted">원하는 여행 스타일을 알려주세요</p>
+                </div>
+
+                <div class="form-group mb-4">
+                    <textarea id="additionalPrompt" rows="6"
+                              placeholder="예: 맛집 위주로 구성해주세요&#10;사진 찍기 좋은 곳을 많이 포함해주세요&#10;아이와 함께 갈 수 있는 곳으로 해주세요&#10;&#10;자유롭게 입력해주세요! 😊"
+                              class="ai-form-control"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <button onclick="prevStep(3)" class="ai-btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>이전
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button onclick="generateSchedule()" class="ai-btn-primary pulse-orange">
+                            일정 생성하기 <i class="fas fa-magic ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step5" class="ai-card step-card" style="display: none;">
+                <div class="loading-section">
+                    <div class="spinner-ring"></div>
+                    <h2 class="ai-card-title justify-content-center">여행 일정 생성 중</h2>
+                    <p id="loadingText" class="loading-text">여행지 분석 중<span class="loading-dots"></span></p>
+
+                    <div class="loading-steps">
+                        <div id="loadingStep1" class="active">✓ 여행 기간 분석 완료</div>
+                        <div id="loadingStep2" class="">📍 찜한 장소 매칭 중...</div>
+                        <div id="loadingStep3" class="">🗺️ 최적 경로 계산 중...</div>
+                        <div id="loadingStep4" class="">🎯 맞춤 일정 생성 중...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button class="floating-fab" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<div class="site-footer">
+    <div class="inner first">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-lg-6">
+                    <div class="widget">
+                        <h3 class="heading">서비스 안내</h3>
+                        <p>이 서비스는 2025년 전라남도 공공ᆞ빅데이터 활용 아이디어 공모전 출품작입니다.<br>
+                            전라남도의 방대한 공공 데이터와 빅데이터를 창의적으로 활용하여,
+                            여행자들에게 더욱 풍부하고 개인화된 경험을 제공하고자 기획되었습니다.
+                            남도의 숨겨진 매력을 발견하고, 특별한 추억을 만들어 갈 수 있도록
+                            최적의 정보를 제공하는 데 초점을 맞추고 있습니다.
+                            <br>지금 바로 전라남도의 매력을 직접 경험해보세요!</p>
+                    </div>
+                </div>
+                <div class="col-md-7 col-lg-2 pl-lg-5">
+                    <div class="widget">
+                        <h3 class="heading">Pages</h3>
+                        <ul class="links list-unstyled">
+                            <li><a href="#">미디어 여행</a></li>
+                            <li><a href="#">테마 여행</a></li>
+                            <li><a href="#">AI 추천 여행</a></li>
+                            <li><a href="#">전남 먹거리</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="widget">
+                        <h3 class="heading">Contact</h3>
+                        <ul class="list-unstyled quick-info links">
+                            <li class="email"><a href="#">poly@example.com</a></li>
+                            <li class="phone"><a href="#">+82 02-2186-5800</a></li>
+                            <li class="addr"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="inner dark">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-8 mb-3 mb-md-0 mx-auto">
+                    <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by Team 아따
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script>
+    let currentStep = 1;
+    let selectedLocations = [];
+    let favoriteLocations = [];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadFavoriteLocations();
+        updateDatePreview();
+        updateDeparturePreview();
+        updateProgress(); // 페이지 로드 시 초기 진행 상태 업데이트
+    });
+
+    // Step Navigation
+    function nextStep(step) {
+        if (!validateCurrentStep()) return;
+
+        document.getElementById(`step${currentStep}`).style.display = 'none';
+        document.getElementById(`step${step}`).style.display = 'block';
+
+        currentStep = step;
+        updateProgress();
+        updatePreview();
+    }
+
+
+    function prevStep(step) {
+        document.getElementById(`step${currentStep}`).style.display = 'none';
+        document.getElementById(`step${step}`).style.display = 'block';
+
+        currentStep = step;
+        updateProgress();
+        updatePreview(); // 이전 스텝으로 돌아갈 때도 미리보기 업데이트
+    }
+
+    function updateProgress() {
+        // 총 스텝 4개 (입력), 5번째는 로딩/결과
+        const totalInputSteps = 4;
+        const progressValue = (currentStep / totalInputSteps) * 100;
+        document.getElementById('progressBar').style.width = progressValue + '%';
+        document.getElementById('stepIndicator').textContent = `${currentStep}/${totalInputSteps}`;
+
+        // 로딩 스텝이 활성화되면 프로그레스 바도 100%로 보이도록 처리 (선택 사항)
+        if (currentStep === 5) {
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('stepIndicator').textContent = `${totalInputSteps}/${totalInputSteps}`;
+        } else {
+            document.getElementById('progressBar').style.width = progressValue + '%';
+            document.getElementById('stepIndicator').textContent = `${currentStep}/${totalInputSteps}`;
+        }
+    }
+
+    // Validation
+    function validateCurrentStep() {
+        switch(currentStep) {
+            case 1:
+                const startDate = document.getElementById('displayStartDate').value;
+                const endDate = document.getElementById('displayEndDate').value;
+                if (!startDate || !endDate) {
+                    alert('출발일과 도착일을 모두 선택해주세요.');
+                    return false;
+                }
+                if (new Date(endDate) < new Date(startDate)) {
+                    alert('도착일은 출발일보다 늦어야 합니다.');
+                    return false;
+                }
+                return true;
+            case 2:
+                const departurePlace = document.getElementById('departurePlace').value.trim();
+                if (!departurePlace) {
+                    alert('출발 장소를 입력해주세요.');
+                    return false;
+                }
+                return true;
+            case 3:
+                if (selectedLocations.length === 0) {
+                    alert('최소 1개 이상의 장소를 선택해주세요.');
+                    return false;
+                }
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    // Load Favorite Locations
+    async function loadFavoriteLocations() {
+        try {
+            const response = await fetch('/favorite/list');
+            const data = await response.json();
+            favoriteLocations = data;
+            renderLocationList();
+        } catch (error) {
+            console.error("Error loading favorite locations:", error);
+            document.getElementById('locationContainer').innerHTML = `
+                    <div class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <p>장소를 불러오는데 실패했습니다.</p>
+                    </div>
+                `;
+        }
+    }
+
+    function renderLocationList() {
+        const container = document.getElementById('locationContainer');
+        container.innerHTML = '';
+
+        if (favoriteLocations.length === 0) {
+            container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-heart-broken fa-2x mb-2"></i>
+                <p>찜한 장소가 없습니다.</p>
+            </div>
+        `;
+            return;
+        }
+
+        favoriteLocations.forEach(location => {
+            // ✅ 타입에 따라 보여줄 이름/선택할 이름 구분
+            let displayName = "";
+            if (location.type === "theme") {
+                displayName = location.name;
+            } else if (location.type === "media") {
+                displayName = location.location;
+            } else {
+                displayName = location.name || location.location;
+            }
+
+            const isSelected = selectedLocations.includes(displayName);
+
+            const listItem = document.createElement('div');
+            listItem.classList.add('location-list-item');
+            if (isSelected) {
+                listItem.classList.add('selected');
+            }
+
+            listItem.setAttribute('onclick', `toggleLocation('${displayName}', this)`);
+
+            listItem.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-map-marker-alt mr-3 text-primary"></i>
+                <span class="font-weight-bold text-secondary">${displayName}</span>
+            </div>
+            <div class="check-indicator">
+                <i class="fas fa-check check-icon ${isSelected ? '' : 'hidden'}"></i>
+            </div>
+        `;
+            container.appendChild(listItem);
+        });
+    }
+
+
+    function toggleLocation(locationName, element) {
+        const checkIcon = element.querySelector('.check-icon');
+        const index = selectedLocations.indexOf(locationName);
+
+        if (index === -1) {
+            selectedLocations.push(locationName);
+            element.classList.add('selected');
+            checkIcon.classList.remove('hidden');
+        } else {
+            selectedLocations.splice(index, 1);
+            element.classList.remove('selected');
+            checkIcon.classList.add('hidden');
+        }
+
+        updateSelectedLocationTags();
+        updatePreview();
+    }
+
+    function updateSelectedLocationTags() {
+        const container = document.getElementById('selectedLocations');
+        container.innerHTML = ''; // 기존 내용 지우기
+
+        if (selectedLocations.length === 0) {
+            container.style.display = 'none';
+            return;
+        } else {
+            container.style.display = 'block';
+        }
+
+        selectedLocations.forEach(location => {
+            const tag = document.createElement('span');
+            tag.classList.add('location-tag');
+            tag.innerHTML = `
+                ${location}
+                <button type="button" onclick="removeLocation('${location}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(tag);
+        });
+    }
+
+    function removeLocation(locationName) {
+        selectedLocations = selectedLocations.filter(loc => loc !== locationName);
+        updateSelectedLocationTags();
+        renderLocationList(); // 목록에서 선택 해제 반영
+        updatePreview();
+    }
+
+    // Preview Updates
+    function updatePreview() {
+        updateDatePreview();
+        updateDeparturePreview();
+        updateLocationPreview();
+    }
+
+    function updateDatePreview() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const preview = document.getElementById('datePreview');
+
+        if (startDate && endDate) {
+            const dayDiff = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24) + 1;
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-calendar-alt"></i> 여행 기간</h4>
+                    <p class="text-dark font-weight-bold">${startDate} ~ ${endDate}</p>
+                    <p class="text-muted">${dayDiff}일 여행</p>
+                `;
+        } else {
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-calendar-alt"></i> 여행 기간</h4>
+                    <p class="text-muted">날짜를 선택해주세요</p>
+                `;
+        }
+    }
+
+    function updateDeparturePreview() {
+        const place = document.getElementById('departurePlace').value;
+        const time = document.getElementById('departureTime').value;
+        const preview = document.getElementById('departurePreview');
+
+        if (place || time) {
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-plane-departure"></i> 출발 정보</h4>
+                    <p class="text-dark font-weight-bold">${place || '미정'}</p>
+                    <p class="text-muted">${time || '09:00'} 출발</p>
+                `;
+        } else {
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-plane-departure"></i> 출발 정보</h4>
+                    <p class="text-muted">출발지와 시간을 입력해주세요</p>
+                `;
+        }
+    }
+
+    function updateLocationPreview() {
+        const preview = document.getElementById('locationPreview');
+
+        if (selectedLocations.length > 0) {
+            let badgesHtml = selectedLocations.map(loc => `<span class="location-badge">${loc}</span>`).join('');
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-map-marked-alt"></i> 선택한 장소 (${selectedLocations.length}개)</h4>
+                    <p>${badgesHtml}</p>
+                `;
+        } else {
+            preview.innerHTML = `
+                    <h4 class="mb-2"><i class="fas fa-map-marked-alt"></i> 선택한 장소</h4>
+                    <p class="text-muted">아직 선택된 장소가 없습니다</p>
+                `;
+        }
+    }
+
+    // Generate Schedule
+    async function generateSchedule() {
+        nextStep(5); // 로딩 스텝으로 전환
+
+        const loadingSteps = [
+            { text: "여행 기간 분석 완료", id: "loadingStep1" },
+            { text: "찜한 장소 매칭 중", id: "loadingStep2" },
+            { text: "최적 경로 계산 중", id: "loadingStep3" },
+            { text: "맞춤 일정 생성 중", id: "loadingStep4" }
+        ];
+
+        let currentLoadingStepIndex = 0;
+        const loadingInterval = setInterval(() => {
+            if (currentLoadingStepIndex < loadingSteps.length) {
+                document.getElementById('loadingText').innerHTML = loadingSteps[currentLoadingStepIndex].text + '<span class="loading-dots"></span>';
+
+                // 이전 스텝 비활성화 및 현재 스텝 활성화
+                if (currentLoadingStepIndex > 0) {
+                    const prevStepEl = document.getElementById(loadingSteps[currentLoadingStepIndex - 1].id);
+                    if (prevStepEl) prevStepEl.classList.remove('active');
+                }
+                const currentStepEl = document.getElementById(loadingSteps[currentLoadingStepIndex].id);
+                if (currentStepEl) currentStepEl.classList.add('active');
+
+                currentLoadingStepIndex++;
+            } else {
+                // 모든 스텝이 완료되면 로딩 텍스트를 고정하고 인터벌 중지
+                document.getElementById('loadingText').innerHTML = "일정 생성 완료!";
+                clearInterval(loadingInterval);
+            }
+        }, 1500); // 각 로딩 메시지 전환 시간
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const departurePlace = document.getElementById('departurePlace').value.trim();
+        const departureTime = document.getElementById('departureTime').value;
+        const additionalPrompt = document.getElementById('additionalPrompt').value.trim();
+
+        const dayDiff = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24) + 1;
+
+        const requestBody = {
+            locations: selectedLocations,
+            startDate: startDate,
+            tripDays: dayDiff,
+            departurePlace: departurePlace,
+            departureTime: departureTime,
+            additionalPrompt: additionalPrompt
+        };
+
+        try {
+            const response = await fetch('/gpt/recommend-schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            clearInterval(loadingInterval); // 응답 오면 바로 로딩 인터벌 중지
+
+            if (!response.ok) {
+                const errorData = await response.json(); // 에러 응답 파싱 시도
+                throw new Error(errorData.message || '일정 생성에 실패했습니다. 다시 시도해주세요.');
+            }
+
+            const scheduleJson = await response.json(); // 응답은 JSON으로 가정
+            showResults(scheduleJson);
+
+        } catch (error) {
+            clearInterval(loadingInterval);
+            console.error('일정 생성 오류:', error);
+            showError(error.message || '알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+    }
+
+    function showResults(scheduleJson) {
+        document.getElementById('step5').style.display = 'none';
+        document.getElementById('previewSection').style.display = 'none'; // 결과 섹션 보여주기 전에 미리보기 섹션 숨김
+        document.getElementById('resultSection').style.display = 'block';
+
+        let html = '';
+        const dates = Object.keys(scheduleJson); // JSON 객체의 키(날짜)를 배열로 가져옴
+
+        dates.forEach((date, dateIndex) => {
+            html += `
+                    <div class="day-schedule-card">
+                        <h4>
+                            <div class="day-circle">${dateIndex + 1}</div>
+                            ${date}
+                        </h4>
+                        <div class="timeline-container">
+                `;
+
+            scheduleJson[date].forEach((entry) => {
+                console.log('주소:', entry.addr);
+                html += `
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+                <h5 class="mb-0">${entry.place || entry.장소명 || '장소 정보 없음'}</h5>
+                <span class="time">${entry.time || entry.시간 || '시간 정보 없음'}</span>
+                <p class="mb-0">${entry.activity || entry["활동 내용"] || '활동 내용 없음'}</p>
+                <p class="addr mt-2"><i class="fas fa-map-marker-alt"></i> ${entry.addr || entry.주소 || '주소 정보 없음'}</p>
+            </div>
+        </div>
+    `;
+            });
+
+            html += `
+                        </div>
+                    </div>
+                `;
+        });
+        document.getElementById('scheduleResult').innerHTML = html;
+    }
+
+    function showError(message) {
+        document.getElementById('step5').style.display = 'none'; // 로딩 화면 숨김
+        document.getElementById('previewSection').style.display = 'none'; // 미리보기 숨기고
+        document.getElementById('resultSection').style.display = 'block'; // 결과 섹션 표시
+        document.getElementById('scheduleResult').innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
+    }
+
+
+    // Scroll to Top FAB
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const startDate = localStorage.getItem('startDate') || '';
+        const endDate = localStorage.getItem('endDate') || '';
+
+        document.getElementById('displayStartDate').value = startDate;
+        document.getElementById('displayEndDate').value = endDate;
+
+        // 날짜 미리보기 갱신
+        updateDatePreview();
+    });
+
+</script>
+
+</body>
+</html>
