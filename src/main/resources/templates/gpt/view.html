@@ -451,6 +451,74 @@
             }
         } */
     </style>
+    <!-- 스타일 -->
+    <style>
+        /* 기존 .lang-btn 스타일을 더 세련되게 업데이트 */
+        .lang-btn {
+            display: flex;
+            flex-direction: column; /* 이미지와 텍스트를 세로로 배치 */
+            align-items: center; /* 가로 중앙 정렬 */
+            gap: 4px; /* 이미지와 텍스트 사이 간격 */
+            padding: 10px 15px; /* 버튼 패딩 */
+            border: 2px solid #e0e0e0;
+            border-radius: 10px; /* 부드러운 모서리 */
+            background-color: #fff;
+            color: var(--orange-text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 은은한 그림자 */
+            min-width: 90px; /* 버튼 최소 너비 설정 (텍스트 길이 차이 보정) */
+            text-decoration: none; /* 링크 스타일 제거 */
+        }
+
+        .lang-btn:hover {
+            border-color: var(--orange-accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px); /* 호버 시 살짝 떠오르는 효과 */
+            color: var(--orange-text); /* 호버 시 텍스트 색상 유지 */
+        }
+
+        .lang-btn.selected {
+            border-color: var(--orange-primary); /* 선택 시 주황색 테두리 */
+            background-color: rgba(243, 166, 0, 0.1); /* 선택 시 주황색 배경 */
+            color: var(--orange-secondary); /* 선택 시 텍스트 색상 강조 */
+            box-shadow: 0 4px 15px rgba(243, 166, 0, 0.2); /* 강한 그림자 */
+        }
+
+        .flag-img {
+            width: 40px; /* 이미지 크기 고정 */
+            height: 30px; /* 이미지 크기 고정 */
+            border: 1px solid #ddd; /* 깃발 이미지 테두리 추가 */
+            border-radius: 4px; /* 깃발 이미지 모서리 둥글게 */
+            object-fit: cover; /* 이미지 비율 유지하면서 채우기 */
+        }
+
+        .lang-label {
+            font-size: 0.9rem;
+            margin-top: 4px; /* 이미지와 텍스트 간격 */
+        }
+
+        /* PDF 다운로드 버튼을 ai-btn-primary 스타일로 변경 */
+        #downloadPdfBtn {
+            max-width: 300px; /* 버튼 너비 제한 */
+            margin-top: 1.5rem; /* 언어 선택 버튼 그룹과의 간격 (d-flex flex-column에 의해 이 위치에서 적용) */
+            /* ai-btn-primary 클래스에 정의된 스타일을 사용하므로, 별도 스타일링 최소화 */
+        }
+
+        /* Flexbox gap 속성 지원을 위한 fallback (구형 브라우저 지원 시) */
+        /* 이 부분은 이미 추가되어 있으니 확인만 해주세요. */
+        .d-flex.flex-wrap.gap-3 > *:not(:last-child) {
+            margin-right: 15px; /* gap-3 (1rem = 16px) 에 맞춰 15px */
+            margin-bottom: 10px; /* 줄바꿈 시 간격 */
+        }
+        @media (min-width: 576px) { /* sm 이상에서 */
+            .d-flex.flex-wrap.gap-3 > *:not(:last-child) {
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -464,11 +532,22 @@
             <ul class="js-clone-nav d-none d-lg-inline-block text-left site-menu float-right">
                 <li class="active"><a href="/user/index">홈</a></li>
                 <li><a href="/movie">미디어 여행</a></li>
-                <li><a href="/favorite/testAllList">테마 여행</a></li>
-                <li><a href="contact.html">AI 추천 여행</a></li>
+                <li><a href="/favorite/">테마 여행</a></li>
+                <li><a href="/gpt/view">AI 추천 여행</a></li>
                 <li><a href="/products/page">전남 먹거리</a></li>
-                <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
-                <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
+
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email != null}">
+                    <a href="/user/myPage">마이페이지</a>
+                </li>
+
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email == null}">
+                    <a href="/user/login">로그인</a>
+                </li>
+                <li th:if="${session.email != null}">
+                    <a href="/user/logout">로그아웃</a>
+                </li>
             </ul>
 
             <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
@@ -517,7 +596,31 @@
     </div>
 
         <div id="resultSection" style="display: none;">
-            <h3 class="ai-card-title">
+            <div class="d-flex flex-column align-items-center mb-4">
+                <div id="langButtons" class="d-flex justify-content-center flex-wrap gap-3 mb-3">
+                    <button class="lang-btn selected" data-lang="ko">
+                        <img src="https://flagcdn.com/w40/kr.png" class="flag-img" alt="한국어">
+                        <span class="lang-label">한국어</span>
+                    </button>
+                    <button class="lang-btn" data-lang="en">
+                        <img src="https://flagcdn.com/w40/us.png" class="flag-img" alt="English">
+                        <span class="lang-label">English</span>
+                    </button>
+                    <button class="lang-btn" data-lang="cn">
+                        <img src="https://flagcdn.com/w40/cn.png" class="flag-img" alt="中文">
+                        <span class="lang-label">中文</span>
+                    </button>
+                    <button class="lang-btn" data-lang="jp">
+                        <img src="https://flagcdn.com/w40/jp.png" class="flag-img" alt="日本語">
+                        <span class="lang-label">日本語</span>
+                    </button>
+                </div>
+
+                <button id="downloadPdfBtn" class="ai-btn-primary">
+                    📄 PDF 다운로드 </button>
+            </div>
+
+            <h3 class="ai-card-title mt-4">
                 <i class="fas fa-route mr-2"></i>생성된 여행 일정
             </h3>
             <div id="scheduleResult"></div>
@@ -665,6 +768,7 @@
     <i class="fas fa-arrow-up"></i>
 </button>
 
+<!--footer start-->
 <div class="site-footer">
     <div class="inner first">
         <div class="container">
@@ -697,7 +801,7 @@
                         <ul class="list-unstyled quick-info links">
                             <li class="email"><a href="#">poly@example.com</a></li>
                             <li class="phone"><a href="#">+82 02-2186-5800</a></li>
-                            <li class="addr"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
+                            <li class="address"><a href="#">서울특별시 강서구 화곡동 우장산로10길 112</a></li>
                         </ul>
                     </div>
                 </div>
@@ -716,6 +820,7 @@
         </div>
     </div>
 </div>
+<!--footer end-->
 
 <script src="/js/jquery-3.4.1.min.js"></script>
 <script src="/js/bootstrap.min.js"></script>
@@ -723,6 +828,9 @@
     let currentStep = 1;
     let selectedLocations = [];
     let favoriteLocations = [];
+    let selectedLang = "ko";
+    let lastGptSchedule = null; // ✅ GPT 일정 응답값 저장용
+
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
@@ -1048,6 +1156,8 @@
             }
 
             const scheduleJson = await response.json(); // 응답은 JSON으로 가정
+
+            lastGptSchedule = scheduleJson; // ✅ GPT 응답 저장
             showResults(scheduleJson);
 
         } catch (error) {
@@ -1129,6 +1239,57 @@
 
 
 </script>
+<!-- 스크립트 -->
+<script>
+    const langTexts = {
+        ko: "📄 PDF 다운로드",
+        en: "📄 Download PDF",
+        cn: "📄 下载 PDF",
+        jp: "📄 PDF ダウンロード"
+    };
 
+    // let selectedLang = "ko"; // 기본 언어
+
+    // 언어 버튼 클릭 이벤트
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+
+            selectedLang = btn.getAttribute("data-lang");
+
+            // 버튼 텍스트도 언어별로 변경
+            const btnEl = document.getElementById("downloadPdfBtn");
+            btnEl.textContent = langTexts[selectedLang] || "📄 PDF 다운로드";
+        });
+    });
+
+    // PDF 다운로드 버튼 클릭 이벤트
+    document.getElementById("downloadPdfBtn").addEventListener("click", async () => {
+        if (!lastGptSchedule) {
+            alert("먼저 GPT로 여행 일정을 생성해주세요!");
+            return;
+        }
+
+        const response = await fetch(`/gpt/schedule/pdf?lang=${selectedLang}`, {
+
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(lastGptSchedule)  // 여기 핵심: schedule만 넘김
+        });
+
+        if (!response.ok) {
+            alert("PDF 생성 실패");
+            return;
+        }
+
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `schedule_${selectedLang}.pdf`;
+        link.click();
+    });
+
+</script>
 </body>
 </html>
