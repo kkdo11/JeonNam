@@ -213,10 +213,22 @@
                 <li class="active"><a href="/user/index">홈</a></li>
                 <li><a href="/movie">미디어 여행</a></li>
                 <li><a href="/favorite/">테마 여행</a></li>
-                <li><a href="contact.html">AI 추천 여행</a></li>
+                <li><a href="/gpt/view">AI 추천 여행</a></li>
                 <li><a href="/products/page">전남 먹거리</a></li>
-                <li th:if="${session.email == null}"><a href="/user/login">로그인</a></li>
-                <li th:if="${session.email != null}"><a href="/user/logout">로그아웃</a></li>
+
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email != null}">
+                    <a href="/user/myPage">마이페이지</a>
+                </li>
+
+                <!-- 로그인 여부에 따라 조건 분기 -->
+                <li th:if="${session.email == null}">
+                    <a href="/user/login">로그인</a>
+                </li>
+                <li th:if="${session.email != null}">
+                    <a href="/user/logout">로그아웃</a>
+                </li>
+
             </ul>
 
             <a href="#" class="burger ml-auto float-right site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
