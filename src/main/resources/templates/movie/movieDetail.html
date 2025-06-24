@@ -244,6 +244,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="detail-main-content">
+
                     <div class="map-container-col">
                         <div id="map-area" data-latitude="34.62939" data-longitude="126.90022"
                              style="width:100%; height:460px;"></div>
@@ -276,7 +277,20 @@
                             <p><strong>📍 장소 : </strong> <span id="detail-place">로딩 중...</span></p>
                             <p><strong>🏠 주소 : </strong> <span id="detail-address">로딩 중...</span></p>
                         </div>
+
+
+
                     </div>
+                    <!-- ✅ 포스터 오른쪽 바깥 떠 있는 이동 아이콘 -->
+                    <div class="floating-theme-btn text-center">
+                        <a href="/favorite/">
+                            <iconify-icon icon="hugeicons:circle-arrow-right-02" style="font-size: 80px; color: #f3a600;"></iconify-icon>
+                            <h5>테마 여행<br> 떠나기</h5>
+                        </a>
+                    </div>
+
+
+
                 </div>
             </div>
         </div>
@@ -607,6 +621,39 @@
         transform: scale(1.1);
         color: #fff;
     }
+
+
+    .floating-theme-btn {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translate(130%, -50%);
+        z-index: 10;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-theme-btn iconify-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .floating-theme-btn:hover iconify-icon {
+        transform: scale(1.2);
+    }
+
+    @media (max-width: 992px) {
+        .floating-theme-btn {
+            position: static;
+            transform: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+    }
+    @keyframes float {
+        0% { transform: translate(130%, -50%) translateY(0px); }
+        50% { transform: translate(130%, -50%) translateY(-10px); }
+        100% { transform: translate(130%, -50%) translateY(0px); }
+    }
+
 </style>
 
 

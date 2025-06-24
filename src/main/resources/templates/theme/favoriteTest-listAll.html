@@ -282,6 +282,15 @@
             <div class="col-lg-12">
                 <div class="row">
 
+                    <!-- 왼쪽: 테마 여행 -->
+                    <div class="floating-theme-btn text-center left">
+                        <a href="/movie">
+                            <iconify-icon icon="hugeicons:circle-arrow-left-02" style="font-size: 80px; color: #f3a600;"></iconify-icon>
+                            <h5>미디어 여행<br> 떠나기</h5>
+                        </a>
+                    </div>
+
+
                     <!-- 🗺️ Left: Map -->
                     <div class="col-lg-6 mb-4" >
                         <div id="map-area"
@@ -464,7 +473,19 @@
 
                         </div> <!-- tab-content -->
                     </div> <!-- col-lg-6 -->
+
+                    <!-- 오른쪽: AI 추천 여행 -->
+                    <div class="floating-theme-btn text-center right">
+                        <a href="/gpt/view">
+                            <iconify-icon icon="hugeicons:circle-arrow-right-02" style="font-size: 80px; color: #f3a600;"></iconify-icon>
+                            <h5>AI 추천 여행<br> 떠나기</h5>
+                        </a>
+                    </div>
+
+
                 </div> <!-- inner row -->
+
+
             </div>
         </div>
     </div>
@@ -570,6 +591,31 @@
     };
 </script>
 
+<style>
 
+    .floating-theme-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 999;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-theme-btn.left {
+        left: -130px;  /* 또는 적절한 값으로 조절 */
+    }
+
+    .floating-theme-btn.right {
+        right: -130px;
+    }
+
+    @keyframes float {
+        0%   { transform: translateY(-50%) translateY(0); }
+        50%  { transform: translateY(-50%) translateY(-10px); }
+        100% { transform: translateY(-50%) translateY(0); }
+    }
+
+
+</style>
 </body>
 </html>

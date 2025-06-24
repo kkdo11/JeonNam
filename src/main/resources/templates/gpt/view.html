@@ -568,7 +568,21 @@
     </div>
 </div>
 <div class="ai-main-content container">
-    <div class="row"> <div class="col-12 mb-4"> <div class="ai-card"> <div id="previewSection">
+    <div class="row">
+
+
+
+        <div class="col-12 mb-4">
+            <div class="ai-card">
+                <div id="previewSection">
+                    <!-- 왼쪽: 테마 여행 -->
+                    <div class="floating-theme-btn text-center left">
+                        <a href="/favorite/">
+                            <iconify-icon icon="hugeicons:circle-arrow-left-02" style="font-size: 80px; color: #f3a600;"></iconify-icon>
+                            <h5>테마 여행<br> 떠나기</h5>
+                        </a>
+                    </div>
+
         <h3 class="ai-card-title">
             <i class="fas fa-eye mr-2"></i>여행 정보 미리보기
         </h3>
@@ -1291,5 +1305,31 @@
     });
 
 </script>
+<style>
+
+    .floating-theme-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 999;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-theme-btn.left {
+        left: -130px;  /* 또는 적절한 값으로 조절 */
+    }
+
+    .floating-theme-btn.right {
+        right: -130px;
+    }
+
+    @keyframes float {
+        0%   { transform: translateY(-50%) translateY(0); }
+        50%  { transform: translateY(-50%) translateY(-10px); }
+        100% { transform: translateY(-50%) translateY(0); }
+    }
+
+
+</style>
 </body>
 </html>
