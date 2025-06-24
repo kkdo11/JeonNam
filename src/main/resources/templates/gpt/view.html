@@ -929,7 +929,7 @@
     // Load Favorite Locations
     async function loadFavoriteLocations() {
         try {
-            const response = await fetch('/favorite/list');
+            const response = await fetch('/gpt/favorite/list');
             const data = await response.json();
             favoriteLocations = data;
             renderLocationList();
