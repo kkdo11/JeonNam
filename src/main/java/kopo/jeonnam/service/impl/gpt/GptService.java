@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.HashSet; // HashSet 추가
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +38,11 @@ public class GptService implements IGptService {
             .build();
 
     /**
-     * [1] 사용자가 찜한 장소명 목록 (단일 선택된 기준 장소)을 기반으로 일정 생성.
-     * places.json의 모든 장소 중 기준 장소를 제외한 나머지 장소들을 GPT에 전달합니다.
+     * [1] 사용자가 찜한 장소명 목록 (클라이언트에서 선택된 모든 장소)을 기반으로 일정 생성.
+     * places.json의 모든 장소와 사용자가 선택한 찜 장소(places.json에 없어도 추가)를 GPT에 전달합니다.
      */
     public String createScheduleWithFavorites(
-            Set<String> favoriteNames, // 클라이언트에서 단일 선택된 찜 장소 이름만 포함되어야 함
+            Set<String> favoriteNames, // 클라이언트에서 선택된 모든 찜 장소 이름
             String startDate,
             int tripDays,
             String departurePlace,
@@ -50,68 +51,56 @@ public class GptService implements IGptService {
     ) {
         List<PlaceInfoDTO> allPlaces = loadAllPlaces(); // places.json의 모든 장소 로드
 
-        // GPT에 전달할 최종 장소 목록을 기본적으로 allPlaces로 초기화
+        // GPT에 전달할 최종 장소 목록을 places.json의 모든 장소로 시작
         List<PlaceInfoDTO> finalPlacesForGpt = new ArrayList<>(allPlaces);
 
-        // ⭐⭐⭐ 핵심 수정: primaryFavoritedPlace, clientPrimaryFavoriteName, primaryFavoriteNameForPrompt를
-        //      단 한 번만 할당하도록 변경하여 final 또는 effectively final 상태를 보장합니다. ⭐⭐⭐
-        final String clientPrimaryFavoriteName;
-        final PlaceInfoDTO primaryFavoritedPlace;
+        // 프롬프트에 사용될 '기준' 장소 이름 (첫 번째 찜 장소 또는 기본값)
         final String primaryFavoriteNameForPrompt;
+        final String firstClientFavoriteName;
 
         if (favoriteNames != null && !favoriteNames.isEmpty()) {
-            clientPrimaryFavoriteName = favoriteNames.iterator().next();
-            primaryFavoriteNameForPrompt = clientPrimaryFavoriteName; // 클라이언트가 보낸 이름을 먼저 프롬프트용으로 설정
+            firstClientFavoriteName = favoriteNames.iterator().next(); // 첫 번째 찜 장소만 프롬프트 컨텍스트용으로 사용
+            primaryFavoriteNameForPrompt = firstClientFavoriteName;
 
-            primaryFavoritedPlace = allPlaces.stream()
-                    .filter(p -> Objects.equals(p.name(), clientPrimaryFavoriteName))
-                    .findFirst()
-                    .orElse(null); // 찾지 못하면 null 할당
+            // 선택된 각 찜 장소를 순회하며 finalPlacesForGpt에 추가 (places.json에 없으면 가상 장소로)
+            for (String selectedFavName : favoriteNames) {
+                boolean foundInAllPlaces = allPlaces.stream()
+                        .anyMatch(p -> Objects.equals(p.name(), selectedFavName));
+
+                if (!foundInAllPlaces) {
+                    System.err.println("WARN: 찜한 장소 '" + selectedFavName + "'을 places.json에서 찾을 수 없습니다. " +
+                            "가상의 장소 정보를 생성하여 GPT에 전달합니다. places.json 파일의 이름과 일치하는지 확인해 주세요.");
+                    // 가상의 PlaceInfoDTO를 생성하여 finalPlacesForGpt에 추가
+                    // 주소는 departurePlace를 사용하여 GPT가 출발지와 연관지어 생각하도록 유도합니다.
+                    finalPlacesForGpt.add(new PlaceInfoDTO(selectedFavName, departurePlace));
+                } else {
+                    System.out.println("DEBUG: 찜한 장소 '" + selectedFavName + "'을 places.json에서 찾았습니다. 일정에 포함됩니다.");
+                }
+            }
         } else {
-            // favoriteNames가 비어있으면 이 경로로 들어와 각 변수가 한 번씩 할당됩니다.
-            clientPrimaryFavoriteName = null; // 이 경로에서 clientPrimaryFavoriteName은 null
-            primaryFavoriteNameForPrompt = "선택된 찜 장소 없음"; // 이 경로에서 프롬프트용 이름
-            primaryFavoritedPlace = null; // 이 경로에서 primaryFavoritedPlace는 null
-            System.err.println("WARN: 일정 생성을 위한 기준 찜 장소가 선택되지 않았습니다. places.json의 모든 장소를 사용합니다.");
+            firstClientFavoriteName = null;
+            primaryFavoriteNameForPrompt = "선택된 찜 장소 없음";
+            System.err.println("WARN: 일정 생성을 위한 찜 장소가 선택되지 않았습니다. places.json의 모든 장소를 사용합니다.");
         }
-
-        // ⭐⭐⭐ primaryFavoritedPlace의 null 여부에 따라 로직 분기 (이제 primaryFavoritedPlace는 final 변수) ⭐⭐⭐
-        if (primaryFavoritedPlace != null) {
-            // 기준 장소를 places.json에서 찾았다면, 해당 장소를 제외한 목록을 생성
-            finalPlacesForGpt = allPlaces.stream()
-                    .filter(p -> !(Objects.equals(p.name(), primaryFavoritedPlace.name()) &&
-                            Objects.equals(p.addr(), primaryFavoritedPlace.addr())))
-                    .collect(Collectors.toList());
-            System.out.println("DEBUG: 기준 찜 장소 '" + clientPrimaryFavoriteName + "'을 places.json에서 성공적으로 찾았고 제외했습니다.");
-        } else if (clientPrimaryFavoriteName != null) { // 찜 장소는 있었지만 places.json에서 매칭되지 않은 경우
-            System.err.println("WARN: 기준 찜 장소 '" + clientPrimaryFavoriteName + "'을 places.json에서 찾을 수 없습니다. " +
-                    "일정을 생성하기 위해 places.json의 모든 장소를 사용합니다.");
-            System.err.println("DEBUG: places.json의 첫 5개 장소 (매칭 확인용):");
-            allPlaces.stream().limit(5).forEach(p ->
-                    System.err.println("  - name: " + p.name() + ", addr: " + p.addr())
-            );
-            // 이 경우 finalPlacesForGpt는 이미 allPlaces로 초기화되어 있으므로 추가 작업 없음.
-            // primaryFavoriteNameForPrompt도 이미 위에서 clientPrimaryFavoriteName으로 설정됨.
-        }
-        // favoriteNames가 처음부터 비어있었던 경우는 위 else 블록에서 처리되며, finalPlacesForGpt는 allPlaces로 유지됨.
 
         if (finalPlacesForGpt.isEmpty()) {
             System.err.println("WARN: GPT에 전달할 장소가 없습니다. places.json 파일에 유효한 장소가 있는지 확인해주세요.");
             return "{\"error\": \"일정 생성을 위한 장소 데이터가 부족합니다. places.json 파일을 확인해주세요.\"}";
         }
 
-        System.out.println("DEBUG: GPT에 전달할 최종 장소 개수 (기준 찜 제외 또는 전체): " + finalPlacesForGpt.size());
+        System.out.println("DEBUG: GPT에 전달할 최종 장소 개수 (선택된 모든 찜 장소 포함): " + finalPlacesForGpt.size());
         finalPlacesForGpt.stream().limit(10).forEach(p -> System.out.println("  - 최종 전달 장소: " + p.name() + " (" + p.addr() + ")"));
 
 
         return createScheduleFromRequest(
-                finalPlacesForGpt, // 이제 이 리스트는 기준 찜 장소를 제외한 (또는 찜 장소를 찾지 못하면 전체) places.json 장소들
+                finalPlacesForGpt, // 이 리스트는 이제 사용자가 선택한 모든 찜 장소(또는 가상 장소)를 포함합니다.
                 startDate,
                 tripDays,
                 departurePlace,
                 departureTime,
                 additionalPrompt,
-                primaryFavoriteNameForPrompt // 프롬프트에 활용될 기준 장소 이름 (매칭 실패 시 클라이언트가 보낸 이름)
+                primaryFavoriteNameForPrompt, // 프롬프트의 '기준 장소' 컨텍스트용 (첫 번째 찜 장소)
+                favoriteNames // GPT 프롬프트에서 '사용자가 특별히 요청한 장소들'을 명시하기 위함
         );
     }
 
@@ -127,25 +116,24 @@ public class GptService implements IGptService {
             String departureTime,
             String additionalPrompt
     ) {
-        // 이 메서드는 직접 호출되지 않고, 아래 오버로드된 메서드로 라우팅되거나 기존 로직의 호환성을 위해 남겨둠.
-        // 여기서는 임시로 빈 문자열을 넘겨주어 아래 오버로드된 메서드를 호출
-        return createScheduleFromRequest(places, startDate, tripDays, departurePlace, departureTime, additionalPrompt, "");
+        return createScheduleFromRequest(places, startDate, tripDays, departurePlace, departureTime, additionalPrompt, "", Collections.emptySet());
     }
 
 
     /**
-     * [2-2] GPT에게 일정 생성 요청 (기준 장소 컨텍스트 포함)
+     * [2-2] GPT에게 일정 생성 요청 (기준 장소 및 선택된 모든 찜 장소 컨텍스트 포함)
      */
     public String createScheduleFromRequest(
-            List<PlaceInfoDTO> places, // 확장되었지만 기준 장소가 제외된 장소 목록
+            List<PlaceInfoDTO> places, // 이 목록에는 사용자의 찜 장소가 포함될 수 있습니다.
             String startDate,
             int tripDays,
             String departurePlace,
             String departureTime,
             String additionalPrompt,
-            String contextPrimaryFavoriteName // GPT 프롬프트에 포함될 기준 장소 이름
+            String contextPrimaryFavoriteName, // GPT 프롬프트에 포함될 '기준' 장소 이름 (선택한 찜 중 첫 번째)
+            Set<String> actualSelectedFavoriteNames // 사용자가 클라이언트에서 선택한 모든 찜 장소 이름 목록
     ) {
-        System.out.println("=== 📌 GPT 요청 전 장소 정보 (제외된 장소: " + contextPrimaryFavoriteName + ", 목록 개수: " + places.size() + ") ===");
+        System.out.println("=== 📌 GPT 요청 전 장소 정보 (기준 장소: " + contextPrimaryFavoriteName + ", 선택된 찜 장소 수: " + (actualSelectedFavoriteNames != null ? actualSelectedFavoriteNames.size() : 0) + ", 목록 개수: " + places.size() + ") ===");
         if (places.isEmpty()) {
             System.out.println("  - 전달할 장소 목록이 비어있습니다.");
         } else {
@@ -161,7 +149,8 @@ public class GptService implements IGptService {
                 departurePlace,
                 departureTime,
                 additionalPrompt,
-                contextPrimaryFavoriteName // 기준 장소 이름을 프롬프트 생성기에 전달
+                contextPrimaryFavoriteName, // 프롬프트의 '기준 장소' 컨텍스트용
+                actualSelectedFavoriteNames // 프롬프트에서 '사용자가 특별히 요청한 장소들'을 명시하기 위함
         );
 
         System.out.println("=== GPT 프롬프트 ===");
@@ -223,13 +212,21 @@ public class GptService implements IGptService {
                             String placeAddr = activity.path("addr").asText("");
 
                             boolean isAllowed = false;
-                            // ⭐⭐ 변경: 출발지 필터링 로직 수정 (출발지이거나 places 목록에 있으면 허용) ⭐⭐
-                            if (placeName.equals(departurePlace)) { // placeName이 departurePlace와 정확히 일치하면 허용
+                            // ⭐⭐⭐ 핵심 수정: 찜한 장소를 최우선으로 허용 ⭐⭐⭐
+                            if (actualSelectedFavoriteNames != null && actualSelectedFavoriteNames.contains(placeName)) {
+                                // 사용자가 특별히 요청한 찜 장소는 주소 일치 여부와 관계없이 허용합니다.
                                 isAllowed = true;
-                            } else { // 그 외의 경우에만 places 목록에서 확인
+                                System.out.println("DEBUG: 요청된 찜 장소 '" + placeName + "'가 일정에 포함됨 (주소: '" + placeAddr + "').");
+                            } else if (placeName.equals(departurePlace)) {
+                                // 출발지는 이전과 동일하게 허용합니다.
+                                isAllowed = true;
+                                System.out.println("DEBUG: 출발지 '" + departurePlace + "'가 일정에 포함됨 (주소: '" + placeAddr + "').");
+                            } else {
+                                // 그 외의 장소들은 places.json (또는 가상 장소 목록)에 이름과 주소가 모두 일치해야 허용합니다.
                                 for (PlaceInfoDTO p : places) {
                                     if (Objects.equals(p.name(), placeName) && Objects.equals(p.addr(), placeAddr)) {
                                         isAllowed = true;
+                                        System.out.println("DEBUG: places.json 또는 가상 장소 목록에 있는 장소 '" + placeName + "' (" + placeAddr + ")가 일정에 포함됨.");
                                         break;
                                     }
                                 }
@@ -273,7 +270,8 @@ public class GptService implements IGptService {
             String departurePlace,
             String departureTime,
             String additionalPrompt,
-            String contextPrimaryFavoriteName
+            String contextPrimaryFavoriteName,
+            Set<String> actualSelectedFavoriteNames // 사용자가 선택한 모든 찜 장소 이름
     ) {
         String jsonAvailablePlaces = places.stream()
                 .map(p -> String.format("{\"name\": \"%s\", \"addr\": \"%s\"}", p.name(), p.addr()))
@@ -283,16 +281,17 @@ public class GptService implements IGptService {
                 ? "✅ [사용자 요청사항 - 반드시 반영]\n- " + additionalPrompt.trim() + "\n\n"
                 : "";
 
-        String primaryFavoriteContext = "";
-        if (contextPrimaryFavoriteName != null && !contextPrimaryFavoriteName.isEmpty() && !contextPrimaryFavoriteName.equals("선택된 찜 장소 없음")) {
-            primaryFavoriteContext = String.format(
-                    "당신이 선택한 기준 장소는 '%s'입니다. 이 일정은 해당 장소 '%s'가 위치한 지역을 포함하여 전라남도 전역의 장소들을 활용하여 구성됩니다. " +
-                            "제공된 '사용 가능한 장소 목록'에는 '%s'이 직접 포함되어 있지 않습니다. " +
-                            "대신, '%s' 주변 및 전라남도의 다른 매력적인 장소들을 다양하게 포함하여 일정을 만드십시오.",
-                    contextPrimaryFavoriteName, contextPrimaryFavoriteName, contextPrimaryFavoriteName, contextPrimaryFavoriteName
+        String favoriteInclusionContext = "";
+        if (actualSelectedFavoriteNames != null && !actualSelectedFavoriteNames.isEmpty()) {
+            String selectedFavsString = String.join(", ", actualSelectedFavoriteNames);
+            favoriteInclusionContext = String.format(
+                    "사용자가 특별히 포함을 요청한 장소들은 다음과 같습니다: **%s**. " +
+                            "이 장소들을 포함하여 전라남도 전역의 다른 매력적인 장소들을 다양하게 활용하여 일정을 구성하십시오. " +
+                            "제공된 '사용 가능한 장소 목록'에는 이 모든 요청 장소가 포함되어 있습니다.\n",
+                    selectedFavsString
             );
         } else {
-            primaryFavoriteContext = "사용자가 특정 기준 장소를 선택하지 않았거나, 선택한 장소를 찾을 수 없었습니다. 전라남도 전역의 장소들을 다양하게 활용하여 일정을 구성하십시오.";
+            favoriteInclusionContext = "사용자가 특정 기준 장소를 선택하지 않았습니다. 전라남도 전역의 장소들을 다양하게 활용하여 일정을 구성하십시오.\n";
         }
 
 
@@ -302,7 +301,7 @@ public class GptService implements IGptService {
 
 --- 🚨 필수 지침: 이 지침을 최우선으로 준수하십시오 🚨 ---
 1.  **'place' 필드에 '사용 가능한 장소 목록'에 없는 장소는 절대로 추가하지 마십시오.**
-    * 단, '출발지'(%s)는 예외적으로 일정의 시작/끝 지점 또는 경유지로 포함될 수 있습니다. (예: '출발지'에서 '목적지'로 이동)
+    * 단, '출발지'(%s)는 예외적으로 일정의 시작/끝 지점 또는 경유지로 포함될 수 있습니다. 출발지의 정확한 주소는 명확히 제공되지 않으므로, 활동 내용은 이동과 관련된 추상적인 설명을 사용하고 주소는 '%s'로 표기하십시오.
 2.  **일정 내 각 장소의 'name'과 'addr'는 '사용 가능한 장소 목록'에 있는 정보와 정확히 일치해야 합니다.** 어떠한 변형이나 혼용도 허용되지 않습니다.
 3.  **'사용 가능한 장소 목록'에 있는 장소들을 균형 있고 다양하게 조합하여 일정을 만드십시오.** 하루에 같은 장소를 두 번 이상 반복하는 것은 피하고, 여러 날에 걸쳐 같은 장소를 사용할 때는 합리적인 이유(예: 숙박)를 명시하십시오.
 
@@ -318,7 +317,7 @@ public class GptService implements IGptService {
 --- 🧭 일정 구성 규칙 ---
 1.  날짜별로 "YYYY-MM-DD" 키를 사용하여 일정을 구성합니다.
 2.  각 날짜의 일정은 [{"time":"HH:MM", "place":"장소명", "activity":"활동 내용", "addr":"정확한 주소"}] 형식의 JSON 배열이어야 합니다.
-3.  하루에 6개의 활동을 포함하되, **각 날짜에는 물리적으로 이동 가능한 1~3개의 주요 장소를 '사용 가능한 장소 목록'에서 선정하고, 그 장소 내에서 또는 그 장소를 중심으로 심층적이고 구체적인 활동을 상세하게 작성하십시오. 이동 동선을 고려하여 효율적인 일정을 만드십시오.**
+3.  하루에 8~9개의 활동을 포함하되, **각 날짜에는 물리적으로 이동 가능한 1~3개의 주요 장소를 '사용 가능한 장소 목록'에서 선정하고, 그 장소 내에서 또는 그 장소를 중심으로 심층적이고 구체적인 활동을 상세하게 작성하십시오. 이동 동선을 고려하여 효율적인 일정을 만드십시오.**
 4.  활동은 반드시 시간 순서대로 정렬하십시오.
 5.  모든 동선은 효율적이고 경제적인 경로로 계획하며, 이동 시간과 거리를 최소화하십시오.
 
@@ -327,8 +326,9 @@ public class GptService implements IGptService {
 * '사용 가능한 장소 목록'에 있는 장소 중 주소가 없거나 "undefined"인 경우가 있다면, 해당 장소는 일정에서 제외하거나 목록 내의 다른 유효한 장소로 대체하십시오.
 """,
                 additionalRequirements,
-                primaryFavoriteContext,
-                departurePlace, // 출발지를 프롬프트에 넘겨줍니다.
+                favoriteInclusionContext, // 새로운 컨텍스트 사용
+                departurePlace,
+                departurePlace,
                 startDate,
                 tripDays,
                 departurePlace,

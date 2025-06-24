@@ -8,7 +8,7 @@ import kopo.jeonnam.dto.gpt.PlaceInfoDTO;
 import kopo.jeonnam.service.gpt.IGptService;
 import kopo.jeonnam.service.impl.favorite.FavoriteService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.Slf4j; // Corrected to slf4j
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet; // HashSet import added
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -146,8 +147,7 @@ public class GptController {
     /**
      * [POST] 사용자 입력 기반 GPT 일정 생성
      * URL: /gpt/recommend-schedule (POST)
-     * 클라이언트에서 넘어온 'places' 리스트 중 첫 번째 장소를 '기준 찜 장소'로 삼아
-     * GptService.createScheduleWithFavorites를 호출합니다.
+     * 클라이언트에서 넘어온 'places' 리스트의 모든 장소를 GptService.createScheduleWithFavorites에 전달합니다.
      * @param request GptRequestDTO (사용자 입력 데이터)
      * @param session HTTP 세션 (로그인 정보 확인용)
      * @return GPT가 생성한 JSON 일정 또는 JSON 에러 메시지
@@ -176,19 +176,19 @@ public class GptController {
                     .body(createErrorJson("Bad Request", "선택한 장소가 없습니다. 일정 생성을 위해 찜을 추가해 주세요."));
         }
 
-        // 클라이언트에서 보낸 'places' 리스트의 첫 번째 장소를 '기준 찜 장소'로 사용
-        // (클라이언트 UI에서는 단일 선택을 강제해야 하지만, 만약 여러 개 넘어와도 첫 번째만 사용)
-        String primaryFavoriteName = request.places().get(0);
-        Set<String> singleFavoriteSet = Collections.singleton(primaryFavoriteName); // Set으로 변환하여 서비스에 전달
+        // ⭐⭐⭐ 핵심 수정: 클라이언트에서 받은 모든 찜 장소 이름을 Set으로 변환하여 GptService에 전달 ⭐⭐⭐
+        // request.places()는 List<String>이므로, 이를 HashSet의 생성자로 바로 전달하여 Set<String>으로 변환합니다.
+        Set<String> allSelectedFavorites = new HashSet<>(request.places());
 
-        log.info("POST /recommend-schedule 요청 - 기준 찜 장소: {}", primaryFavoriteName);
+        // 로깅 추가 (기존 '기준 찜 장소' 로그 대체)
+        log.info("POST /recommend-schedule 요청 - 전달될 찜 장소 (전체): {}", allSelectedFavorites);
 
 
         try {
             // GptService의 createScheduleWithFavorites 메서드를 호출하여
-            // 해당 기준 찜 장소를 제외한 places.json의 모든 장소를 활용하도록 합니다.
+            // 선택된 모든 찜 장소를 활용하도록 합니다.
             String gptResponse = gptService.createScheduleWithFavorites(
-                    singleFavoriteSet, // 단일 찜 장소 이름을 Set으로 전달
+                    allSelectedFavorites, // Set<String>으로 모든 찜 장소 이름을 전달
                     request.startDate(),
                     request.tripDays(),
                     request.departurePlace(),
